@@ -1,0 +1,65 @@
+<div class="wrapper">
+  <aside id="sidebar">
+    <div class="d-flex">
+      <button class="toggle-btn" type="button" (click)="toggleSidebar()">
+        <i class="bi bi-house-door"></i>
+      </button>
+      <div class="sidebar-logo">
+        <a href="#">Menu</a>
+      </div>
+    </div>
+    <ul class="sidebar-nav">
+      <li class="sidebar-item">
+        <a routerLink="salones" class="sidebar-link">
+          <i class="bi bi-h-square"></i>
+          <span>Comisionado</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a routerLink="equipo" class="sidebar-link">
+          <i class="bi bi-pen-fill"></i>
+          <span>Gestión de equipo</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a routerLink="camas" class="sidebar-link">
+          <i class="bi bi-clipboard-heart-fill"></i>
+          <span>Gestión de camas</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a routerLink="procedimientos" class="sidebar-link">
+          <i class="bi bi-heart-pulse"></i>
+          <span>Gestión de procedimientos</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a routerLink="personal" class="sidebar-link">
+          <i class="bi bi-people-fill"></i>
+          <span>Gestión de personal</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a routerLink="reportes" class="sidebar-link">
+          <i class="bi bi-star-fill"></i>
+          <span>Reportes de áreas de mejora</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a routerLink="carga" class="sidebar-link">
+          <i class="bi bi-person"></i>
+          <span>Perfil</span>
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-link">
+        <i class="bi bi-box-arrow-left"></i>
+        <span>Salir</span>
+      </a>
+    </div>
+  </aside>
+  <div class="main p-3">
+    <router-outlet></router-outlet>
+  </div>
+</div>
