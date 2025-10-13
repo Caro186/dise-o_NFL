@@ -18,11 +18,11 @@
                   <p>Please login to your account</p>
 
                   <div class="form-outline mb-4">
-                    <input type="email" formControlName="username" class="form-control" placeholder="Username" />
-                    <div *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.invalid" class="text-danger">
-                      <small *ngIf="loginForm.get('username')?.errors?.['required']">El correo es obligatorio.</small>
-                      <small *ngIf="loginForm.get('username')?.errors?.['email']">Formato de correo inválido.</small>
-                      <small *ngIf="loginForm.get('username')?.errors?.['maxlength']">Máximo 50 caracteres.</small>
+                    <input type="email" formControlName="email" class="form-control" placeholder="Email" />
+                    <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="text-danger">
+                      <small *ngIf="loginForm.get('email')?.errors?.['required']">El correo es obligatorio.</small>
+                      <small *ngIf="loginForm.get('email')?.errors?.['email']">Formato de correo inválido.</small>
+                      <small *ngIf="loginForm.get('email')?.errors?.['maxlength']">Máximo 50 caracteres.</small>
                     </div>
                   </div>
                   <div class="form-outline mb-4">
