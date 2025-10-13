@@ -48,7 +48,7 @@ export class Login {
       next: (res) => {
         if(res.status === 'ok') {
           // Redirigir al perfil del jugador
-          this.router.navigate(['/perfil']);
+          this.router.navigate(['/mainpage']);
         } else {
           // Mensaje genérico por credenciales inválidas
           this.serverError = 'Usuario o contraseña incorrectos';
