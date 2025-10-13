@@ -21,7 +21,7 @@ export class Login {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
       password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), this.passwordValidator]]
     });
   }
@@ -46,9 +46,11 @@ export class Login {
     const credentials = this.loginForm.value;
     this.authService.login(credentials).subscribe({
       next: (res) => {
+        console.log(res);
+        console.log(res.status);
         if(res.status === 'ok') {
           // Redirigir al perfil del jugador
-          this.router.navigate(['/perfil']);
+          this.router.navigate(['/mainpage']);
         } else {
           // Mensaje genérico por credenciales inválidas
           this.serverError = 'Usuario o contraseña incorrectos';
