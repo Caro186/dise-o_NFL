@@ -1,23 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { RouterModule } from '@angular/router'; // Importa RouterModule
+import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Authservice } from '../../services/authservice';
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.html',
-  styleUrl: './register.css',
-  imports: [RouterModule,ReactiveFormsModule,CommonModule]
+  styleUrls: ['./register.css'],
+  imports: [RouterModule, ReactiveFormsModule, CommonModule]
 })
 export class Register implements OnInit {
   registerForm!: FormGroup;
   submissionError: string | null = null;
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder, private authService: Authservice) { }
 
-  ngOnInit(): void { //metodo oninit, para enviar los datos al form , genera un grupo de validacion
+  ngOnInit(): void {
     this.registerForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(50)]],
+      nombreCompleto: ['', [Validators.required, Validators.maxLength(50)]],
       alias: ['', [Validators.required, Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
       password: ['', [
@@ -30,37 +32,39 @@ export class Register implements OnInit {
     });
   }
 
-  // Validador personalizado para confirmar que password y confirmPassword coinciden
   passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
     const password = group.get('password')?.value;
     const confirmPassword = group.get('confirmPassword')?.value;
-    if (password !== confirmPassword) {
-      return { mismatch: true };
-    }
-    return null;
+    return password !== confirmPassword ? { mismatch: true } : null;
   }
 
   onSubmit(): void {
     this.submissionError = null;
 
     if (this.registerForm.invalid) {
-      // Marcar todos los campos como tocados para mostrar errores
       this.registerForm.markAllAsTouched();
       return;
     }
 
-    // Aquí iría la lógica para enviar los datos al backend (CAMBIAR)
+    const registroDto = {
+      email: this.registerForm.get('email')?.value,
+      password: this.registerForm.get('password')?.value,
+      nombreCompleto: this.registerForm.get('nombreCompleto')?.value,
+      alias: this.registerForm.get('alias')?.value
+    };
 
-    // Simulación de respuesta error backend para correo duplicado (como ejemplo):
-    const email = this.registerForm.get('email')?.value;
-    if (email === 'existing@example.com') { // simular correo duplicado
-      this.submissionError = 'The email address is already registered.';
-      return;
-    }
-
-    // Si no hay errores, proceder con registro (simulación)
-    console.log('User registered:', this.registerForm.value);
-    alert('Registration successful!');
-    this.registerForm.reset();
+    this.authService.register(registroDto).subscribe({
+      next: response => {
+        alert('Usuario registrado exitosamente');
+        this.registerForm.reset();
+      },
+      error: err => {
+        if (err.status === 400 && err.error?.mensaje) {
+          this.submissionError = err.error.mensaje; // Muestra errores del backend, ej. email duplicado
+        } else {
+          this.submissionError = 'Error en el registro.';
+        }
+      }
+    });
   }
 }

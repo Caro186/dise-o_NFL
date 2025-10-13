@@ -17,9 +17,13 @@ export interface LoginResponse {
   providedIn: 'root'
 })
 export class Authservice {
-  private baseUrl = 'https://localhost:5001/api'; //revisar esto , la api cambia de direccion 
+  private baseUrl = 'http://localhost:5225/api'; //revisar esto , la api cambia de direccion 
   constructor(private http: HttpClient) {}
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, credentials);
   }
+  register(registroDto: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/Auth/register`, registroDto);
+  }
+
 }

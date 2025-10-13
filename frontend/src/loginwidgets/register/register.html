@@ -11,12 +11,11 @@
               <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
                 <div class="form-outline mb-4">
-                <label class="form-label" for="name">Your Name</label>
-                  <input type="text" formControlName="name" id="name" class="form-control form-control-lg" maxlength="50" />
-                  
-                  <div *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid" class="text-danger mt-1">
-                    <div *ngIf="registerForm.get('name')?.errors?.['required']">Name is required.</div>
-                    <div *ngIf="registerForm.get('name')?.errors?.['maxlength']">Name must be at most 50 characters.</div>
+                  <label class="form-label" for="nombreCompleto">Your Nombre Completo</label>
+                  <input type="text" formControlName="nombreCompleto" id="nombreCompleto" class="form-control form-control-lg" maxlength="50" />
+                  <div *ngIf="registerForm.get('nombreCompleto')?.touched && registerForm.get('nombreCompleto')?.invalid" class="text-danger mt-1">
+                    <div *ngIf="registerForm.get('nombreCompleto')?.errors?.['required']">Nombre Completo is required.</div>
+                    <div *ngIf="registerForm.get('nombreCompleto')?.errors?.['maxlength']">Nombre Completo must be at most 50 characters.</div>
                   </div>
                 </div>
 
@@ -35,7 +34,7 @@
                   <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="text-danger mt-1">
                     <div *ngIf="registerForm.get('email')?.errors?.['required']">Email is required.</div>
                     <div *ngIf="registerForm.get('email')?.errors?.['maxlength']">Email must be at most 50 characters.</div>
-                    <div *ngIf="registerForm.get('email')?.errors?.['email']">Invalid email format.</div>
+                    <div *ngIf="registerForm.get('email')?.errors?.['email']">Invalid Email format.</div>
                   </div>
                 </div>
 
