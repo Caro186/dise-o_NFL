@@ -3250,31 +3250,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\josev\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Usuario\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Obsidian\\OrganizaciónJoseAndresVargasTorres\\02-Studies\\Product Design and Quality\\Proyect\\dise-o_NFL\\backend\\NFLFantasyAPI\\NFLFantasyAPI.csproj",
+      "projectUniqueName": "C:\\Users\\Usuario\\Desktop\\Backenddiseño\\dise-o_NFL\\backend\\NFLFantasyAPI\\NFLFantasyAPI.csproj",
       "projectName": "NFLFantasyAPI",
-      "projectPath": "C:\\Obsidian\\OrganizaciónJoseAndresVargasTorres\\02-Studies\\Product Design and Quality\\Proyect\\dise-o_NFL\\backend\\NFLFantasyAPI\\NFLFantasyAPI.csproj",
-      "packagesPath": "C:\\Users\\josev\\.nuget\\packages\\",
-      "outputPath": "C:\\Obsidian\\OrganizaciónJoseAndresVargasTorres\\02-Studies\\Product Design and Quality\\Proyect\\dise-o_NFL\\backend\\NFLFantasyAPI\\obj\\",
+      "projectPath": "C:\\Users\\Usuario\\Desktop\\Backenddiseño\\dise-o_NFL\\backend\\NFLFantasyAPI\\NFLFantasyAPI.csproj",
+      "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Usuario\\Desktop\\Backenddiseño\\dise-o_NFL\\backend\\NFLFantasyAPI\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\josev\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Usuario\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -3341,7 +3334,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

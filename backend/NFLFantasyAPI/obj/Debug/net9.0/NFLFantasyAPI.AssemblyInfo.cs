@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NFLFantasyAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b8217ff99c13cac82330abdb40a97f6fc21c5da2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d3af2818f3f8666d321eb4fc69d5400bbf18a1dd")]
 [assembly: System.Reflection.AssemblyProductAttribute("NFLFantasyAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NFLFantasyAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
