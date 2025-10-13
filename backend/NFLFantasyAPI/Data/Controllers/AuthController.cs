@@ -31,7 +31,7 @@ namespace NFLFantasyAPI.Controllers
                 Email = registroDto.Email,
                 Password = registroDto.Password, // En producción usar hash
                 NombreCompleto = registroDto.NombreCompleto,
-                FechaRegistro = DateTime.Now
+                FechaRegistro = DateTime.UtcNow
             };
 
             _context.Usuarios.Add(usuario);
@@ -60,7 +60,7 @@ namespace NFLFantasyAPI.Controllers
             }
 
             return Ok(new { 
-                mensaje = "Login exitoso",
+                status = "ok",
                 usuario = new {
                     usuario.Id,
                     usuario.Email,
