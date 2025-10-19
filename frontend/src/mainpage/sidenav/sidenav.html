@@ -2,23 +2,41 @@
   <aside id="sidebar">
     <div class="d-flex">
       <button class="toggle-btn" type="button" (click)="toggleSidebar()">
-        <i class="bi bi-house-door"></i>
+        <i class="bi bi-list"></i>
       </button>
       <div class="sidebar-logo">
-        <a href="#">Menu</a>
+        <a href="#">NFL Fantasy</a>
       </div>
     </div>
+
+    <!-- Información del usuario -->
+    <div class="sidebar-user">
+      <div class="user-avatar">
+        {{ getUserInitials() }}
+      </div>
+      <div class="user-info">
+        <span class="user-name">{{ currentUser?.nombreCompleto }}</span>
+        <span class="user-email">{{ currentUser?.email }}</span>
+      </div>
+    </div>
+
     <ul class="sidebar-nav">
+      <li class="sidebar-item">
+        <a routerLink="teams" routerLinkActive="active" class="sidebar-link">
+          <i class="bi bi-people-fill"></i>
+          <span>Mis Equipos</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a routerLink="/form" routerLinkActive="active" class="sidebar-link">
+          <i class="bi bi-plus-circle-fill"></i>
+          <span>Crear Equipo</span>
+        </a>
+      </li>
       <li class="sidebar-item">
         <a routerLink="salones" class="sidebar-link">
           <i class="bi bi-h-square"></i>
           <span>Comisionado</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a routerLink="teams" class="sidebar-link">
-          <i class="bi bi-pen-fill"></i>
-          <span>Gestión de equipo</span>
         </a>
       </li>
       <li class="sidebar-item">
@@ -52,13 +70,15 @@
         </a>
       </li>
     </ul>
+
     <div class="sidebar-footer">
-      <a href="#" class="sidebar-link">
+      <a href="#" class="sidebar-link" (click)="logout(); $event.preventDefault()">
         <i class="bi bi-box-arrow-left"></i>
         <span>Salir</span>
       </a>
     </div>
   </aside>
+
   <div class="main p-3">
     <router-outlet></router-outlet>
   </div>

@@ -1,19 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NFLFantasyAPI.Models
+namespace NFLFantasyAPI.DTOs
 {
     /// <summary>
-    /// Representa un usuario registrado en el sistema Fantasy NFL
+    /// DTO para solicitud de registro de usuario
     /// </summary>
-    public class Usuario
+    public class RegistroDto
     {
         /// <summary>
-        /// Identificador único del usuario
-        /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Correo electrónico del usuario (único en el sistema)
+        /// Email del usuario
         /// </summary>
         [Required(ErrorMessage = "El email es obligatorio")]
         [EmailAddress(ErrorMessage = "Formato de email inválido")]
@@ -21,10 +16,11 @@ namespace NFLFantasyAPI.Models
         public string Email { get; set; } = string.Empty;
 
         /// <summary>
-        /// Contraseña del usuario (almacenada con hash)
+        /// Contraseña del usuario
         /// </summary>
         [Required(ErrorMessage = "La contraseña es obligatoria")]
-        [MaxLength(255, ErrorMessage = "El hash de contraseña no puede exceder 255 caracteres")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]{8,12}$",
+            ErrorMessage = "La contraseña debe tener entre 8 y 12 caracteres alfanuméricos, con al menos una mayúscula y una minúscula")]
         public string Password { get; set; } = string.Empty;
 
         /// <summary>
@@ -33,10 +29,5 @@ namespace NFLFantasyAPI.Models
         [Required(ErrorMessage = "El nombre completo es obligatorio")]
         [MaxLength(50, ErrorMessage = "El nombre completo no puede exceder 50 caracteres")]
         public string NombreCompleto { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Fecha y hora de registro del usuario en el sistema
-        /// </summary>
-        public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
     }
 }

@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Authservice } from '../../services/authservice';
 
+/**
+ * Componente de registro para crear nuevos usuarios
+ */
 @Component({
   selector: 'app-register',
   templateUrl: './register.html',
@@ -15,12 +19,30 @@ export class Register implements OnInit {
   registerForm!: FormGroup;
   submissionError: string | null = null;
 
-  constructor(private fb: FormBuilder, private authService: Authservice) { }
+  /**
+   * Constructor del componente de registro
+   * @param fb FormBuilder para crear formularios reactivos
+   * @param authService Servicio de autenticación
+   * @param router Router para navegación
+   */
+  constructor(
+    private fb: FormBuilder, 
+    private authService: Authservice,
+    private router: Router
+  ) {
+    // Si ya está logueado, redirigir a mainpage
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/mainpage']);
+    }
+  }
 
+  /**
+   * Inicialización del componente
+   * Configura el formulario de registro con sus validaciones
+   */
   ngOnInit(): void {
     this.registerForm = this.fb.group({
       nombreCompleto: ['', [Validators.required, Validators.maxLength(50)]],
-      alias: ['', [Validators.required, Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
       password: ['', [
         Validators.required,
@@ -32,12 +54,21 @@ export class Register implements OnInit {
     });
   }
 
+  /**
+   * Validador personalizado para verificar que las contraseñas coincidan
+   * @param group Grupo de controles del formulario
+   * @returns Objeto con el error o null si las contraseñas coinciden
+   */
   passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
     const password = group.get('password')?.value;
     const confirmPassword = group.get('confirmPassword')?.value;
     return password !== confirmPassword ? { mismatch: true } : null;
   }
 
+  /**
+   * Método para registrar un nuevo usuario
+   * Valida el formulario y realiza la petición de registro al backend
+   */
   onSubmit(): void {
     this.submissionError = null;
 
@@ -49,20 +80,30 @@ export class Register implements OnInit {
     const registroDto = {
       email: this.registerForm.get('email')?.value,
       password: this.registerForm.get('password')?.value,
-      nombreCompleto: this.registerForm.get('nombreCompleto')?.value,
-      alias: this.registerForm.get('alias')?.value
+      nombreCompleto: this.registerForm.get('nombreCompleto')?.value
     };
 
     this.authService.register(registroDto).subscribe({
-      next: response => {
-        alert('Usuario registrado exitosamente');
+      next: (response) => {
+        console.log('Registro exitoso:', response);
+        alert('Usuario registrado exitosamente. Ahora puedes iniciar sesión.');
+        
+        // Resetear formulario y redirigir al login
         this.registerForm.reset();
+        this.router.navigate(['/']);
       },
-      error: err => {
-        if (err.status === 400 && err.error?.mensaje) {
-          this.submissionError = err.error.mensaje; // Muestra errores del backend, ej. email duplicado
+      error: (error) => {
+        console.error('Error en registro:', error);
+        
+        // Manejar diferentes tipos de errores
+        if (error.status === 400 && error.error?.mensaje) {
+          this.submissionError = error.error.mensaje;
+        } else if (error.status === 0) {
+          this.submissionError = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
+        } else if (error.error?.errores && error.error.errores.length > 0) {
+          this.submissionError = error.error.errores.join(', ');
         } else {
-          this.submissionError = 'Error en el registro.';
+          this.submissionError = 'Error en el registro. Inténtalo de nuevo.';
         }
       }
     });

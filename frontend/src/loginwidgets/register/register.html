@@ -11,20 +11,11 @@
               <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
                 <div class="form-outline mb-4">
-                  <label class="form-label" for="nombreCompleto">Your Nombre Completo</label>
+                  <label class="form-label" for="nombreCompleto">Your Full Name</label>
                   <input type="text" formControlName="nombreCompleto" id="nombreCompleto" class="form-control form-control-lg" maxlength="50" />
                   <div *ngIf="registerForm.get('nombreCompleto')?.touched && registerForm.get('nombreCompleto')?.invalid" class="text-danger mt-1">
-                    <div *ngIf="registerForm.get('nombreCompleto')?.errors?.['required']">Nombre Completo is required.</div>
-                    <div *ngIf="registerForm.get('nombreCompleto')?.errors?.['maxlength']">Nombre Completo must be at most 50 characters.</div>
-                  </div>
-                </div>
-
-                <div class="form-outline mb-4">
-                  <label class="form-label" for="alias">Alias</label>
-                  <input type="text" formControlName="alias" id="alias" class="form-control form-control-lg" maxlength="50" />
-                  <div *ngIf="registerForm.get('alias')?.touched && registerForm.get('alias')?.invalid" class="text-danger mt-1">
-                    <div *ngIf="registerForm.get('alias')?.errors?.['required']">Alias is required.</div>
-                    <div *ngIf="registerForm.get('alias')?.errors?.['maxlength']">Alias must be at most 50 characters.</div>
+                    <div *ngIf="registerForm.get('nombreCompleto')?.errors?.['required']">Full Name is required.</div>
+                    <div *ngIf="registerForm.get('nombreCompleto')?.errors?.['maxlength']">Full Name must be at most 50 characters.</div>
                   </div>
                 </div>
 
