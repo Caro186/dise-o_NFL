@@ -1,48 +1,87 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { EquipoService, EquipoResponseDto } from '../../services/equipo.service';
+import { Authservice } from '../../services/authservice';
 
-
-export interface Equipo {
-  id: string;
-  nombre: string;
-  manager: string;
-  estado: string;
-  liga: string;
-  imagenURL: string;
-}
-
+/**
+ * Componente para mostrar y gestionar equipos
+ */
 @Component({
   selector: 'app-teams',
   templateUrl: './teams.html',
   styleUrls: ['./teams.css'],
-  imports: [CommonModule]
+  imports: [CommonModule, RouterModule]
 })
-export class Teams {
-  equipos: Equipo[] = [
-    {
-      id: "1",
-      nombre: "Equipo A",
-      manager: "Manager 1",
-      estado: "Activo",
-      liga: "NFL",
-      imagenURL: "https://fabrikbrands.com/wp-content/uploads/NFL-Team-Logos-11-1200x750.png"
-    },
-    {
-      id: "2",
-      nombre: "Equipo B",
-      manager: "Manager 2",
-      estado: "Inactivo",
-      liga: "NFL",
-      imagenURL: "https://tse4.mm.bing.net/th/id/OIP.c9opj_wj613V0F013nG8owHaEo?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"
-    },
-    {
-      id: "3",
-      nombre: "Equipo C",
-      manager: "Manager 3",
-      estado: "Activo",
-      liga: "NFL",
-      imagenURL: "https://tse3.mm.bing.net/th/id/OIP.zklz8AHVfSZIRR-hxf9QaQHaFj?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3"
+export class Teams implements OnInit {
+  equipos: EquipoResponseDto[] = [];
+  isLoading: boolean = true;
+  errorMessage: string = '';
+  baseUrl: string = 'http://localhost:5000';
+
+  /**
+   * Constructor del componente de equipos
+   * @param equipoService Servicio para gestionar equipos
+   * @param authService Servicio de autenticación
+   */
+  constructor(
+    private equipoService: EquipoService,
+    private authService: Authservice
+  ) { }
+
+  /**
+   * Inicialización del componente
+   * Carga los equipos del usuario actual
+   */
+  ngOnInit(): void {
+    this.cargarEquipos();
+  }
+
+  /**
+   * Carga los equipos del usuario logueado desde el backend
+   */
+  cargarEquipos(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    const currentUser = this.authService.currentUserValue;
+    
+    if (!currentUser) {
+      this.errorMessage = 'Debes iniciar sesión para ver tus equipos.';
+      this.isLoading = false;
+      return;
     }
-    // Agrega más equipos estáticos aquí
-  ];
+
+    // Obtener equipos del usuario actual
+    this.equipoService.obtenerEquiposPorUsuario(currentUser.id).subscribe({
+      next: (equipos) => {
+        console.log('Equipos cargados:', equipos);
+        this.equipos = equipos;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar equipos:', error);
+        this.isLoading = false;
+        
+        if (error.status === 0) {
+          this.errorMessage = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
+        } else {
+          this.errorMessage = 'Error al cargar los equipos. Inténtalo de nuevo.';
+        }
+      }
+    });
+  }
+
+  /**
+   * Obtiene la URL completa de la imagen del equipo
+   * @param imagenUrl URL relativa de la imagen
+   * @returns URL completa o imagen por defecto
+   */
+  obtenerImagenUrl(imagenUrl: string | null): string {
+    if (imagenUrl) {
+      return `${this.baseUrl}${imagenUrl}`;
+    }
+    // Imagen por defecto si no hay imagen
+    return 'https://via.placeholder.com/150?text=Sin+Imagen';
+  }
 }
