@@ -20,7 +20,7 @@ namespace NFLFantasyAPI.Data
         /// <summary>
         /// Colección de usuarios en la base de datos
         /// </summary>
-        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; } //esto crea una tabla en la db
 
         /// <summary>
         /// Colección de equipos en la base de datos
