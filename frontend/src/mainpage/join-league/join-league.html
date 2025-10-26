@@ -1,0 +1,99 @@
+<div class="gradient-custom-2 gradient-form d-flex align-items-center justify-content-center">
+  <div class="card p-4" style="width: 450px;">
+    <!-- Información de la liga -->
+    <div class="text-center mb-4">
+      <h3 class="mb-2">{{ ligaNombre }}</h3>
+      <p class="text-muted mb-1">Temporada: {{ temporada }}</p>
+      <p class="text-muted mb-1">Estado: <span class="badge bg-success">{{ estado }}</span></p>
+      <p class="text-muted">Cupos disponibles: <strong>{{ cuposDisponibles }} / {{ cuposTotales }}</strong></p>
+    </div>
+
+    <hr class="my-3">
+
+    <!-- Formulario para unirse -->
+    <form>
+      <!-- Contraseña de la liga -->
+      <div class="mb-3">
+        <label for="password">Contraseña de la liga:</label>
+        <input 
+          id="password" 
+          type="password" 
+          placeholder="Ingresa la contraseña" 
+          class="form-control"
+          [(ngModel)]="password"
+          name="password"
+          required
+        />
+      </div>
+
+      <!-- Alias del usuario -->
+      <div class="mb-3">
+        <label for="alias">Tu alias:</label>
+        <input 
+          id="alias" 
+          type="text" 
+          placeholder="Ej: ElCapitan" 
+          class="form-control"
+          [(ngModel)]="alias"
+          name="alias"
+          maxlength="50"
+          required
+        />
+        <small class="text-muted">
+          • Debe ser único dentro de la liga (máx. 50 caracteres)
+        </small>
+      </div>
+
+      <!-- Nombre del equipo -->
+      <div class="mb-3">
+        <label for="nombreEquipo">Nombre de tu equipo:</label>
+        <input 
+          id="nombreEquipo" 
+          type="text" 
+          placeholder="Ej: Los Invencibles" 
+          class="form-control"
+          [(ngModel)]="nombreEquipo"
+          name="nombreEquipo"
+          maxlength="100"
+          required
+        />
+        <small class="text-muted">
+          • Debe ser único dentro de la liga (máx. 100 caracteres)
+        </small>
+      </div>
+
+      <!-- Mensajes de error -->
+      <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Mensaje de éxito -->
+      <div *ngIf="successMessage" class="alert alert-success" role="alert">
+        {{ successMessage }}
+      </div>
+
+      <!-- Botones -->
+      <div class="d-flex gap-2">
+        <button 
+          type="button" 
+          class="btn btn-secondary flex-fill" 
+          (click)="onCancel()"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-primary flex-fill" 
+          (click)="onJoin()"
+          [disabled]="isLoading || !isFormValid()"
+        >
+          <span *ngIf="!isLoading">Unirse a la liga</span>
+          <span *ngIf="isLoading">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Uniéndose...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
