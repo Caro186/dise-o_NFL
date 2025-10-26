@@ -21,7 +21,7 @@ export const routes: Routes = [
   {
     path: 'mainpage',
     component: Sidenav,
-    canActivate: [authGuard],
+    //canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -37,7 +37,7 @@ export const routes: Routes = [
   { 
     path: 'form', 
     component: Userform,
-    canActivate: [authGuard]
+    //canActivate: [authGuard]
   },
   {
     path: '**',
