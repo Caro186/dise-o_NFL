@@ -5,7 +5,6 @@ import { Sidenav } from '../mainpage/sidenav/sidenav';
 import { Teams } from '../mainpage/teams/teams';
 import { Userform } from '../mainpage/userform/userform';
 import { authGuard } from '../guards/auth.guard';
-
 /**
  * Configuración de rutas de la aplicación
  */
@@ -39,8 +38,10 @@ export const routes: Routes = [
     component: Userform,
     //canActivate: [authGuard]
   },
+
   {
     path: '**',
     redirectTo: ''
-  }
+  },
+   
 ];
