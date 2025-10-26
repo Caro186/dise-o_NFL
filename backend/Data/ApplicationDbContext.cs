@@ -26,7 +26,6 @@ namespace NFLFantasyAPI.Data
         /// Colección de equipos en la base de datos
         /// </summary>
         public DbSet<Equipo> Equipos { get; set; }
-
         /// <summary>
         /// Configuración adicional del modelo de datos
         /// </summary>
