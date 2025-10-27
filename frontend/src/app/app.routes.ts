@@ -4,18 +4,19 @@ import { Register } from '../loginwidgets/register/register';
 import { Sidenav } from '../mainpage/sidenav/sidenav';
 import { Teams } from '../mainpage/teams/teams';
 import { Userform } from '../mainpage/userform/userform';
+import { TemporadaComponent } from '../mainpage/temporada/temporada';
 import { authGuard } from '../guards/auth.guard';
 /**
  * Configuración de rutas de la aplicación
  */
 export const routes: Routes = [
-  { 
-    path: '', 
-    component: Login 
+  {
+    path: '',
+    component: Login
   },
-  { 
-    path: 'register', 
-    component: Register 
+  {
+    path: 'register',
+    component: Register
   },
   {
     path: 'mainpage',
@@ -33,15 +34,18 @@ export const routes: Routes = [
       }
     ]
   },
-  { 
-    path: 'form', 
+  {
+    path: 'form',
     component: Userform,
     //canActivate: [authGuard]
   },
-
+  {
+    path: 'temporada',
+    component: TemporadaComponent
+  },
   {
     path: '**',
     redirectTo: ''
   },
-   
+
 ];

@@ -1,0 +1,51 @@
+/* Reseteo de márgenes y altura completa */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Gradiente de fondo */
+.gradient-background {
+  background: linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593);
+  min-height: 100vh; /* asegura que cubra toda la pantalla */
+}
+
+/* Ajuste opcional para que la página no se “mueva” al hacer scroll */
+body {
+  overflow-x: hidden;
+}
+
+/* Navbar semitransparente con texto blanco */
+.navbar-custom {
+  background-color: rgba(26, 72, 91, 0.8);
+  color: white;
+  border-radius: 10px; /* Ajusta el valor a lo que quieras */
+}
+
+/* Formulario blanco con borde azul y sombra */
+.form-card {
+  background-color: white;
+  color: #1a485b; /* texto azul oscuro */
+  border: 2px solid #4D7381; /* borde azul */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Botón azul personalizado */
+.btn-custom {
+  background-color: #4D7381;
+  color: white;
+  border-radius: 5px;
+  border: none;
+  padding: 0.5rem 1rem;
+}
+
+.btn-custom:hover {
+  background-color: #1a485b;
+}
+
+/* Ajustes de card */
+.card {
+  border-radius: 10px;
+}

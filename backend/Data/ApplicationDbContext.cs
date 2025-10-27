@@ -30,6 +30,10 @@ namespace NFLFantasyAPI.Data
         /// Configuración adicional del modelo de datos
         /// </summary>
         /// <param name="modelBuilder">Constructor del modelo</param>
+        public DbSet<Liga> Ligas { get; set; }
+        public DbSet<Temporada> Temporadas { get; set; }
+        public DbSet<Semana> Semanas { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -66,6 +70,35 @@ namespace NFLFantasyAPI.Data
                 // Índice para mejorar búsquedas por usuario
                 entity.HasIndex(e => e.UsuarioId);
             });
+
+            // Configuración de Temporada
+            modelBuilder.Entity<Temporada>(entity =>
+            {
+                entity.ToTable("temporadas");
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.Nombre).IsRequired();
+                entity.Property(t => t.FechaInicio).IsRequired();
+                entity.Property(t => t.FechaCierre).IsRequired();
+                entity.Property(t => t.FechaCreacion).IsRequired();
+                entity.Property(t => t.Actual).HasDefaultValue(false);
+
+                // Relación uno a muchos con Semana
+                entity.HasMany(t => t.Semanas)
+                      .WithOne(s => s.Temporada)
+                      .HasForeignKey(s => s.TemporadaId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configuración de Semana
+            modelBuilder.Entity<Semana>(entity =>
+            {
+                entity.ToTable("semanas");
+                entity.HasKey(s => s.Id);
+                entity.Property(s => s.FechaInicio).IsRequired();
+                entity.Property(s => s.FechaFin).IsRequired();
+                entity.Property(s => s.TemporadaId).IsRequired();
+            });
+
         }
     }
 }

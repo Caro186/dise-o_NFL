@@ -105,7 +105,7 @@ export class Userform {
           this.selectedFile = file;
           this.imagenPreview = e.target!.result as string;
         };
-        
+
         img.onerror = () => {
           alert('Error al cargar la imagen.');
           input.value = '';
@@ -123,10 +123,10 @@ export class Userform {
    */
   onSubmit(): void {
     this.errorMessage = '';
-    
+
     // Validar nombre del equipo
     const nombre = this.nombreEquipo.trim();
-    
+
     if (!nombre) {
       this.errorMessage = 'Por favor ingresa el nombre del equipo.';
       return;
@@ -191,7 +191,7 @@ export class Userform {
       error: (error) => {
         console.error('Error al crear equipo:', error);
         this.isLoading = false;
-        
+
         // Manejar errores
         if (error.status === 400 && error.error?.mensaje) {
           this.errorMessage = error.error.mensaje;
