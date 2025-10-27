@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgClass, CommonModule } from '@angular/common';
-import { Authservice, UsuarioDto } from '../../services/authservice';
+import { AuthService, Usuario, } from '../../services/authservice';
 
 /**
  * Componente de navegación lateral principal
@@ -19,7 +19,7 @@ import { Authservice, UsuarioDto } from '../../services/authservice';
   styleUrl: './sidenav.css'
 })
 export class Sidenav implements OnInit {
-  currentUser: UsuarioDto | null = null;
+  currentUser: Usuario | null = null;
 
   /**
    * Constructor del componente de navegación
@@ -28,7 +28,7 @@ export class Sidenav implements OnInit {
    */
   constructor(
     private router: Router,
-    private authService: Authservice
+    private authService: AuthService
   ) {}
 
   /**
@@ -57,7 +57,7 @@ export class Sidenav implements OnInit {
   logout(): void {
     if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
       this.authService.logout();
-      this.router.navigate(['/']);
+      this.router.navigate(['/login']);
     }
   }
 
@@ -66,13 +66,13 @@ export class Sidenav implements OnInit {
    * @returns Iniciales del usuario o '?' si no hay usuario
    */
   getUserInitials(): string {
-    if (!this.currentUser) {
+    if (!this.currentUser || !this.currentUser.nombreCompleto) {
       return '?';
     }
-    const names = this.currentUser.nombreCompleto.split(' ');
+    const names = this.currentUser.nombreCompleto.trim().split(' ');
     if (names.length >= 2) {
-      return names[0][0] + names[1][0];
+      return (names[0][0] + names[1][0]).toUpperCase();
     }
-    return names[0][0];
+    return names[0][0].toUpperCase();
   }
 }

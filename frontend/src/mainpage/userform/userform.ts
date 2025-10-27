@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EquipoService } from '../../services/equipo.service';
-import { Authservice } from '../../services/authservice';
+import { AuthService } from '../../services/authservice';
 
 /**
  * Componente para crear/editar equipos de fantasy
@@ -30,7 +30,7 @@ export class Userform {
    */
   constructor(
     private equipoService: EquipoService,
-    private authService: Authservice,
+    private authService: AuthService,
     private router: Router
   ) { }
 
@@ -121,90 +121,90 @@ export class Userform {
    * Envía el formulario para crear un equipo
    * Crea el equipo primero y luego sube la imagen si existe
    */
-  onSubmit(): void {
-    this.errorMessage = '';
-    
-    // Validar nombre del equipo
-    const nombre = this.nombreEquipo.trim();
-    
-    if (!nombre) {
-      this.errorMessage = 'Por favor ingresa el nombre del equipo.';
-      return;
-    }
-
-    if (nombre.length < 1 || nombre.length > 100) {
-      this.errorMessage = 'El nombre del equipo debe tener entre 1 y 100 caracteres.';
-      return;
-    }
-
-    // Verificar que el usuario esté logueado
-    const currentUser = this.authService.currentUserValue;
-    if (!currentUser) {
-      this.errorMessage = 'Debes iniciar sesión para crear un equipo.';
-      this.router.navigate(['/']);
-      return;
-    }
-
-    this.isLoading = true;
-
-    // Crear DTO para el equipo
-    const equipoDto = {
-      nombre: nombre,
-      usuarioId: currentUser.id,
-      liga: 'NFL'
-    };
-
-    console.log('Creando equipo:', equipoDto);
-
-    // Primero crear el equipo
-    this.equipoService.crearEquipo(equipoDto).subscribe({
-      next: (equipoCreado) => {
-        console.log('Equipo creado exitosamente:', equipoCreado);
-
-        // Si hay imagen, subirla
-        if (this.selectedFile) {
-          this.equipoService.subirImagen(equipoCreado.id, this.selectedFile).subscribe({
-            next: (imageResponse) => {
-              console.log('Imagen subida exitosamente:', imageResponse);
-              this.isLoading = false;
-              alert('Equipo creado exitosamente con imagen');
-              this.resetForm();
-              this.router.navigate(['/mainpage/teams']);
-            },
-            error: (imageError) => {
-              console.error('Error al subir imagen:', imageError);
-              this.isLoading = false;
-              // El equipo se creó pero la imagen falló
-              alert('Equipo creado, pero hubo un error al subir la imagen. Puedes intentar subirla después.');
-              this.resetForm();
-              this.router.navigate(['/mainpage/teams']);
-            }
-          });
-        } else {
-          // No hay imagen, solo navegar
-          this.isLoading = false;
-          alert('Equipo creado exitosamente');
-          this.resetForm();
-          this.router.navigate(['/mainpage/teams']);
-        }
-      },
-      error: (error) => {
-        console.error('Error al crear equipo:', error);
-        this.isLoading = false;
-        
-        // Manejar errores
-        if (error.status === 400 && error.error?.mensaje) {
-          this.errorMessage = error.error.mensaje;
-        } else if (error.status === 404) {
-          this.errorMessage = 'Usuario no encontrado. Por favor, inicia sesión de nuevo.';
-        } else if (error.status === 0) {
-          this.errorMessage = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
-        } else {
-          this.errorMessage = 'Error al crear el equipo. Inténtalo de nuevo.';
-        }
-      }
-    });
+onSubmit(): void {
+  this.errorMessage = '';
+  
+  // Validar nombre del equipo
+  const nombre = this.nombreEquipo.trim();
+  
+  if (!nombre) {
+    this.errorMessage = 'Por favor ingresa el nombre del equipo.';
+    return;
   }
+
+  if (nombre.length < 1 || nombre.length > 100) {
+    this.errorMessage = 'El nombre del equipo debe tener entre 1 y 100 caracteres.';
+    return;
+  }
+
+  // Verificar que el usuario esté logueado
+  const currentUser = this.authService.currentUserValue;
+  if (!currentUser) {
+    this.errorMessage = 'Debes iniciar sesión para crear un equipo.';
+    this.router.navigate(['/']);
+    return;
+  }
+
+  this.isLoading = true;
+
+  // Crear DTO para el equipo SIN LIGA ASIGNADA
+  const equipoDto = {
+    nombre: nombre,
+    usuarioId: currentUser.id
+    // NO enviamos ligaId, por lo que será null en el backend y se guardará como 0
+  };
+
+  console.log('Creando equipo sin liga:', equipoDto);
+
+  // Primero crear el equipo
+  this.equipoService.crearEquipo(equipoDto).subscribe({
+    next: (equipoCreado) => {
+      console.log('Equipo creado exitosamente:', equipoCreado);
+
+      // Si hay imagen, subirla
+      if (this.selectedFile) {
+        this.equipoService.subirImagen(equipoCreado.id, this.selectedFile).subscribe({
+          next: (imageResponse) => {
+            console.log('Imagen subida exitosamente:', imageResponse);
+            this.isLoading = false;
+            alert('Equipo creado exitosamente con imagen');
+            this.resetForm();
+            this.router.navigate(['/mainpage/teams']);
+          },
+          error: (imageError) => {
+            console.error('Error al subir imagen:', imageError);
+            this.isLoading = false;
+            // El equipo se creó pero la imagen falló
+            alert('Equipo creado, pero hubo un error al subir la imagen. Puedes intentar subirla después.');
+            this.resetForm();
+            this.router.navigate(['/mainpage/teams']);
+          }
+        });
+      } else {
+        // No hay imagen, solo navegar
+        this.isLoading = false;
+        alert('Equipo creado exitosamente');
+        this.resetForm();
+        this.router.navigate(['/mainpage/teams']);
+      }
+    },
+    error: (error) => {
+      console.error('Error al crear equipo:', error);
+      this.isLoading = false;
+      
+      // Manejar errores
+      if (error.status === 400 && error.error?.mensaje) {
+        this.errorMessage = error.error.mensaje;
+      } else if (error.status === 404) {
+        this.errorMessage = 'Usuario no encontrado. Por favor, inicia sesión de nuevo.';
+      } else if (error.status === 0) {
+        this.errorMessage = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
+      } else {
+        this.errorMessage = 'Error al crear el equipo. Inténtalo de nuevo.';
+      }
+    }
+  });
+}
 
   /**
    * Resetea el formulario a su estado inicial

@@ -1,58 +1,80 @@
-<div class="container mt-5">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <span class="navbar-brand me-auto">Mis Equipos</span>
-            <div class="btn-group" role="group" aria-label="Botones de acciones">
-                <button type="button" class="btn btn-dark" (click)="cargarEquipos()">
-                    Actualizar equipos
-                </button>
-            </div>
-        </div>
-    </nav>
+<div class="crear-liga-container">
+  <h2>Crear Nueva Liga</h2>
 
-    <!-- Mensaje de carga -->
-    <div *ngIf="isLoading" class="alert alert-info mt-4">
-        Cargando equipos...
+  <form [formGroup]="crearLigaForm" (ngSubmit)="onSubmit()">
+
+    <div class="form-group">
+      <label for="NombreLiga">Nombre de la liga</label>
+      <input id="NombreLiga" type="text" formControlName="NombreLiga" />
+      <div *ngIf="f['NombreLiga']?.touched && f['NombreLiga']?.invalid" class="error">
+        <small *ngIf="f['NombreLiga']?.errors?.['required']">El nombre de la liga es obligatorio.</small>
+        <small *ngIf="f['NombreLiga']?.errors?.['minlength']">Mínimo 1 carácter.</small>
+        <small *ngIf="f['NombreLiga']?.errors?.['maxlength']">Máximo 100 caracteres.</small>
+      </div>
     </div>
 
-    <!-- Mensaje de error -->
-    <div *ngIf="errorMessage" class="alert alert-danger mt-4">
-        {{ errorMessage }}
+    <div class="form-group">
+      <label for="Descripcion">Descripción (opcional)</label>
+      <textarea id="Descripcion" formControlName="Descripcion"></textarea>
+      <div *ngIf="f['Descripcion']?.touched && f['Descripcion']?.invalid" class="error">
+        <small *ngIf="f['Descripcion']?.errors?.['maxlength']">Máximo 500 caracteres.</small>
+      </div>
     </div>
 
-    <!-- Lista de equipos -->
-    <div class="row mt-4" *ngIf="!isLoading && !errorMessage">
-        <!-- Mensaje si no hay equipos -->
-        <div *ngIf="equipos.length === 0" class="col-12">
-            <div class="alert alert-warning">
-                No tienes equipos registrados. 
-                <a routerLink="/form" class="alert-link">Crea tu primer equipo aquí</a>.
-            </div>
-        </div>
-
-        <!-- Carta de equipo iterando con *ngFor -->
-        <div class="col-md-4 mb-4" *ngFor="let equipo of equipos">
-            <div class="card bg-light h-100">
-                <div class="row no-gutters h-100">
-                    <div class="col-5 d-flex align-items-center justify-content-center p-2">
-                        <img 
-                            [src]="obtenerImagenUrl(equipo.imagenUrl)" 
-                            [alt]="equipo.nombre" 
-                            style="max-height: 120px; object-fit: contain;" 
-                            class="card-img"
-                        >
-                    </div>
-                    <div class="col-7">
-                        <div class="card-body d-flex flex-column justify-content-between h-100">
-                            <p class="card-title font-weight-bold mb-1">{{ equipo.nombre }}</p>
-                            <h6 class="card-text mb-1">Manager: {{ equipo.nombrePropietario }}</h6>
-                            <h6 class="card-text mb-1">Estado: {{ equipo.estado }}</h6>
-                            <h6 class="card-text">Liga: {{ equipo.liga || 'N/A' }}</h6>
-                            <button class="btn btn-primary mt-2" >Ver Liga</button> <!--boton para mapear la busqueda-->>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="form-group">
+      <label for="Password">Contraseña de la liga</label>
+      <input id="Password" type="password" formControlName="Password" />
+      <div *ngIf="f['Password']?.touched && f['Password']?.invalid" class="error">
+        <small *ngIf="f['Password']?.errors?.['required']">La contraseña es obligatoria.</small>
+        <small *ngIf="f['Password']?.errors?.['pattern']">
+          Debe tener 8-12 caracteres, incluir mayúscula, minúscula y número.
+        </small>
+      </div>
     </div>
+
+    <div class="form-group">
+      <label for="CantidadEquipos">Cantidad de equipos</label>
+      <!-- CAMBIO: Usar select en lugar de input number -->
+      <select id="CantidadEquipos" formControlName="CantidadEquipos">
+        <option *ngFor="let val of valoresPermitidosEquipos" [value]="val">
+          {{ val }} equipos
+        </option>
+      </select>
+      <div *ngIf="f['CantidadEquipos']?.touched && f['CantidadEquipos']?.invalid" class="error">
+        <small *ngIf="f['CantidadEquipos']?.errors?.['required']">Campo obligatorio.</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="TipoPlayoffs">Tipo de playoffs</label>
+      <select id="TipoPlayoffs" formControlName="TipoPlayoffs">
+        <option *ngFor="let val of valoresPermitidosPlayoffs" [value]="val">
+          {{ val }} equipos
+        </option>
+      </select>
+      <div *ngIf="f['TipoPlayoffs']?.touched && f['TipoPlayoffs']?.invalid" class="error">
+        <small *ngIf="f['TipoPlayoffs']?.errors?.['required']">Campo obligatorio.</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="NombreEquipo">Nombre del equipo del comisionado</label>
+      <input id="NombreEquipo" type="text" formControlName="NombreEquipo" />
+      <div *ngIf="f['NombreEquipo']?.touched && f['NombreEquipo']?.invalid" class="error">
+        <small *ngIf="f['NombreEquipo']?.errors?.['required']">El nombre del equipo es obligatorio.</small>
+        <small *ngIf="f['NombreEquipo']?.errors?.['maxlength']">Máximo 100 caracteres.</small>
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="submitting">
+      {{ submitting ? 'Creando...' : 'Crear Liga' }}
+    </button>
+
+    <div *ngIf="errorMessage" class="error-message">
+      <strong>Error:</strong> {{ errorMessage }}
+    </div>
+    <div *ngIf="successMessage" class="success-message">
+      <strong>✓</strong> {{ successMessage }}
+    </div>
+  </form>
 </div>

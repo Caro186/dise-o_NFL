@@ -1,106 +1,146 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Authservice } from '../../services/authservice';
-import { ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, HostListener } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService, LoginDto, LoginResponse, Usuario } from '../../services/authservice';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
-/**
- * Componente de login para autenticación de usuarios
- */
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
-  imports: [ReactiveFormsModule, CommonModule, RouterModule]
+  standalone: true,
+  imports: [RouterModule, CommonModule, ReactiveFormsModule]
 })
-export class Login {
-  loginForm: FormGroup;
+export class LoginComponent implements OnInit {
+  loginForm!: FormGroup;
   serverError: string = '';
+  isLoading: boolean = false;
+  cuentaBloqueada: boolean = false;
 
-  /**
-   * Constructor del componente de login
-   * @param fb FormBuilder para crear formularios reactivos
-   * @param authService Servicio de autenticación
-   * @param router Router para navegación
-   */
+  private failedAttempts: number = 0;
+  private sessionTimeout: any;
+  private readonly SESSION_DURATION = 12 * 60 * 60 * 1000; // 12 horas
+
   constructor(
-  private fb: FormBuilder,
-  private authService: Authservice,
-  private router: Router
-) {
-  // Si ya está logueado, redirigir a mainpage
-  if (this.authService.isLoggedIn()) {
-    this.router.navigate(['/mainpage']);
-  }
+    private authService: AuthService, 
+    private router: Router,
+    private fb: FormBuilder
+  ) {}
 
-  this.loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
-    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), this.passwordValidator]]
-  });
-}
+  ngOnInit(): void {
+    // Inicializar el formulario
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.maxLength(12),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]{8,12}$/)
+      ]]
+    });
 
-  /**
-   * Validación personalizada de contraseña
-   * Debe ser alfanumérica con al menos una mayúscula y una minúscula
-   * @param control Control del formulario a validar
-   * @returns Objeto con el error o null si es válido
-   */
-  passwordValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value || '';
-    const hasUpper = /[A-Z]/.test(value);
-    const hasLower = /[a-z]/.test(value);
-    const hasAlphaNum = /^[a-zA-Z0-9]+$/.test(value);
-    
-    if (!hasUpper || !hasLower || !hasAlphaNum) {
-      return { passwordInvalid: true };
+    // Si ya hay sesión activa
+    const token = localStorage.getItem('token');
+    const lastActivity = Number(localStorage.getItem('lastActivity') || '0');
+    if (token && Date.now() - lastActivity < this.SESSION_DURATION) {
+      this.startSessionTimer();
+      this.router.navigate(['/perfil']);
     }
-    return null;
   }
 
-  /**
-   * Método para iniciar sesión
-   * Valida el formulario y realiza la petición de login al backend
-   */
+  /** Reset temporizador al interactuar */
+  @HostListener('document:click')
+  @HostListener('document:keydown')
+  resetSessionTimer(): void {
+    if (localStorage.getItem('token')) {
+      localStorage.setItem('lastActivity', Date.now().toString());
+      clearTimeout(this.sessionTimeout);
+      this.startSessionTimer();
+    }
+  }
+
+  /** Temporizador de expiración */
+  private startSessionTimer(): void {
+    this.sessionTimeout = setTimeout(() => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('lastActivity');
+      localStorage.removeItem('usuario');
+      alert('Tu sesión ha expirado por inactividad.');
+      this.router.navigate(['/login']);
+    }, this.SESSION_DURATION);
+  }
+
+  /** Envío del formulario */
   onSubmit(): void {
     this.serverError = '';
-    
+
+    // Validar formulario
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
-    const credentials = {
+    this.isLoading = true;
+
+    const loginDto: LoginDto = {
       email: this.loginForm.get('email')?.value,
       password: this.loginForm.get('password')?.value
+
+      
     };
 
-    this.authService.login(credentials).subscribe({
-      next: (response) => {
-        console.log('Login exitoso:', response);
-        
+    this.authService.login(loginDto).subscribe({
+      next: (response: LoginResponse) => {
+        this.isLoading = false;
+
         if (response.status === 'ok') {
-          // Redirigir a la página principal
+          // Login exitoso
+          this.failedAttempts = 0;
+
+          // Guardar token y fecha de actividad
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('lastActivity', Date.now().toString());
+          localStorage.setItem('usuario', JSON.stringify(response.usuario));
+
+          this.startSessionTimer();
           this.router.navigate(['/mainpage']);
-        } else {
-          this.serverError = 'Usuario o contraseña incorrectos';
+        } else if (response.usuario.estado === 'bloqueada') {
+          this.cuentaBloqueada = true;
+          this.serverError = 'Tu cuenta ha sido bloqueada por exceso de intentos fallidos.';
         }
       },
       error: (error) => {
-        console.error('Error en login:', error);
-        
-        // Manejar diferentes tipos de errores
-        if (error.status === 401) {
-          this.serverError = 'Usuario o contraseña incorrectos';
-        } else if (error.status === 0) {
-          this.serverError = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
-        } else if (error.error && error.error.mensaje) {
-          this.serverError = error.error.mensaje;
+        this.isLoading = false;
+
+        if (error.message.includes('bloqueada')) {
+          this.cuentaBloqueada = true;
+          this.serverError = error.message;
         } else {
-          this.serverError = 'Error al conectar con el servidor';
+          this.handleFailedAttempt();
         }
       }
     });
+  }
+
+  /** Manejo de intentos fallidos */
+  private handleFailedAttempt(): void {
+    this.failedAttempts++;
+    if (this.failedAttempts >= 5) {
+      this.cuentaBloqueada = true;
+      this.serverError = 'Cuenta bloqueada tras 5 intentos fallidos.';
+    } else {
+      this.serverError = 'Credenciales inválidas.';
+    }
+  }
+
+  /** Limpia mensajes al escribir */
+  onInputChange(): void {
+    this.serverError = '';
+    this.cuentaBloqueada = false;
+  }
+
+  /** Redirige a registro */
+  goToRegister(): void {
+    this.router.navigate(['/register']);
   }
 }

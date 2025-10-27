@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Authservice } from '../services/authservice';
+import { AuthService } from '../services/authservice';
 
 /**
  * Guard para proteger rutas que requieren autenticación
@@ -8,7 +8,7 @@ import { Authservice } from '../services/authservice';
  * @returns true si el usuario está autenticado, false y redirige al login en caso contrario
  */
 export const authGuard = () => {
-  const authService = inject(Authservice);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
   if (authService.isLoggedIn()) {

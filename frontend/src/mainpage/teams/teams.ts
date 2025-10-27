@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { EquipoService, EquipoResponseDto } from '../../services/equipo.service';
-import { Authservice } from '../../services/authservice';
+import { AuthService } from '../../services/authservice';
 
 /**
  * Componente para mostrar y gestionar equipos
@@ -26,7 +26,7 @@ export class Teams implements OnInit {
    */
   constructor(
     private equipoService: EquipoService,
-    private authService: Authservice
+    private authService: AuthService
   ) { }
 
   /**

@@ -1,5 +1,5 @@
 <div class="gradient-custom-2 gradient-form d-flex align-items-center justify-content-center">
-  <div class="card p-4" style="width: 450px;">
+  <div class="card p-4" style="width: 500px; max-width: 95%;">
     <!-- Información de la liga -->
     <div class="text-center mb-4">
       <h3 class="mb-2">{{ ligaNombre }}</h3>
@@ -10,11 +10,19 @@
 
     <hr class="my-3">
 
+    <!-- Loader mientras se cargan los datos -->
+    <div *ngIf="isLoading && !errorMessage" class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="text-muted mt-2">Cargando datos de la liga...</p>
+    </div>
+
     <!-- Formulario para unirse -->
-    <form>
+    <form *ngIf="!isLoading || errorMessage">
       <!-- Contraseña de la liga -->
       <div class="mb-3">
-        <label for="password">Contraseña de la liga:</label>
+        <label for="password" class="form-label">Contraseña de la liga: <span class="text-danger">*</span></label>
         <input 
           id="password" 
           type="password" 
@@ -26,9 +34,9 @@
         />
       </div>
 
-      <!-- Alias del usuario -->
+      <!-- Alias del usuario (opcional) -->
       <div class="mb-3">
-        <label for="alias">Tu alias:</label>
+        <label for="alias" class="form-label">Tu alias (opcional):</label>
         <input 
           id="alias" 
           type="text" 
@@ -37,47 +45,86 @@
           [(ngModel)]="alias"
           name="alias"
           maxlength="50"
-          required
         />
         <small class="text-muted">
           • Debe ser único dentro de la liga (máx. 50 caracteres)
         </small>
       </div>
 
-      <!-- Nombre del equipo -->
+      <hr class="my-3">
+
+      <!-- Selector de equipo existente -->
       <div class="mb-3">
-        <label for="nombreEquipo">Nombre de tu equipo:</label>
-        <input 
-          id="nombreEquipo" 
-          type="text" 
-          placeholder="Ej: Los Invencibles" 
-          class="form-control"
-          [(ngModel)]="nombreEquipo"
-          name="nombreEquipo"
-          maxlength="100"
+        <label for="equipoExistente" class="form-label">Selecciona tu equipo: <span class="text-danger">*</span></label>
+        
+        <!-- Loader de equipos -->
+        <div *ngIf="isLoadingTeams" class="text-center py-3">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Cargando equipos...</span>
+          </div>
+          <small class="text-muted ms-2">Cargando tus equipos...</small>
+        </div>
+
+        <!-- Lista de equipos disponibles -->
+        <select 
+          *ngIf="!isLoadingTeams && equiposDisponibles.length > 0"
+          id="equipoExistente"
+          class="form-select"
+          [(ngModel)]="equipoSeleccionadoId"
+          name="equipoExistente"
           required
-        />
-        <small class="text-muted">
-          • Debe ser único dentro de la liga (máx. 100 caracteres)
-        </small>
+        >
+          <option [value]="null" disabled>-- Selecciona un equipo --</option>
+          <option *ngFor="let equipo of equiposDisponibles" [value]="equipo.id">
+            {{ equipo.nombre }}
+          </option>
+        </select>
+
+        <!-- Mensaje si no hay equipos -->
+        <div *ngIf="!isLoadingTeams && equiposDisponibles.length === 0" class="alert alert-warning mt-2">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <strong>No tienes equipos disponibles.</strong>
+          <br>
+          <small>Debes crear un equipo primero para poder unirte a una liga.</small>
+          <br>
+          <button 
+            type="button" 
+            class="btn btn-sm btn-outline-primary mt-2"
+            (click)="onCreateNewTeam()"
+          >
+            <i class="bi bi-plus-circle me-1"></i> Crear equipo
+          </button>
+        </div>
+
+        <!-- Vista previa del equipo seleccionado -->
+        <div *ngIf="equipoSeleccionadoId && equiposDisponibles.length > 0" class="mt-2 p-2 bg-light rounded">
+          <small class="text-muted">
+            <i class="bi bi-check-circle-fill text-success me-1"></i>
+            Equipo seleccionado: 
+            <strong>{{ getEquipoSeleccionadoNombre() }}</strong>
+          </small>
+        </div>
       </div>
 
       <!-- Mensajes de error -->
       <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
         {{ errorMessage }}
       </div>
 
       <!-- Mensaje de éxito -->
       <div *ngIf="successMessage" class="alert alert-success" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
         {{ successMessage }}
       </div>
 
       <!-- Botones -->
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 mt-4">
         <button 
           type="button" 
           class="btn btn-secondary flex-fill" 
           (click)="onCancel()"
+          [disabled]="isLoading"
         >
           Cancelar
         </button>
@@ -85,7 +132,7 @@
           type="button" 
           class="btn btn-primary flex-fill" 
           (click)="onJoin()"
-          [disabled]="isLoading || !isFormValid()"
+          [disabled]="isLoading || !isFormValid() || equiposDisponibles.length === 0"
         >
           <span *ngIf="!isLoading">Unirse a la liga</span>
           <span *ngIf="isLoading">
