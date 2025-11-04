@@ -12,15 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NFLFantasyAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251026233624_AddTemporadaAndSemana")]
-    partial class AddTemporadaAndSemana
+    [Migration("20251027220054_Sprint1_CompleteTables")]
+    partial class Sprint1_CompleteTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -66,6 +66,43 @@ namespace NFLFantasyAPI.Migrations
                     b.ToTable("equipos", (string)null);
                 });
 
+            modelBuilder.Entity("NFLFantasyAPI.Models.EquipoLiga", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Alias")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("EsComisionado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("FechaUnion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("IdEquipo")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("IdLiga")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdLiga");
+
+                    b.HasIndex("IdEquipo", "IdLiga")
+                        .IsUnique();
+
+                    b.ToTable("equipos_ligas", (string)null);
+                });
+
             modelBuilder.Entity("NFLFantasyAPI.Models.Liga", b =>
                 {
                     b.Property<int>("IdLiga")
@@ -74,8 +111,17 @@ namespace NFLFantasyAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdLiga"));
 
-                    b.Property<int>("CuposOcupados")
+                    b.Property<int?>("ComisionadoId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ConfigPlayoffs")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("CuposOcupados")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<int>("CuposTotales")
                         .HasColumnType("integer");
@@ -83,10 +129,16 @@ namespace NFLFantasyAPI.Migrations
                     b.Property<string>("Descripcion")
                         .HasColumnType("text");
 
+                    b.Property<string>("EsquemaPuntos")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Estado")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Pre-Draft");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("timestamp with time zone");
@@ -97,31 +149,60 @@ namespace NFLFantasyAPI.Migrations
                     b.Property<DateTime?>("FechaInicio")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("IdCreador")
+                    b.Property<DateTime?>("FechaLimiteIntercambios")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FormatoPosiciones")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("IdComisionado")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("IdTemporada")
                         .HasColumnType("integer");
 
                     b.Property<string>("ImagenUrl")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int?>("LimiteMaximoCambios")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("LimiteMaximoContrataciones")
+                        .HasColumnType("integer");
+
                     b.Property<string>("NombreLiga")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("Temporada")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<bool>("PermitirDecimales")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<int?>("TemporadaId")
+                        .HasColumnType("integer");
 
                     b.HasKey("IdLiga");
 
-                    b.ToTable("Ligas");
+                    b.HasIndex("ComisionadoId");
+
+                    b.HasIndex("IdComisionado");
+
+                    b.HasIndex("IdTemporada");
+
+                    b.HasIndex("NombreLiga");
+
+                    b.HasIndex("TemporadaId");
+
+                    b.ToTable("ligas", (string)null);
                 });
 
             modelBuilder.Entity("NFLFantasyAPI.Models.Usuario", b =>
@@ -137,8 +218,26 @@ namespace NFLFantasyAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("EstadoCuenta")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Activa");
+
+                    b.Property<DateTime?>("FechaBloqueo")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FechaUltimoIntentoFallido")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("IntentosFailidos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("NombreCompleto")
                         .IsRequired()
@@ -149,6 +248,9 @@ namespace NFLFantasyAPI.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime?>("UltimaActividad")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -221,6 +323,52 @@ namespace NFLFantasyAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("NFLFantasyAPI.Models.EquipoLiga", b =>
+                {
+                    b.HasOne("NFLFantasyAPI.Models.Equipo", "Equipo")
+                        .WithMany()
+                        .HasForeignKey("IdEquipo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NFLFantasyAPI.Models.Liga", "Liga")
+                        .WithMany()
+                        .HasForeignKey("IdLiga")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Equipo");
+
+                    b.Navigation("Liga");
+                });
+
+            modelBuilder.Entity("NFLFantasyAPI.Models.Liga", b =>
+                {
+                    b.HasOne("NFLFantasyAPI.Models.Usuario", "Comisionado")
+                        .WithMany()
+                        .HasForeignKey("ComisionadoId");
+
+                    b.HasOne("NFLFantasyAPI.Models.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("IdComisionado")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Temporada", null)
+                        .WithMany()
+                        .HasForeignKey("IdTemporada")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Temporada", "Temporada")
+                        .WithMany()
+                        .HasForeignKey("TemporadaId");
+
+                    b.Navigation("Comisionado");
+
+                    b.Navigation("Temporada");
                 });
 
             modelBuilder.Entity("Semana", b =>

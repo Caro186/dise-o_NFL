@@ -8,6 +8,7 @@ interface Temporada {
   cantidadSemanas: number;
   fechaInicio: Date;
   fechaCierre: Date;
+  actual: boolean;
 }
 
 interface Semana {
@@ -28,6 +29,7 @@ export class TemporadaComponent implements OnInit {
     cantidadSemanas: 1,
     fechaInicio: new Date(),
     fechaCierre: new Date(),
+    actual: false
   };
 
   semanas: Semana[] = [];
@@ -56,7 +58,6 @@ export class TemporadaComponent implements OnInit {
       this.semanas.push({ inicio: null, fin: null });
     }
   }
-
 
   crearTemporada(): void {
     const nombre = this.temporada.nombre;
@@ -138,7 +139,7 @@ export class TemporadaComponent implements OnInit {
       nombre,
       fechaInicio: fechaInicioTemporada.toISOString(),
       fechaCierre: fechaCierreTemporada.toISOString(),
-      actual: false,
+      actual: this.temporada.actual,
       semanas: semanasDto
     };
 
@@ -146,7 +147,7 @@ export class TemporadaComponent implements OnInit {
       next: (resp) => {
         alert(`Temporada ${resp.nombre} creada correctamente.`);
         // Reinicia formulario
-        this.temporada = { nombre: 1, cantidadSemanas: 1, fechaInicio: new Date(), fechaCierre: new Date() };
+        this.temporada = { nombre: 1, cantidadSemanas: 1, fechaInicio: new Date(), fechaCierre: new Date(), actual: false };
         this.semanas = [];
         this.cargarTemporadas(); // recargar temporadas
       },
@@ -156,6 +157,4 @@ export class TemporadaComponent implements OnInit {
       }
     });
   }
-
-
 }

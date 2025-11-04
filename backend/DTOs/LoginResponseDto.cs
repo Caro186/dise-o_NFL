@@ -14,5 +14,15 @@ namespace NFLFantasyAPI.DTOs
         /// Información del usuario autenticado
         /// </summary>
         public UsuarioResponseDto? Usuario { get; set; }
+
+        /// <summary>
+        /// Token JWT para autenticación
+        /// </summary>
+        public string? Token { get; set; }
+
+        /// <summary>
+        /// Fecha de expiración del token
+        /// </summary>
+        public DateTime? TokenExpiracion { get; set; }
     }
 }

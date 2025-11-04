@@ -38,9 +38,9 @@ backend/*.db-shm
 backend/*.db-wal
 
 # Uploads
-backend/wwwroot/uploads/**
-!backend/wwwroot/uploads/.gitkeep
-!backend/wwwroot/uploads/equipos/.gitkeep
+# Ignorar archivos subidos pero mantener la estructura
+wwwroot/uploads/**/*
+!wwwroot/uploads/**/.gitkeep
 
 # Configuration (sensible)
 backend/appsettings.*.json

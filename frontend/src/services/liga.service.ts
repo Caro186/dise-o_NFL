@@ -1,84 +1,73 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-export interface Liga {
-  id_liga: number;
-  nombre_liga: string;
-  descripcion: string;
-  temporada: string;
-  estado: 'activa' | 'inactiva' | 'finalizada';
-  cupos_totales: number;
-  cupos_ocupados: number;
-  fecha_creacion: string;
-  fecha_inicio: string;
-  fecha_fin: string;
+export interface CrearLigaRequest {
+  nombreLiga: string;
+  descripcion?: string;
+  password: string;
+  cantidadEquipos: number;
+  idComisionado: number;
+  nombreEquipoComisionado: string;
+  equiposEnPlayoffs: number;
 }
 
-export interface JoinLeagueRequest {
-  id_liga: number;
-  id_usuario: number;
+export interface LigaResponse {
+  idLiga: number;
+  nombreLiga: string;
+  descripcion?: string;
+  idTemporada: number;
+  estado: string;
+  cuposTotales: number;
+  cuposOcupados: number;
+  cuposDisponibles: number;
+  fechaCreacion: Date;
+  fechaInicio?: Date;
+  fechaFin?: Date;
+  idComisionado: number;
+  nombreComisionado: string;
+  idEquipoComisionado: number;
+  nombreEquipoComisionado: string;
+}
+
+export interface UnirseALigaRequest {
+  idLiga: number;
+  idUsuario: number;
   password: string;
   alias: string;
-  nombre_equipo: string;
+  nombreEquipo: string;
 }
 
-export interface JoinLeagueResponse {
-  success: boolean;
-  message: string;
-  id_participante?: number;
+export interface UnirseALigaResponse {
+  mensaje: string;
+  idLiga: number;
+  nombreLiga: string;
+  idEquipo: number;
+  nombreEquipo: string;
+  cuposDisponibles: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class LeagueService {
-  private apiUrl = 'http://localhost:3000/api'; // Ajusta según tu configuración
+export class LigaService {
+  private baseUrl = 'http://localhost:5000/api/Liga';
 
   constructor(private http: HttpClient) {}
 
-  // Obtener información de una liga específica
-  getLeagueById(id: number): Observable<Liga> {
-    return this.http.get<Liga>(`${this.apiUrl}/ligas/${id}`)
-      .pipe(catchError(this.handleError));
+  crearLiga(ligaData: CrearLigaRequest): Observable<LigaResponse> {
+    return this.http.post<LigaResponse>(this.baseUrl, ligaData);
   }
 
-  // Buscar ligas por nombre, temporada y estado
-  searchLeagues(nombre?: string, temporada?: string, estado?: string): Observable<Liga[]> {
-    let params: any = {};
-    if (nombre) params.nombre = nombre;
-    if (temporada) params.temporada = temporada;
-    if (estado) params.estado = estado;
-
-    return this.http.get<Liga[]>(`${this.apiUrl}/ligas/search`, { params })
-      .pipe(catchError(this.handleError));
+  obtenerLiga(id: number): Observable<LigaResponse> {
+    return this.http.get<LigaResponse>(`${this.baseUrl}/${id}`);
   }
 
-  // Unirse a una liga
-  joinLeague(request: JoinLeagueRequest): Observable<JoinLeagueResponse> {
-    return this.http.post<JoinLeagueResponse>(`${this.apiUrl}/ligas/join`, request)
-      .pipe(catchError(this.handleError));
+  obtenerTodasLasLigas(): Observable<LigaResponse[]> {
+    return this.http.get<LigaResponse[]>(this.baseUrl);
   }
 
-  // Verificar si el usuario ya está en la liga
-  checkUserInLeague(idLiga: number, idUsuario: number): Observable<boolean> {
-    return this.http.get<{exists: boolean}>(`${this.apiUrl}/ligas/${idLiga}/users/${idUsuario}`)
-      .pipe(
-        map(response => response.exists),
-        catchError(this.handleError)
-      );
-  }
-
-  private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'Ocurrió un error inesperado';
-    
-    if (error.error instanceof ErrorEvent) {
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      errorMessage = error.error?.message || errorMessage;
-    }
-    
-    return throwError(() => new Error(errorMessage));
+  unirseALiga(data: UnirseALigaRequest): Observable<UnirseALigaResponse> {
+    return this.http.post<UnirseALigaResponse>(`${this.baseUrl}/unirse`, data);
   }
 }

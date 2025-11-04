@@ -61,6 +61,20 @@
         />
       </div>
 
+      <!-- Checkbox para marcar como actual -->
+      <div class="mb-3 form-check">
+        <input
+          type="checkbox"
+          class="form-check-input"
+          id="actual"
+          name="actual"
+          [(ngModel)]="temporada.actual"
+        />
+        <label class="form-check-label" for="actual">
+          Marcar como temporada actual
+        </label>
+      </div>
+
       <!-- Campos de fechas por semana -->
       <div *ngFor="let semana of semanas; let i = index" class="mb-3 p-2 border rounded">
         <h5>Semana {{ i + 1 }}</h5>
@@ -87,6 +101,7 @@
       <strong>Nombre:</strong> {{ t.nombre }} <br />
       <strong>Inicio:</strong> {{ t.fechaInicio | date }} |
       <strong>Cierre:</strong> {{ t.fechaCierre | date }} |
+      <strong>Actual:</strong> {{ t.actual ? 'Sí' : 'No' }} |
       <strong>Semanas:</strong> {{ t.semanas?.length || 0 }}
 
       <div *ngIf="t.semanas && t.semanas.length > 0" class="mt-2">

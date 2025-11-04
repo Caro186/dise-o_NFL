@@ -38,5 +38,32 @@ namespace NFLFantasyAPI.Models
         /// Fecha y hora de registro del usuario en el sistema
         /// </summary>
         public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Contador de intentos fallidos de inicio de sesión consecutivos
+        /// </summary>
+        public int IntentosFailidos { get; set; } = 0;
+
+        /// <summary>
+        /// Fecha y hora del último intento fallido de inicio de sesión
+        /// </summary>
+        public DateTime? FechaUltimoIntentoFallido { get; set; }
+
+        /// <summary>
+        /// Estado de la cuenta del usuario (Activa o Bloqueada)
+        /// </summary>
+        [Required]
+        [MaxLength(20, ErrorMessage = "El estado no puede exceder 20 caracteres")]
+        public string EstadoCuenta { get; set; } = "Activa";
+
+        /// <summary>
+        /// Fecha y hora en que la cuenta fue bloqueada
+        /// </summary>
+        public DateTime? FechaBloqueo { get; set; }
+
+        /// <summary>
+        /// Fecha y hora de la última actividad del usuario (para control de inactividad)
+        /// </summary>
+        public DateTime? UltimaActividad { get; set; }
     }
 }
