@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace NFLFantasyAPI.DTOs
@@ -5,7 +6,7 @@ namespace NFLFantasyAPI.DTOs
     /// <summary>
     /// DTO para la creación de una nueva liga
     /// </summary>
-    public class LigaCreateDto
+    public class CrearLigaDto
     {
         /// <summary>
         /// Nombre de la liga (1-100 caracteres)
@@ -32,7 +33,7 @@ namespace NFLFantasyAPI.DTOs
         /// Cantidad de equipos permitidos (4, 6, 8, 10, 12, 14, 16, 18 o 20)
         /// </summary>
         [Required(ErrorMessage = "La cantidad de equipos es obligatoria")]
-        [Range(4, 20, ErrorMessage = "La cantidad de equipos debe estar entre 4 y 20")]
+        [Range(4, 20, ErrorMessage = "La cantidad de equipos debe ser 4, 6, 8, 10, 12, 14, 16, 18 o 20")]
         public int CantidadEquipos { get; set; }
 
         /// <summary>
@@ -55,4 +56,9 @@ namespace NFLFantasyAPI.DTOs
         [Range(4, 6, ErrorMessage = "Los playoffs deben ser de 4 o 6 equipos")]
         public int EquiposEnPlayoffs { get; set; } = 4;
     }
+
+    /// <summary>
+    /// DTO para la respuesta de creación de liga
+    /// </summary>
+    
 }

@@ -1,0 +1,115 @@
+<div class="crear-liga-container">
+  <div class="crear-liga-card">
+    <h2>Crear Nueva Liga</h2>
+    <p class="subtitle">Configura tu liga de Fantasy NFL</p>
+
+    <form [formGroup]="crearLigaForm" (ngSubmit)="onSubmit()">
+      <!-- Nombre de la Liga -->
+      <div class="form-group">
+        <label for="nombreLiga">Nombre de la Liga *</label>
+        <input
+          type="text"
+          id="nombreLiga"
+          formControlName="nombreLiga"
+          class="form-control"
+          placeholder="Ej: Liga de los Campeones 2024"
+          maxlength="100"
+        />
+        <div class="error-message" *ngIf="crearLigaForm.get('nombreLiga')?.invalid && crearLigaForm.get('nombreLiga')?.touched">
+          <span *ngIf="crearLigaForm.get('nombreLiga')?.errors?.['required']">El nombre es obligatorio</span>
+          <span *ngIf="crearLigaForm.get('nombreLiga')?.errors?.['maxlength']">Máximo 100 caracteres</span>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-group">
+        <label for="descripcion">Descripción (Opcional)</label>
+        <textarea
+          id="descripcion"
+          formControlName="descripcion"
+          class="form-control"
+          placeholder="Describe tu liga..."
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="password">Contraseña de la Liga *</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          class="form-control"
+          placeholder="8-12 caracteres, alfanumérica"
+          maxlength="12"
+        />
+        <small class="form-hint">8-12 caracteres, alfanumérica, con mayúsculas y minúsculas</small>
+        <div class="error-message" *ngIf="crearLigaForm.get('password')?.invalid && crearLigaForm.get('password')?.touched">
+          <span *ngIf="crearLigaForm.get('password')?.errors?.['required']">La contraseña es obligatoria</span>
+          <span *ngIf="crearLigaForm.get('password')?.errors?.['minlength']">Mínimo 8 caracteres</span>
+          <span *ngIf="crearLigaForm.get('password')?.errors?.['maxlength']">Máximo 12 caracteres</span>
+          <span *ngIf="crearLigaForm.get('password')?.errors?.['passwordInvalid']">Debe ser alfanumérica con mayúsculas y minúsculas</span>
+        </div>
+      </div>
+
+      <!-- Cantidad de Equipos -->
+      <div class="form-group">
+        <label for="cantidadEquipos">Cantidad de Equipos *</label>
+        <select id="cantidadEquipos" formControlName="cantidadEquipos" class="form-control">
+          <option *ngFor="let cantidad of cantidadesEquipos" [value]="cantidad">
+            {{ cantidad }} equipos
+          </option>
+        </select>
+      </div>
+
+      <!-- Nombre del Equipo del Comisionado -->
+      <div class="form-group">
+        <label for="nombreEquipoComisionado">Nombre de tu Equipo *</label>
+        <input
+          type="text"
+          id="nombreEquipoComisionado"
+          formControlName="nombreEquipoComisionado"
+          class="form-control"
+          placeholder="Ej: Los Invencibles"
+          maxlength="100"
+        />
+        <small class="form-hint">Como comisionado, serás el primer equipo de la liga</small>
+        <div class="error-message" *ngIf="crearLigaForm.get('nombreEquipoComisionado')?.invalid && crearLigaForm.get('nombreEquipoComisionado')?.touched">
+          <span *ngIf="crearLigaForm.get('nombreEquipoComisionado')?.errors?.['required']">El nombre del equipo es obligatorio</span>
+          <span *ngIf="crearLigaForm.get('nombreEquipoComisionado')?.errors?.['maxlength']">Máximo 100 caracteres</span>
+        </div>
+      </div>
+
+      <!-- Configuración de Playoffs -->
+      <div class="form-group">
+        <label for="equiposEnPlayoffs">Playoffs *</label>
+        <select id="equiposEnPlayoffs" formControlName="equiposEnPlayoffs" class="form-control">
+          <option *ngFor="let opcion of opcionesPlayoffs" [value]="opcion.valor">
+            {{ opcion.texto }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Mensajes -->
+      <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="isLoading">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading || crearLigaForm.invalid">
+          <span *ngIf="isLoading">Creando...</span>
+          <span *ngIf="!isLoading">Crear Liga</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -6,167 +6,265 @@ using NFLFantasyAPI.DTOs;
 
 namespace NFLFantasyAPI.Controllers
 {
+    /// <summary>
+    /// Controlador para gestión de temporadas
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class TemporadaController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<TemporadaController> _logger;
 
-        public TemporadaController(ApplicationDbContext context)
+        public TemporadaController(ApplicationDbContext context, ILogger<TemporadaController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
-        // GET: api/temporada
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TemporadaDTO>>> GetTemporadas()
-        {
-            var temporadas = await _context.Temporadas
-                .Include(t => t.Semanas)
-                .ToListAsync();
-
-            return temporadas.Select(t => new TemporadaDTO
-            {
-                Nombre = t.Nombre,
-                FechaInicio = t.FechaInicio,
-                FechaCierre = t.FechaCierre,
-                Actual = t.Actual,
-                Semanas = t.Semanas.Select(s => new SemanaDTO
-                {
-                    FechaInicio = s.FechaInicio,
-                    FechaFin = s.FechaFin
-                }).ToList()
-            }).ToList();
-        }
-
-        // GET: api/temporada/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<TemporadaDTO>> GetTemporada(int id)
-        {
-            var temporada = await _context.Temporadas
-                .Include(t => t.Semanas)
-                .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (temporada == null)
-                return NotFound();
-
-            var dto = new TemporadaDTO
-            {
-                Nombre = temporada.Nombre,
-                FechaInicio = temporada.FechaInicio,
-                FechaCierre = temporada.FechaCierre,
-                Actual = temporada.Actual,
-                Semanas = temporada.Semanas.Select(s => new SemanaDTO
-                {
-                    FechaInicio = s.FechaInicio,
-                    FechaFin = s.FechaFin
-                }).ToList()
-            };
-
-            return dto;
-        }
-
-        // POST: api/temporada
+        /// <summary>
+        /// Crea una nueva temporada con sus semanas
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<TemporadaDTO>> CrearTemporada([FromBody] TemporadaDTO dto)
+        public async Task<ActionResult> CrearTemporada([FromBody] CrearTemporadaDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            // Validación extra: FechaInicio < FechaCierre
-            if (dto.FechaInicio > dto.FechaCierre)
-                return BadRequest("La fecha de inicio no puede ser mayor que la fecha de cierre.");
-
-            var temporada = new Temporada
+            try
             {
-                Nombre = dto.Nombre,
-                FechaInicio = dto.FechaInicio,
-                FechaCierre = dto.FechaCierre,
-                Actual = dto.Actual,
-                FechaCreacion = DateTime.UtcNow,
-                Semanas = dto.Semanas?.Select(s => new Semana
+                if (!ModelState.IsValid)
                 {
-                    FechaInicio = s.FechaInicio,
-                    FechaFin = s.FechaFin
-                }).ToList()
-            };
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "Datos inválidos",
+                        Errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()
+                    });
+                }
 
-            // Solo una temporada puede ser actual
-            if (temporada.Actual)
-            {
-                var actuales = await _context.Temporadas.Where(t => t.Actual).ToListAsync();
-                foreach (var t in actuales) t.Actual = false;
+                // Validar que el nombre de temporada sea único
+                if (await _context.Temporadas.AnyAsync(t => t.Nombre == dto.Nombre))
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "Ya existe una temporada con ese nombre"
+                    });
+                }
+
+                // Validar que fechas sean coherentes
+                if (dto.FechaInicio >= dto.FechaCierre)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "La fecha de inicio debe ser anterior a la fecha de cierre"
+                    });
+                }
+
+                // Validar que no haya traslape con otras temporadas
+                var hayTraslape = await _context.Temporadas
+                    .AnyAsync(t => t.FechaInicio <= dto.FechaCierre && t.FechaCierre >= dto.FechaInicio);
+
+                if (hayTraslape)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "Las fechas se traslapan con otra temporada existente"
+                    });
+                }
+
+                // Si se marca como actual, desmarcar las demás
+                if (dto.Actual)
+                {
+                    var temporadasActuales = await _context.Temporadas
+                        .Where(t => t.Actual)
+                        .ToListAsync();
+
+                    foreach (var temp in temporadasActuales)
+                    {
+                        temp.Actual = false;
+                    }
+                }
+
+                // Crear la temporada
+                var temporada = new Temporada
+                {
+                    Nombre = dto.Nombre,
+                    FechaInicio = dto.FechaInicio,
+                    FechaCierre = dto.FechaCierre,
+                    FechaCreacion = DateTime.UtcNow,
+                    Actual = dto.Actual
+                };
+
+                _context.Temporadas.Add(temporada);
+                await _context.SaveChangesAsync();
+
+                // Crear las semanas si las hay
+                if (dto.Semanas != null && dto.Semanas.Any())
+                {
+                    foreach (var semanaDto in dto.Semanas)
+                    {
+                        // Validar que las fechas de la semana estén dentro del rango de la temporada
+                        if (semanaDto.FechaInicio < temporada.FechaInicio || 
+                            semanaDto.FechaFin > temporada.FechaCierre)
+                        {
+                            return BadRequest(new ErrorResponseDto
+                            {
+                                Mensaje = "Las fechas de las semanas deben estar dentro del rango de la temporada"
+                            });
+                        }
+
+                        var semana = new Semana
+                        {
+                            FechaInicio = semanaDto.FechaInicio,
+                            FechaFin = semanaDto.FechaFin,
+                            TemporadaId = temporada.Id
+                        };
+
+                        _context.Semanas.Add(semana);
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+
+                _logger.LogInformation("Temporada creada: {Nombre}", temporada.Nombre);
+
+                var response = new TemporadaResponseDto
+                {
+                    Id = temporada.Id,
+                    Nombre = temporada.Nombre,
+                    FechaInicio = temporada.FechaInicio,
+                    FechaCierre = temporada.FechaCierre,
+                    FechaCreacion = temporada.FechaCreacion,
+                    Actual = temporada.Actual
+                };
+
+                return CreatedAtAction(nameof(ObtenerTemporada), new { id = temporada.Id }, response);
             }
-
-            _context.Temporadas.Add(temporada);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetTemporada), new { id = temporada.Id }, dto);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear temporada");
+                return StatusCode(500, new ErrorResponseDto
+                {
+                    Mensaje = "Error al crear la temporada"
+                });
+            }
         }
 
-        // PUT: api/temporada/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> ActualizarTemporada(int id, [FromBody] TemporadaDTO dto)
+        /// <summary>
+        /// Obtiene todas las temporadas
+        /// </summary>
+        [HttpGet]
+        public async Task<ActionResult> ObtenerTemporadas()
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var temporada = await _context.Temporadas
-                .Include(t => t.Semanas)
-                .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (temporada == null)
-                return NotFound();
-
-            // Actualizar campos
-            temporada.Nombre = dto.Nombre;
-            temporada.FechaInicio = dto.FechaInicio;
-            temporada.FechaCierre = dto.FechaCierre;
-
-            // Actualizar semanas: borrar existentes y agregar nuevas
-            temporada.Semanas.Clear();
-            if (dto.Semanas != null && dto.Semanas.Count > 0)
+            try
             {
-                temporada.Semanas = dto.Semanas.Select(s => new Semana
-                {
-                    FechaInicio = s.FechaInicio,
-                    FechaFin = s.FechaFin
-                }).ToList();
+                var temporadas = await _context.Temporadas
+                    .Include(t => t.Semanas)
+                    .Select(t => new TemporadaResponseDto
+                    {
+                        Id = t.Id,
+                        Nombre = t.Nombre,
+                        FechaInicio = t.FechaInicio,
+                        FechaCreacion = t.FechaCreacion,
+                        FechaCierre = t.FechaCierre,
+                        Actual = t.Actual
+                    })
+                    .ToListAsync();
+
+                return Ok(temporadas);
             }
-
-            // Actualizar bandera "Actual"
-            if (dto.Actual)
+            catch (Exception ex)
             {
-                var actuales = await _context.Temporadas.Where(t => t.Actual && t.Id != id).ToListAsync();
-                foreach (var t in actuales) t.Actual = false;
+                _logger.LogError(ex, "Error al obtener temporadas");
+                return StatusCode(500, new ErrorResponseDto
+                {
+                    Mensaje = "Error al obtener temporadas"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una temporada por ID
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<ActionResult> ObtenerTemporada(int id)
+        {
+            try
+            {
+                var temporada = await _context.Temporadas
+                    .Include(t => t.Semanas)
+                    .FirstOrDefaultAsync(t => t.Id == id);
+
+                if (temporada == null)
+                {
+                    return NotFound(new ErrorResponseDto
+                    {
+                        Mensaje = "Temporada no encontrada"
+                    });
+                }
+
+                var response = new TemporadaResponseDto
+                {
+                    Id = temporada.Id,
+                    Nombre = temporada.Nombre,
+                    FechaInicio = temporada.FechaInicio,
+                    FechaCierre = temporada.FechaCierre,
+                    FechaCreacion = temporada.FechaCreacion,
+                    Actual = temporada.Actual
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener temporada");
+                return StatusCode(500, new ErrorResponseDto
+                {
+                    Mensaje = "Error al obtener la temporada"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Marca una temporada como actual
+        /// </summary>
+        [HttpPut("{id}/marcar-actual")]
+        public async Task<ActionResult> MarcarComoActual(int id)
+        {
+            try
+            {
+                var temporada = await _context.Temporadas.FindAsync(id);
+
+                if (temporada == null)
+                {
+                    return NotFound(new ErrorResponseDto
+                    {
+                        Mensaje = "Temporada no encontrada"
+                    });
+                }
+
+                // Desmarcar todas las demás
+                var temporadasActuales = await _context.Temporadas
+                    .Where(t => t.Actual && t.Id != id)
+                    .ToListAsync();
+
+                foreach (var temp in temporadasActuales)
+                {
+                    temp.Actual = false;
+                }
 
                 temporada.Actual = true;
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Temporada {Id} marcada como actual", id);
+
+                return Ok(new { mensaje = "Temporada marcada como actual" });
             }
-            else
+            catch (Exception ex)
             {
-                temporada.Actual = false;
+                _logger.LogError(ex, "Error al marcar temporada como actual");
+                return StatusCode(500, new ErrorResponseDto
+                {
+                    Mensaje = "Error al marcar la temporada como actual"
+                });
             }
-
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        // PUT: api/temporada/5/actual
-        [HttpPut("{id}/actual")]
-        public async Task<IActionResult> MarcarActual(int id)
-        {
-            var temporada = await _context.Temporadas.FirstOrDefaultAsync(t => t.Id == id);
-            if (temporada == null)
-                return NotFound();
-
-            // Desmarcar otras
-            var actuales = await _context.Temporadas.Where(t => t.Actual && t.Id != id).ToListAsync();
-            foreach (var t in actuales) t.Actual = false;
-
-            temporada.Actual = true;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
     }
 }

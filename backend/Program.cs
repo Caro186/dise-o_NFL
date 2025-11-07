@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using NFLFantasyAPI.Data;
+using NFLFantasyAPI.Services;
 using Serilog;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +22,34 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// Registrar el servicio JWT
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+// Configuración de autenticación JWT
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key no configurada");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer no configurado");
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience no configurado");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
 // Configuración mejorada de Swagger
 builder.Services.AddSwaggerGen(options =>
 {
@@ -30,6 +62,31 @@ builder.Services.AddSwaggerGen(options =>
         {
             Name = "Equipo de Desarrollo NFL Fantasy",
             Email = "support@nflfantasy.com"
+        }
+    });
+
+    // Configurar Swagger para usar JWT
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header usando el esquema Bearer. Ejemplo: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
         }
     });
 
@@ -79,7 +136,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "NFL Fantasy API v1");
-        options.RoutePrefix = string.Empty; // Swagger en la raíz
+        options.RoutePrefix = string.Empty;
     });
 }
 
@@ -106,18 +163,27 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-app.UseStaticFiles();
+// Crear estructura de carpetas necesarias
+var uploadsPath = Path.Combine(app.Environment.WebRootPath, "uploads", "equipos");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+    Log.Information("Carpeta de uploads creada: {UploadsPath}", uploadsPath);
+}
 
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 
 app.UseCors(myAllowSpecificOrigins);
 
+// Agregar middleware de autenticación y autorización
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-Log.Information("Iniciando aplicación NFL Fantasy API");
+Log.Information("Iniciando aplicación NFL Fantasy API con autenticación JWT");
 
 try
 {

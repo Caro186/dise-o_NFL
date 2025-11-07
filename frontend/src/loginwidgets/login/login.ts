@@ -26,20 +26,20 @@ export class Login {
    * @param router Router para navegación
    */
   constructor(
-  private fb: FormBuilder,
-  private authService: Authservice,
-  private router: Router
-) {
-  // Si ya está logueado, redirigir a mainpage
-  if (this.authService.isLoggedIn()) {
-    this.router.navigate(['/mainpage']);
-  }
+    private fb: FormBuilder,
+    private authService: Authservice,
+    private router: Router
+  ) {
+    // Si ya está logueado, redirigir a mainpage
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/mainpage']);
+    }
 
-  this.loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
-    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), this.passwordValidator]]
-  });
-}
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
+      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), this.passwordValidator]]
+    });
+  }
 
   /**
    * Validación personalizada de contraseña
@@ -93,6 +93,10 @@ export class Login {
         // Manejar diferentes tipos de errores
         if (error.status === 401) {
           this.serverError = 'Usuario o contraseña incorrectos';
+        } else if (error.status === 403) {
+          // Cuenta bloqueada
+          this.serverError = error.error?.mensaje || 
+            'Tu cuenta ha sido bloqueada por múltiples intentos fallidos. Por favor, contacta al administrador.';
         } else if (error.status === 0) {
           this.serverError = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
         } else if (error.error && error.error.mensaje) {

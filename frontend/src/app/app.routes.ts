@@ -5,10 +5,11 @@ import { Sidenav } from '../mainpage/sidenav/sidenav';
 import { Teams } from '../mainpage/teams/teams';
 import { Userform } from '../mainpage/userform/userform';
 import { TemporadaComponent } from '../mainpage/temporada/temporada';
+import { Perfil } from '../perfil/perfil';
 import { authGuard } from '../guards/auth.guard';
-/**
- * Configuración de rutas de la aplicación
- */
+import { CrearLiga } from '../mainpage/crear-liga/crear-liga';
+import { BuscarUnirseLiga } from '../mainpage/buscar-unirse-liga/buscar-unirse-liga';
+
 export const routes: Routes = [
   {
     path: '',
@@ -21,31 +22,41 @@ export const routes: Routes = [
   {
     path: 'mainpage',
     component: Sidenav,
-    //canActivate: [authGuard],
+    canActivate: [authGuard],
     children: [
       {
         path: '',
-        redirectTo: 'teams',
+        redirectTo: 'perfil',
         pathMatch: 'full'
+      },
+      {
+        path: 'perfil',
+        component: Perfil
       },
       {
         path: 'teams',
         component: Teams
+      },
+      {
+        path: 'form',
+        component: Userform
+      },
+      {
+        path: 'temporada',
+        component: TemporadaComponent
+      },
+      {
+        path: 'crear-liga',
+        component: CrearLiga
+      },
+      {
+        path: 'buscar-liga',
+        component: BuscarUnirseLiga
       }
     ]
   },
   {
-    path: 'form',
-    component: Userform,
-    //canActivate: [authGuard]
-  },
-  {
-    path: 'temporada',
-    component: TemporadaComponent
-  },
-  {
     path: '**',
     redirectTo: ''
-  },
-
+  }
 ];

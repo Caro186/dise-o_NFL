@@ -1,178 +1,331 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NFLFantasyAPI.Data;
-using NFLFantasyAPI.DTOs;
 using NFLFantasyAPI.Models;
-using System.Threading.Tasks;
-using Npgsql;
-using System;
-using System.Collections.Generic;
+using NFLFantasyAPI.DTOs;
+using BCrypt.Net;
 
 namespace NFLFantasyAPI.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class LigasController : ControllerBase
+    [ApiController]
+    public class LigaController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly string _connectionString;
+        private readonly ILogger<LigaController> _logger;
 
-        public LigasController(ApplicationDbContext context, IConfiguration configuration)
+        public LigaController(ApplicationDbContext context, ILogger<LigaController> logger)
         {
             _context = context;
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _logger = logger;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLiga([FromBody] LigaCreateDto ligaCreateDto)
+        public async Task<ActionResult<LigaResponseDto>> CrearLiga(LigaCreateDto ligaDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var liga = new Liga
+            try
             {
-                ImagenUrl = ligaCreateDto.ImagenUrl,
-                NombreLiga = ligaCreateDto.NombreLiga,
-                Descripcion = ligaCreateDto.Descripcion,
-                PasswordHash = ligaCreateDto.PasswordHash,
-                Temporada = ligaCreateDto.Temporada,
-                Estado = ligaCreateDto.Estado,
-                CuposTotales = ligaCreateDto.CuposTotales,
-                FechaInicio = ligaCreateDto.FechaInicio,
-                FechaFin = ligaCreateDto.FechaFin,
-                IdCreador = ligaCreateDto.IdCreador,
-            };
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "Datos de liga inválidos",
+                        Errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()
+                    });
+                }
 
-            await _context.Ligas.AddAsync(liga);
-            await _context.SaveChangesAsync();
+                int[] cantidadesValidas = { 4, 6, 8, 10, 12, 14, 16, 18, 20 };
+                if (!cantidadesValidas.Contains(ligaDto.CantidadEquipos))
+                {
+                    return BadRequest(new ErrorResponseDto { Mensaje = "La cantidad de equipos debe ser 4, 6, 8, 10, 12, 14, 16, 18 o 20" });
+                }
 
-            return CreatedAtAction(nameof(GetLigaById), new { id = liga.IdLiga }, liga);
+                var temporadaActual = await _context.Temporadas.FirstOrDefaultAsync(t => t.Actual);
+                if (temporadaActual == null)
+                {
+                    return BadRequest(new ErrorResponseDto { Mensaje = "No hay una temporada activa" });
+                }
+
+                var ligaExistente = await _context.Ligas.AnyAsync(l => l.NombreLiga == ligaDto.NombreLiga && l.IdTemporada == temporadaActual.Id);
+                if (ligaExistente)
+                {
+                    return BadRequest(new ErrorResponseDto { Mensaje = "Ya existe una liga con ese nombre" });
+                }
+
+                var usuario = await _context.Usuarios.FindAsync(ligaDto.IdComisionado);
+                if (usuario == null)
+                {
+                    return NotFound(new ErrorResponseDto { Mensaje = "Usuario no encontrado" });
+                }
+
+                string configPlayoffs = ligaDto.EquiposEnPlayoffs == 6
+                    ? "{\"equipos\":6,\"semanas\":[16,17,18]}"
+                    : "{\"equipos\":4,\"semanas\":[16,17]}";
+
+                var liga = new Liga
+                {
+                    NombreLiga = ligaDto.NombreLiga,
+                    Descripcion = ligaDto.Descripcion,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(ligaDto.Password),
+                    IdTemporada = temporadaActual.Id,
+                    Estado = "Pre-Draft",
+                    CuposTotales = ligaDto.CantidadEquipos,
+                    CuposOcupados = 1,
+                    FechaCreacion = DateTime.UtcNow,
+                    IdComisionado = ligaDto.IdComisionado,
+                    ConfigPlayoffs = configPlayoffs,
+                    PermitirDecimales = true
+                };
+
+                _context.Ligas.Add(liga);
+                await _context.SaveChangesAsync();
+
+                var equipoComisionado = new Equipo
+                {
+                    Nombre = ligaDto.NombreEquipoComisionado,
+                    UsuarioId = ligaDto.IdComisionado,
+                    Liga = liga.NombreLiga,
+                    Estado = "Activo",
+                    FechaCreacion = DateTime.UtcNow
+                };
+
+                _context.Equipos.Add(equipoComisionado);
+                await _context.SaveChangesAsync();
+
+                var equipoLiga = new EquipoLiga
+                {
+                    IdEquipo = equipoComisionado.Id,
+                    IdLiga = liga.IdLiga,
+                    Alias = usuario.NombreCompleto,
+                    FechaUnion = DateTime.UtcNow,
+                    EsComisionado = true
+                };
+
+                _context.EquiposLigas.Add(equipoLiga);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Liga creada: {Nombre}", liga.NombreLiga);
+
+                var response = new LigaResponseDto
+                {
+                    IdLiga = liga.IdLiga,
+                    NombreLiga = liga.NombreLiga,
+                    Descripcion = liga.Descripcion,
+                    IdTemporada = liga.IdTemporada,
+                    Estado = liga.Estado,
+                    CuposTotales = liga.CuposTotales,
+                    CuposOcupados = liga.CuposOcupados,
+                    CuposDisponibles = liga.CuposTotales - liga.CuposOcupados,
+                    FechaCreacion = liga.FechaCreacion,
+                    IdComisionado = liga.IdComisionado,
+                    NombreComisionado = usuario.NombreCompleto,
+                    IdEquipoComisionado = equipoComisionado.Id,
+                    NombreEquipoComisionado = equipoComisionado.Nombre
+                };
+
+                return CreatedAtAction(nameof(ObtenerLiga), new { id = liga.IdLiga }, response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear liga");
+                return StatusCode(500, new ErrorResponseDto { Mensaje = "Error al crear liga" });
+            }
+        }
+
+        [HttpPost("unirse")]
+        public async Task<ActionResult> UnirseALiga([FromBody] UnirseALigaDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "Datos inválidos",
+                        Errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()
+                    });
+                }
+
+                var liga = await _context.Ligas.FindAsync(dto.IdLiga);
+                if (liga == null)
+                {
+                    return NotFound(new ErrorResponseDto { Mensaje = "Liga no encontrada" });
+                }
+
+                if (liga.Estado == "Finalizada")
+                {
+                    return BadRequest(new ErrorResponseDto { Mensaje = "Esta liga ya finalizó" });
+                }
+
+                if (liga.CuposOcupados >= liga.CuposTotales)
+                {
+                    return BadRequest(new ErrorResponseDto { Mensaje = "No hay cupos disponibles en esta liga" });
+                }
+
+                if (!BCrypt.Net.BCrypt.Verify(dto.Password, liga.PasswordHash))
+                {
+                    _logger.LogWarning("Intento de unirse a liga con contraseña incorrecta: Liga {IdLiga}, Usuario {IdUsuario}", dto.IdLiga, dto.IdUsuario);
+                    return StatusCode(403, new ErrorResponseDto { Mensaje = "Contraseña incorrecta" });
+                }
+
+                var usuario = await _context.Usuarios.FindAsync(dto.IdUsuario);
+                if (usuario == null)
+                {
+                    return NotFound(new ErrorResponseDto { Mensaje = "Usuario no encontrado" });
+                }
+
+                var yaEstaEnLiga = await _context.EquiposLigas
+                    .AnyAsync(el => el.IdLiga == dto.IdLiga && 
+                                    el.Equipo != null && 
+                                    el.Equipo.UsuarioId == dto.IdUsuario);
+
+                if (yaEstaEnLiga)
+                {
+                    return BadRequest(new ErrorResponseDto { Mensaje = "Ya perteneces a esta liga" });
+                }
+
+                var aliasExiste = await _context.EquiposLigas
+                    .AnyAsync(el => el.IdLiga == dto.IdLiga && el.Alias == dto.Alias);
+
+                if (aliasExiste)
+                {
+                    return BadRequest(new ErrorResponseDto { Mensaje = "El alias ya existe en esta liga. Por favor elige otro" });
+                }
+
+                var nombreEquipoExiste = await _context.EquiposLigas
+                    .Include(el => el.Equipo)
+                    .AnyAsync(el => el.IdLiga == dto.IdLiga && 
+                                    el.Equipo != null && 
+                                    el.Equipo.Nombre == dto.NombreEquipo);
+
+                if (nombreEquipoExiste)
+                {
+                    return BadRequest(new ErrorResponseDto { Mensaje = "El nombre del equipo ya existe en esta liga. Por favor elige otro" });
+                }
+
+                var nuevoEquipo = new Equipo
+                {
+                    Nombre = dto.NombreEquipo,
+                    UsuarioId = dto.IdUsuario,
+                    Liga = liga.NombreLiga,
+                    Estado = "Activo",
+                    FechaCreacion = DateTime.UtcNow
+                };
+
+                _context.Equipos.Add(nuevoEquipo);
+                await _context.SaveChangesAsync();
+
+                var equipoLiga = new EquipoLiga
+                {
+                    IdEquipo = nuevoEquipo.Id,
+                    IdLiga = liga.IdLiga,
+                    Alias = dto.Alias,
+                    FechaUnion = DateTime.UtcNow,
+                    EsComisionado = false
+                };
+
+                _context.EquiposLigas.Add(equipoLiga);
+
+                liga.CuposOcupados++;
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Usuario {IdUsuario} se unió a liga {IdLiga} con equipo {NombreEquipo}", 
+                    dto.IdUsuario, dto.IdLiga, dto.NombreEquipo);
+
+                return Ok(new
+                {
+                    mensaje = "Te has unido exitosamente a la liga",
+                    idLiga = liga.IdLiga,
+                    nombreLiga = liga.NombreLiga,
+                    idEquipo = nuevoEquipo.Id,
+                    nombreEquipo = nuevoEquipo.Nombre,
+                    cuposDisponibles = liga.CuposTotales - liga.CuposOcupados
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al unirse a liga");
+                return StatusCode(500, new ErrorResponseDto { Mensaje = "Error al unirse a la liga" });
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetLigaById(int id)
+        public async Task<ActionResult<LigaResponseDto>> ObtenerLiga(int id)
         {
             try
             {
-                await using var connection = new NpgsqlConnection(_connectionString);
-                await connection.OpenAsync();
-
-                string query = @"SELECT id_liga, nombre_liga, descripcion, temporada, estado, 
-                                cupos_totales, cupos_ocupados, fecha_creacion, fecha_inicio, fecha_fin
-                                FROM ligas WHERE id_liga = @id_liga";
-
-                await using var command = new NpgsqlCommand(query, connection);
-                command.Parameters.AddWithValue("id_liga", id);
-
-                await using var reader = await command.ExecuteReaderAsync();
-                if (await reader.ReadAsync())
+                var liga = await _context.Ligas.FindAsync(id);
+                if (liga == null)
                 {
-                    var liga = new
-                    {
-                        id_liga = reader.GetInt32(reader.GetOrdinal("id_liga")),
-                        nombre_liga = reader.GetString(reader.GetOrdinal("nombre_liga")),
-                        descripcion = reader.IsDBNull(reader.GetOrdinal("descripcion")) ? "" : reader.GetString(reader.GetOrdinal("descripcion")),
-                        temporada = reader.GetString(reader.GetOrdinal("temporada")),
-                        estado = reader.GetString(reader.GetOrdinal("estado")),
-                        cupos_totales = reader.GetInt32(reader.GetOrdinal("cupos_totales")),
-                        cupos_ocupados = reader.GetInt32(reader.GetOrdinal("cupos_ocupados")),
-                        fecha_creacion = reader.GetDateTime(reader.GetOrdinal("fecha_creacion")),
-                        fecha_inicio = reader.IsDBNull(reader.GetOrdinal("fecha_inicio")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("fecha_inicio")),
-                        fecha_fin = reader.IsDBNull(reader.GetOrdinal("fecha_fin")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("fecha_fin"))
-                    };
-                    return Ok(liga);
+                    return NotFound(new ErrorResponseDto { Mensaje = "Liga no encontrada" });
                 }
-                return NotFound(new { message = "Liga no encontrada" });
+
+                var comisionado = await _context.Usuarios.FindAsync(liga.IdComisionado);
+                var equipoComisionado = await _context.Equipos.FirstOrDefaultAsync(e => e.UsuarioId == liga.IdComisionado && e.Liga == liga.NombreLiga);
+
+                var response = new LigaResponseDto
+                {
+                    IdLiga = liga.IdLiga,
+                    NombreLiga = liga.NombreLiga,
+                    Descripcion = liga.Descripcion,
+                    IdTemporada = liga.IdTemporada,
+                    Estado = liga.Estado,
+                    CuposTotales = liga.CuposTotales,
+                    CuposOcupados = liga.CuposOcupados,
+                    CuposDisponibles = liga.CuposTotales - liga.CuposOcupados,
+                    FechaCreacion = liga.FechaCreacion,
+                    IdComisionado = liga.IdComisionado,
+                    NombreComisionado = comisionado?.NombreCompleto ?? "",
+                    IdEquipoComisionado = equipoComisionado?.Id ?? 0,
+                    NombreEquipoComisionado = equipoComisionado?.Nombre ?? ""
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error al obtener la liga", error = ex.Message });
+                _logger.LogError(ex, "Error al obtener liga");
+                return StatusCode(500, new ErrorResponseDto { Mensaje = "Error al obtener liga" });
             }
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchLeagues([FromQuery] string? nombre, [FromQuery] string? temporada, [FromQuery] string? estado)
+
+
+        
+
+        [HttpGet]
+        public async Task<ActionResult<List<LigaResponseDto>>> ObtenerTodasLasLigas()
         {
             try
             {
-                await using var connection = new NpgsqlConnection(_connectionString);
-                await connection.OpenAsync();
-
-                string query = @"SELECT id_liga, nombre_liga, descripcion, temporada, estado, 
-                                cupos_totales, cupos_ocupados, fecha_creacion
-                                FROM ligas WHERE 1=1";
-
-                var parameters = new List<NpgsqlParameter>();
-
-                if (!string.IsNullOrEmpty(nombre))
+                var ligas = await _context.Ligas.ToListAsync();
+                
+                var response = new List<LigaResponseDto>();
+                foreach (var liga in ligas)
                 {
-                    query += " AND nombre_liga ILIKE @nombre";
-                    parameters.Add(new NpgsqlParameter("nombre", $"%{nombre}%"));
-                }
-
-                if (!string.IsNullOrEmpty(temporada))
-                {
-                    query += " AND temporada = @temporada";
-                    parameters.Add(new NpgsqlParameter("temporada", temporada));
-                }
-
-                if (!string.IsNullOrEmpty(estado))
-                {
-                    query += " AND estado = @estado";
-                    parameters.Add(new NpgsqlParameter("estado", estado));
-                }
-
-                query += " ORDER BY fecha_creacion DESC";
-
-                await using var command = new NpgsqlCommand(query, connection);
-                command.Parameters.AddRange(parameters.ToArray());
-
-                var ligas = new List<object>();
-
-                await using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    ligas.Add(new
+                    var comisionado = await _context.Usuarios.FindAsync(liga.IdComisionado);
+                    response.Add(new LigaResponseDto
                     {
-                        id_liga = reader.GetInt32(reader.GetOrdinal("id_liga")),
-                        nombre_liga = reader.GetString(reader.GetOrdinal("nombre_liga")),
-                        descripcion = reader.IsDBNull(reader.GetOrdinal("descripcion")) ? "" : reader.GetString(reader.GetOrdinal("descripcion")),
-                        temporada = reader.GetString(reader.GetOrdinal("temporada")),
-                        estado = reader.GetString(reader.GetOrdinal("estado")),
-                        cupos_totales = reader.GetInt32(reader.GetOrdinal("cupos_totales")),
-                        cupos_ocupados = reader.GetInt32(reader.GetOrdinal("cupos_ocupados")),
-                        fecha_creacion = reader.GetDateTime(reader.GetOrdinal("fecha_creacion"))
+                        IdLiga = liga.IdLiga,
+                        NombreLiga = liga.NombreLiga,
+                        Descripcion = liga.Descripcion,
+                        IdTemporada = liga.IdTemporada,
+                        Estado = liga.Estado,
+                        CuposTotales = liga.CuposTotales,
+                        CuposOcupados = liga.CuposOcupados,
+                        CuposDisponibles = liga.CuposTotales - liga.CuposOcupados,
+                        FechaCreacion = liga.FechaCreacion,
+                        IdComisionado = liga.IdComisionado,
+                        NombreComisionado = comisionado?.NombreCompleto ?? ""
                     });
                 }
-                return Ok(ligas);
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error al buscar ligas", error = ex.Message });
-            }
-        }
-
-        [HttpGet("{idLiga}/users/{idUsuario}")]
-        public async Task<IActionResult> CheckUserInLeague(int idLiga, int idUsuario)
-        {
-            try
-            {
-                await using var connection = new NpgsqlConnection(_connectionString);
-                await connection.OpenAsync();
-
-                string query = @"SELECT COUNT(*) FROM participantes_liga 
-                                 WHERE id_liga = @idLiga AND id_usuario = @idUsuario AND activo = TRUE";
-
-                await using var command = new NpgsqlCommand(query, connection);
-                command.Parameters.AddWithValue("idLiga", idLiga);
-                command.Parameters.AddWithValue("idUsuario", idUsuario);
-
-                var count = Convert.ToInt32(await command.ExecuteScalarAsync());
-
-                return Ok(new { exists = count > 0 });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al verificar membresía", error = ex.Message });
+                _logger.LogError(ex, "Error al obtener ligas");
+                return StatusCode(500, new ErrorResponseDto { Mensaje = "Error al obtener ligas" });
             }
         }
     }

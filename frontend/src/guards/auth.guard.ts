@@ -1,13 +1,12 @@
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, CanActivateFn } from '@angular/router';
 import { Authservice } from '../services/authservice';
 
 /**
  * Guard para proteger rutas que requieren autenticación
- * Redirige al login si el usuario no está autenticado
- * @returns true si el usuario está autenticado, false y redirige al login en caso contrario
+ * Verifica que el usuario esté logueado y tenga un token válido
  */
-export const authGuard = () => {
+export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(Authservice);
   const router = inject(Router);
 
@@ -15,7 +14,7 @@ export const authGuard = () => {
     return true;
   }
 
-  // Redirigir al login si no está autenticado
-  router.navigate(['/']);
+  // Si no está logueado, redirigir al login
+  router.navigate(['/'], { queryParams: { returnUrl: state.url } });
   return false;
 };

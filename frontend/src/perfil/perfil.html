@@ -1,0 +1,73 @@
+<div class="perfil-container">
+  <!-- Header del perfil -->
+  <div class="perfil-header">
+    <div class="perfil-info">
+      <div class="avatar">
+        <span class="avatar-inicial">{{ usuario?.nombreCompleto?.charAt(0) || 'U' }}</span>
+      </div>
+      <div class="usuario-datos">
+        <h1>{{ usuario?.nombreCompleto }}</h1>
+        <p class="email">{{ usuario?.email }}</p>
+        <p class="fecha-registro">Miembro desde {{ formatearFecha(usuario?.fechaRegistro) }}</p>
+      </div>
+    </div>
+    <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
+  </div>
+
+  <!-- Sección de equipos -->
+  <div class="equipos-section">
+    <div class="section-header">
+      <h2>Mis Equipos</h2>
+      <a routerLink="/mainpage/userform" class="btn-crear-equipo">+ Crear Equipo</a>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoadingEquipos" class="loading">
+      <p>Cargando equipos...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="errorMessage && !isLoadingEquipos" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Lista de equipos -->
+    <div *ngIf="!isLoadingEquipos && !errorMessage" class="equipos-grid">
+      <!-- Sin equipos -->
+      <div *ngIf="equipos.length === 0" class="sin-equipos">
+        <p>Aún no tienes equipos creados</p>
+        <a routerLink="/mainpage/userform" class="btn-primary">Crear mi primer equipo</a>
+      </div>
+
+      <!-- Cards de equipos -->
+      <div *ngFor="let equipo of equipos" class="equipo-card">
+        <div class="equipo-imagen">
+          <img [src]="obtenerImagenUrl(equipo.imagenUrl)" [alt]="equipo.nombre">
+        </div>
+        <div class="equipo-info">
+          <h3>{{ equipo.nombre }}</h3>
+          <p class="equipo-liga" *ngIf="equipo.liga">
+            <span class="badge">{{ equipo.liga }}</span>
+          </p>
+          <p class="equipo-estado">
+            <span [class]="'estado-badge ' + (equipo.estado === 'Activo' ? 'activo' : 'inactivo')">
+              {{ equipo.estado }}
+            </span>
+          </p>
+          <p class="equipo-fecha">Creado: {{ formatearFecha(equipo.fechaCreacion) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de ligas -->
+  <div class="ligas-section">
+    <div class="section-header">
+      <h2>Mis Ligas</h2>
+      <a routerLink="/mainpage/liga" class="btn-crear-liga">+ Crear Liga</a>
+    </div>
+    <div class="proximamente">
+      <p>Funcionalidad de ligas próximamente...</p>
+    </div>
+  </div>
+</div>
