@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "kPeErPuEyQQ=",
+  "dgSpecHash": "NwCoi+MMn30=",
   "success": true,
   "projectFilePath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.Presentation/NFLFantasyAPI.Presentation.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/jaam/.nuget/packages/microsoft.aspnetcore.openapi/9.0.9/microsoft.aspnetcore.openapi.9.0.9.nupkg.sha512",
+    "/home/jaam/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
   "logs": []
 }
