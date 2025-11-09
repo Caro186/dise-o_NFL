@@ -46,18 +46,14 @@ export class Liga implements OnInit {
       return;
     }
 
-    // Obtener todas las ligas
-    this.ligaService.obtenerTodas().subscribe({
-      next: (todasLasLigas) => {
-        // Filtrar ligas donde el usuario es comisionado o participante
-        // Por ahora solo mostramos las ligas donde es comisionado
-        // TODO: Cuando esté la relación EquipoFantasy-Liga, filtrar también por participación
-        this.ligas = todasLasLigas
-          .filter(liga => liga.idComisionado === currentUser.id)
-          .map(liga => ({
-            ...liga,
-            esComisionado: liga.idComisionado === currentUser.id
-          }));
+    // Usar el nuevo endpoint que obtiene todas las ligas del usuario
+    this.ligaService.obtenerPorUsuario(currentUser.id).subscribe({
+      next: (ligasDelUsuario) => {
+        // Mapear las ligas indicando si el usuario es comisionado
+        this.ligas = ligasDelUsuario.map(liga => ({
+          ...liga,
+          esComisionado: liga.comisionadoId === currentUser.id  // ✅ Ahora usa comisionadoId
+        }));
         
         this.isLoading = false;
       },

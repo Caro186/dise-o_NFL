@@ -16,6 +16,8 @@ export interface LigaCreateDto {
   esquemaPuntos: string;
   configPlayoffs: string;
   permitirDecimales?: boolean;
+  equipoFantasyId?: number; 
+
 }
 
 /**
@@ -34,7 +36,7 @@ export interface LigaResponseDto {
   fechaCreacion: Date;
   fechaInicio?: Date;
   fechaFin?: Date;
-  idComisionado: number;
+  comisionadoId: number;
   nombreComisionado?: string;
   formatoPosiciones: string;
   esquemaPuntos: string;
@@ -124,5 +126,13 @@ export class LigaService {
  */
 unirseALiga(data: UnirseLigaDto): Observable<any> {
   return this.http.post(`${this.baseUrl}/unirse`, data);
+}
+
+
+/**
+ * Obtiene todas las ligas donde un usuario participa
+ */
+obtenerPorUsuario(usuarioId: number): Observable<LigaResponseDto[]> {
+  return this.http.get<LigaResponseDto[]>(`${this.baseUrl}/usuario/${usuarioId}`);
 }
 }
