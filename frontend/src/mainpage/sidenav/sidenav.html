@@ -29,20 +29,46 @@
         <i class="bi bi-person-badge"></i>
         <span *ngIf="!menuCollapsed">Mi Perfil</span>
       </a>
+    </div>
+
+    <!-- Sección: Equipos Fantasy -->
+    <div class="nav-section">
+      <hr *ngIf="!menuCollapsed">
+      <div class="nav-section-title" *ngIf="!menuCollapsed">
+        <i class="bi bi-trophy"></i> Equipos Fantasy
+      </div>
 
       <a routerLink="/mainpage/equipos-fantasy" routerLinkActive="active" class="nav-item">
-        <i class="bi bi-trophy"></i>
-        <span *ngIf="!menuCollapsed">Mis Equipos Fantasy</span>
+        <i class="bi bi-list-ul"></i>
+        <span *ngIf="!menuCollapsed">Mis Equipos</span>
       </a>
 
       <a routerLink="/mainpage/equipos-fantasy/crear" routerLinkActive="active" class="nav-item">
         <i class="bi bi-plus-circle"></i>
-        <span *ngIf="!menuCollapsed">Crear Equipo Fantasy</span>
+        <span *ngIf="!menuCollapsed">Crear Equipo</span>
+      </a>
+    </div>
+
+    <!-- Sección: Ligas -->
+    <div class="nav-section">
+      <hr *ngIf="!menuCollapsed">
+      <div class="nav-section-title" *ngIf="!menuCollapsed">
+        <i class="bi bi-flag-fill"></i> Ligas
+      </div>
+
+      <a routerLink="/mainpage/ligas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <i class="bi bi-collection"></i>
+        <span *ngIf="!menuCollapsed">Mis Ligas</span>
       </a>
 
-      <a routerLink="/mainpage/ligas" routerLinkActive="active" class="nav-item">
-        <i class="bi bi-flag"></i>
-        <span *ngIf="!menuCollapsed">Ligas</span>
+      <a routerLink="/mainpage/ligas/crear" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-plus-square"></i>
+        <span *ngIf="!menuCollapsed">Crear Liga</span>
+      </a>
+
+      <a routerLink="/mainpage/ligas/buscar" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-search"></i>
+        <span *ngIf="!menuCollapsed">Buscar y Unirse</span>
       </a>
     </div>
 
@@ -59,7 +85,7 @@
       </a>
 
       <a routerLink="/mainpage/admin/equipos-nfl/crear" routerLinkActive="active" class="nav-item">
-        <i class="bi bi-plus-square"></i>
+        <i class="bi bi-plus-square-fill"></i>
         <span *ngIf="!menuCollapsed">Crear Equipo NFL</span>
       </a>
 
