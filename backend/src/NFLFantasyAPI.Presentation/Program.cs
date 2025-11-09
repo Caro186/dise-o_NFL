@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using NFLFantasyAPI.Data;
-using NFLFantasyAPI.Services;
+using NFLFantasyAPI.Logic.Service;
 using Serilog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using NFLFantasyAPI.Logic.DbContextProvider;
 using System.Text;
 
 
@@ -113,8 +113,10 @@ namespace NFLFantasyAPI.Presentation
                 throw new InvalidOperationException("La cadena de conexión 'DefaultConnection' no está configurada");
             }
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connectionString));
+
+            var dbProvider = new DbContextProvider();
+            dbProvider.ConfigureDatabase(builder.Services, connectionString);
+
 
             // Configuración de CORS
             var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -125,7 +127,7 @@ namespace NFLFantasyAPI.Presentation
                     policy =>
                     {
                         policy.WithOrigins(
-                                builder.Configuration["Cors:AllowedOrigins"]?.Split(',') 
+                                builder.Configuration["Cors:AllowedOrigins"]?.Split(',')
                                 ?? new[] { "http://localhost:4200" }
                             )
                             .AllowAnyHeader()
@@ -204,7 +206,7 @@ namespace NFLFantasyAPI.Presentation
             {
                 Log.CloseAndFlush();
             }
-                    }
+        }
     }
 }
 

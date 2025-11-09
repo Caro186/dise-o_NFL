@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "EGuIFcxOZIA=",
+  "dgSpecHash": "UkiFw17H0E0=",
   "success": true,
   "projectFilePath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/jaam/.nuget/packages/microsoft.extensions.dependencyinjection/9.0.10/microsoft.extensions.dependencyinjection.9.0.10.nupkg.sha512",
+    "/home/jaam/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.10/microsoft.extensions.dependencyinjection.abstractions.9.0.10.nupkg.sha512"
+  ],
   "logs": []
 }
