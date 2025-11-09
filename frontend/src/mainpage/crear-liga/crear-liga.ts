@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LigaService, LigaCreateDto } from '../../services/liga.service';
+import { LigaService, LigaCreateDto, UnirseLigaDto } from '../../services/liga.service';
 import { EquipoFantasyService, EquipoFantasyResponseDto, EquipoFantasyCreateDto } from '../../services/equipo-fantasy.service';
 import { TemporadaService, TemporadaResponseDto } from '../../services/temporada.service';
 import { Authservice } from '../../services/authservice';
@@ -174,8 +174,8 @@ export class CrearLiga implements OnInit {
     });
   }
 
-  /**
-   * Crea la liga con el equipo especificado
+    /**
+   * Crea la liga con el equipo especificado y lo vincula
    */
   private crearLiga(usuarioId: number, equipoFantasyId: number): void {
     const ligaDto: LigaCreateDto = {
@@ -193,14 +193,34 @@ export class CrearLiga implements OnInit {
 
     this.ligaService.crear(ligaDto).subscribe({
       next: (ligaCreada) => {
-        this.isLoading = false;
-        this.successMessage = '¡Liga creada exitosamente!';
-        
-        // TODO: Vincular el equipo a la liga (necesita endpoint del backend)
-        // Por ahora redirigir después de 2 segundos
-        setTimeout(() => {
-          this.router.navigate(['/mainpage/ligas']);
-        }, 2000);
+        // Ahora vincular el equipo a la liga usando el endpoint de unirse
+        const unirseDto: UnirseLigaDto = {
+          ligaId: ligaCreada.idLiga,
+          password: this.password,
+          usuarioId: usuarioId,
+          equipoId: equipoFantasyId,
+          alias: this.nombreLiga // o puedes usar otro alias
+        };
+
+        this.ligaService.unirseALiga(unirseDto).subscribe({
+          next: () => {
+            this.isLoading = false;
+            this.successMessage = '¡Liga creada y equipo vinculado exitosamente!';
+            
+            setTimeout(() => {
+              this.router.navigate(['/mainpage/ligas']);
+            }, 2000);
+          },
+          error: (error) => {
+            console.error('Error al vincular equipo a la liga:', error);
+            this.isLoading = false;
+            this.errorMessage = 'Liga creada, pero no se pudo vincular el equipo. Intenta unirte manualmente.';
+            
+            setTimeout(() => {
+              this.router.navigate(['/mainpage/ligas']);
+            }, 3000);
+          }
+        });
       },
       error: (error) => {
         console.error('Error al crear liga:', error);
