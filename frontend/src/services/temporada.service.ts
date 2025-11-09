@@ -15,7 +15,7 @@ export interface SemanaDto {
  * DTO para crear o actualizar una temporada
  */
 export interface TemporadaDto {
-  nombre: number;
+  nombre: string;
   fechaInicio: string; // ISO string
   fechaCierre: string;
   actual: boolean;

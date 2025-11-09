@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NFLFantasyAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class AgregarRolAUsuario : Migration
+    public partial class cambiarTemporada : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,7 +35,7 @@ namespace NFLFantasyAPI.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nombre = table.Column<int>(type: "integer", nullable: false),
+                    Nombre = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     FechaInicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FechaCierre = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -76,8 +76,7 @@ namespace NFLFantasyAPI.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FechaInicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FechaFin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TemporadaId = table.Column<int>(type: "integer", nullable: false),
-                    TemporadaId1 = table.Column<int>(type: "integer", nullable: false)
+                    TemporadaId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,12 +84,6 @@ namespace NFLFantasyAPI.Migrations
                     table.ForeignKey(
                         name: "FK_semanas_temporadas_TemporadaId",
                         column: x => x.TemporadaId,
-                        principalTable: "temporadas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_semanas_temporadas_TemporadaId1",
-                        column: x => x.TemporadaId1,
                         principalTable: "temporadas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -117,9 +110,7 @@ namespace NFLFantasyAPI.Migrations
                     FormatoPosiciones = table.Column<string>(type: "text", nullable: false),
                     EsquemaPuntos = table.Column<string>(type: "text", nullable: false),
                     ConfigPlayoffs = table.Column<string>(type: "text", nullable: false),
-                    PermitirDecimales = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    ComisionadoId1 = table.Column<int>(type: "integer", nullable: true),
-                    TemporadaId = table.Column<int>(type: "integer", nullable: true)
+                    PermitirDecimales = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -131,21 +122,11 @@ namespace NFLFantasyAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ligas_temporadas_TemporadaId",
-                        column: x => x.TemporadaId,
-                        principalTable: "temporadas",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_ligas_usuarios_ComisionadoId",
                         column: x => x.ComisionadoId,
                         principalTable: "usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ligas_usuarios_ComisionadoId1",
-                        column: x => x.ComisionadoId1,
-                        principalTable: "usuarios",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -200,11 +181,6 @@ namespace NFLFantasyAPI.Migrations
                 column: "ComisionadoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ligas_ComisionadoId1",
-                table: "ligas",
-                column: "ComisionadoId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ligas_IdTemporada",
                 table: "ligas",
                 column: "IdTemporada");
@@ -215,19 +191,9 @@ namespace NFLFantasyAPI.Migrations
                 column: "NombreLiga");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ligas_TemporadaId",
-                table: "ligas",
-                column: "TemporadaId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_semanas_TemporadaId",
                 table: "semanas",
                 column: "TemporadaId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_semanas_TemporadaId1",
-                table: "semanas",
-                column: "TemporadaId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_usuarios_Email",

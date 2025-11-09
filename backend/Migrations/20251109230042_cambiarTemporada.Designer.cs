@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NFLFantasyAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251109182626_AgregarRolAUsuario")]
-    partial class AgregarRolAUsuario
+    [Migration("20251109230042_cambiarTemporada")]
+    partial class cambiarTemporada
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -118,9 +118,6 @@ namespace NFLFantasyAPI.Migrations
                     b.Property<int>("ComisionadoId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ComisionadoId1")
-                        .HasColumnType("integer");
-
                     b.Property<string>("ConfigPlayoffs")
                         .IsRequired()
                         .HasColumnType("text");
@@ -182,20 +179,13 @@ namespace NFLFantasyAPI.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
-                    b.Property<int?>("TemporadaId")
-                        .HasColumnType("integer");
-
                     b.HasKey("IdLiga");
 
                     b.HasIndex("ComisionadoId");
 
-                    b.HasIndex("ComisionadoId1");
-
                     b.HasIndex("IdTemporada");
 
                     b.HasIndex("NombreLiga");
-
-                    b.HasIndex("TemporadaId");
 
                     b.ToTable("ligas", (string)null);
                 });
@@ -279,14 +269,9 @@ namespace NFLFantasyAPI.Migrations
                     b.Property<int>("TemporadaId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TemporadaId1")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("TemporadaId");
-
-                    b.HasIndex("TemporadaId1");
 
                     b.ToTable("semanas", (string)null);
                 });
@@ -313,8 +298,10 @@ namespace NFLFantasyAPI.Migrations
                     b.Property<DateTime>("FechaInicio")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Nombre")
-                        .HasColumnType("integer");
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -341,25 +328,17 @@ namespace NFLFantasyAPI.Migrations
 
             modelBuilder.Entity("NFLFantasyAPI.Models.Liga", b =>
                 {
-                    b.HasOne("NFLFantasyAPI.Models.Usuario", null)
+                    b.HasOne("NFLFantasyAPI.Models.Usuario", "Comisionado")
                         .WithMany()
                         .HasForeignKey("ComisionadoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("NFLFantasyAPI.Models.Usuario", "Comisionado")
-                        .WithMany()
-                        .HasForeignKey("ComisionadoId1");
-
-                    b.HasOne("Temporada", null)
+                    b.HasOne("Temporada", "Temporada")
                         .WithMany()
                         .HasForeignKey("IdTemporada")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Temporada", "Temporada")
-                        .WithMany()
-                        .HasForeignKey("TemporadaId");
 
                     b.Navigation("Comisionado");
 
@@ -368,15 +347,9 @@ namespace NFLFantasyAPI.Migrations
 
             modelBuilder.Entity("Semana", b =>
                 {
-                    b.HasOne("Temporada", null)
-                        .WithMany()
-                        .HasForeignKey("TemporadaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Temporada", "Temporada")
                         .WithMany("Semanas")
-                        .HasForeignKey("TemporadaId1")
+                        .HasForeignKey("TemporadaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

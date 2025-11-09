@@ -78,6 +78,7 @@ namespace NFLFantasyAPI.Data
             });
 
             // Configurar tabla de ligas
+           // Configurar tabla de ligas
             modelBuilder.Entity<Liga>(entity =>
             {
                 entity.ToTable("ligas");
@@ -96,19 +97,18 @@ namespace NFLFantasyAPI.Data
                 entity.Property(l => l.ConfigPlayoffs).IsRequired();
                 entity.Property(l => l.PermitirDecimales).HasDefaultValue(true);
 
-                entity.HasOne<Usuario>()
+                entity.HasOne(l => l.Comisionado)
                     .WithMany()
                     .HasForeignKey(l => l.ComisionadoId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne<Temporada>()
+                entity.HasOne(l => l.Temporada)
                     .WithMany()
                     .HasForeignKey(l => l.IdTemporada)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasIndex(l => l.NombreLiga);
             });
-
             
             // Configurar tabla de temporadas
             modelBuilder.Entity<Temporada>(entity =>
@@ -123,6 +123,7 @@ namespace NFLFantasyAPI.Data
             });
 
             // Configurar tabla de semanas
+            // Configurar tabla de semanas
             modelBuilder.Entity<Semana>(entity =>
             {
                 entity.ToTable("semanas");
@@ -131,8 +132,8 @@ namespace NFLFantasyAPI.Data
                 entity.Property(s => s.FechaInicio).IsRequired();
                 entity.Property(s => s.FechaFin).IsRequired();
 
-                entity.HasOne<Temporada>()
-                    .WithMany()
+                entity.HasOne(s => s.Temporada)
+                    .WithMany(t => t.Semanas)  // Asume que Temporada tiene una colección de Semanas
                     .HasForeignKey(s => s.TemporadaId)
                     .OnDelete(DeleteBehavior.Cascade);
 

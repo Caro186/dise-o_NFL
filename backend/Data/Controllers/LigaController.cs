@@ -80,125 +80,6 @@ namespace NFLFantasyAPI.Controllers
             }
         }
 
-
-
-                /// <summary>
-        /// Permite a un usuario unirse a una liga existente
-        /// </summary>
-        [HttpPost("unirse")]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UnirseLiga([FromBody] UnirseLigaDto dto)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(new ErrorResponseDto
-                    {
-                        Mensaje = "Datos inválidos",
-                        Errores = ModelState.Values
-                            .SelectMany(v => v.Errors)
-                            .Select(e => e.ErrorMessage)
-                            .ToList()
-                    });
-                }
-
-                // Verificar que la liga existe
-                var liga = await _context.Ligas.FindAsync(dto.LigaId);
-                if (liga == null)
-                {
-                    return NotFound(new ErrorResponseDto
-                    {
-                        Mensaje = "Liga no encontrada"
-                    });
-                }
-
-                // Verificar que el usuario existe
-                var usuario = await _context.Usuarios.FindAsync(dto.UsuarioId);
-                if (usuario == null)
-                {
-                    return NotFound(new ErrorResponseDto
-                    {
-                        Mensaje = "Usuario no encontrado"
-                    });
-                }
-
-                // Verificar que el equipo existe y pertenece al usuario
-                var equipo = await _context.EquiposFantasy.FindAsync(dto.EquipoId);
-                if (equipo == null)
-                {
-                    return NotFound(new ErrorResponseDto
-                    {
-                        Mensaje = "Equipo no encontrado"
-                    });
-                }
-
-                if (equipo.UsuarioId != dto.UsuarioId)
-                {
-                    return BadRequest(new ErrorResponseDto
-                    {
-                        Mensaje = "El equipo no pertenece al usuario"
-                    });
-                }
-
-                // Verificar la contraseña de la liga
-                bool passwordValido = BCrypt.Net.BCrypt.Verify(dto.Password, liga.PasswordHash);
-                if (!passwordValido)
-                {
-                    return BadRequest(new ErrorResponseDto
-                    {
-                        Mensaje = "Contraseña incorrecta"
-                    });
-                }
-
-                // Verificar que la liga no esté llena
-                if (liga.CuposOcupados >= liga.CuposTotales)
-                {
-                    return BadRequest(new ErrorResponseDto
-                    {
-                        Mensaje = "La liga está llena"
-                    });
-                }
-
-                // Verificar que el usuario no esté ya en la liga
-               
-               
-               
-
-                // Actualizar cupos ocupados
-                liga.CuposOcupados++;
-
-                // Actualizar la liga del equipo fantasy
-                equipo.LigaId = dto.LigaId;
-
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("Usuario {UsuarioId} se unió a la liga {LigaId} con equipo {EquipoId}",
-                    dto.UsuarioId, dto.LigaId, dto.EquipoId);
-
-                return Ok(new
-                {
-                    mensaje = $"Te has unido exitosamente a la liga '{liga.NombreLiga}'",
-                    ligaId = liga.IdLiga,
-                    nombreLiga = liga.NombreLiga,
-                    equipoId = dto.EquipoId,
-                    alias = dto.Alias
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al unirse a la liga");
-                return StatusCode(500, new ErrorResponseDto
-                {
-                    Mensaje = "Error interno del servidor"
-                });
-            }
-        }
-
-
-
         /// <summary>
         /// Obtiene una liga por ID
         /// </summary>
@@ -305,6 +186,62 @@ namespace NFLFantasyAPI.Controllers
         }
 
         /// <summary>
+        /// Obtiene todas las ligas donde un usuario participa (como comisionado o miembro)
+        /// </summary>
+        [HttpGet("usuario/{usuarioId}")]
+        [ProducesResponseType(typeof(List<LigaResponseDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetLigasPorUsuario(int usuarioId)
+        {
+            try
+            {
+                // Obtener IDs de ligas donde el usuario tiene equipos
+                var ligasIds = await _context.EquiposFantasy
+                    .Where(e => e.UsuarioId == usuarioId && e.LigaId.HasValue)
+                    .Select(e => e.LigaId!.Value)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Obtener las ligas completas
+                var ligas = await _context.Ligas
+                    .Include(l => l.Comisionado)
+                    .Include(l => l.Temporada)
+                    .Where(l => ligasIds.Contains(l.IdLiga))
+                    .Select(l => new LigaResponseDto
+                    {
+                        IdLiga = l.IdLiga,
+                        ImagenUrl = l.ImagenUrl,
+                        NombreLiga = l.NombreLiga,
+                        Descripcion = l.Descripcion,
+                        IdTemporada = l.IdTemporada,
+                        NombreTemporada = l.Temporada != null ? l.Temporada.Nombre.ToString() : null,
+                        Estado = l.Estado,
+                        CuposTotales = l.CuposTotales,
+                        CuposOcupados = l.CuposOcupados,
+                        FechaCreacion = l.FechaCreacion,
+                        FechaInicio = l.FechaInicio,
+                        FechaFin = l.FechaFin,
+                        ComisionadoId = l.ComisionadoId,
+                        NombreComisionado = l.Comisionado != null ? l.Comisionado.NombreCompleto : null,
+                        FormatoPosiciones = l.FormatoPosiciones,
+                        EsquemaPuntos = l.EsquemaPuntos,
+                        ConfigPlayoffs = l.ConfigPlayoffs,
+                        PermitirDecimales = l.PermitirDecimales
+                    })
+                    .ToListAsync();
+
+                return Ok(ligas);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener ligas del usuario {UsuarioId}", usuarioId);
+                return StatusCode(500, new ErrorResponseDto
+                {
+                    Mensaje = "Error interno del servidor"
+                });
+            }
+        }
+
+        /// <summary>
         /// Crea una nueva liga
         /// </summary>
         [HttpPost]
@@ -327,8 +264,8 @@ namespace NFLFantasyAPI.Controllers
                 }
 
                 // Verificar que el usuario comisionado existe
-                var usuarioExiste = await _context.Usuarios.AnyAsync(u => u.Id == ligaDto.ComisionadoId);
-                if (!usuarioExiste)
+                var comisionado = await _context.Usuarios.FindAsync(ligaDto.ComisionadoId);
+                if (comisionado == null)
                 {
                     return NotFound(new ErrorResponseDto
                     {
@@ -357,6 +294,40 @@ namespace NFLFantasyAPI.Controllers
                     });
                 }
 
+                // ✅ NUEVO: Validar equipo fantasy si se proporciona
+                EquipoFantasy? equipoFantasy = null;
+                if (ligaDto.EquipoFantasyId.HasValue)
+                {
+                    equipoFantasy = await _context.EquiposFantasy
+                        .FirstOrDefaultAsync(e => e.Id == ligaDto.EquipoFantasyId.Value);
+                        
+                    if (equipoFantasy == null)
+                    {
+                        return NotFound(new ErrorResponseDto
+                        {
+                            Mensaje = "Equipo fantasy no encontrado"
+                        });
+                    }
+
+                    // Verificar que el equipo pertenezca al comisionado
+                    if (equipoFantasy.UsuarioId != ligaDto.ComisionadoId)
+                    {
+                        return BadRequest(new ErrorResponseDto
+                        {
+                            Mensaje = "El equipo no pertenece al comisionado"
+                        });
+                    }
+
+                    // Verificar que el equipo no esté en otra liga
+                    if (equipoFantasy.LigaId.HasValue)
+                    {
+                        return BadRequest(new ErrorResponseDto
+                        {
+                            Mensaje = "El equipo ya está en otra liga"
+                        });
+                    }
+                }
+
                 // Hashear la contraseña
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(ligaDto.PasswordHash);
 
@@ -382,6 +353,17 @@ namespace NFLFantasyAPI.Controllers
 
                 _logger.LogInformation("Liga creada: {NombreLiga} por usuario {ComisionadoId}",
                     liga.NombreLiga, liga.ComisionadoId);
+
+                // ✅ NUEVO: Vincular el equipo fantasy a la liga
+                if (equipoFantasy != null)
+                {
+                    equipoFantasy.LigaId = liga.IdLiga;
+                    _context.EquiposFantasy.Update(equipoFantasy);
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation("Equipo fantasy {EquipoId} vinculado a liga {LigaId}",
+                        equipoFantasy.Id, liga.IdLiga);
+                }
 
                 // Cargar relaciones para la respuesta
                 await _context.Entry(liga).Reference(l => l.Comisionado).LoadAsync();
@@ -414,6 +396,145 @@ namespace NFLFantasyAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear liga");
+                return StatusCode(500, new ErrorResponseDto
+                {
+                    Mensaje = "Error interno del servidor"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Permite a un usuario unirse a una liga existente
+        /// </summary>
+        [HttpPost("unirse")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UnirseLiga([FromBody] UnirseLigaDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "Datos inválidos",
+                        Errores = ModelState.Values
+                            .SelectMany(v => v.Errors)
+                            .Select(e => e.ErrorMessage)
+                            .ToList()
+                    });
+                }
+
+                // Validar que la liga existe
+                var liga = await _context.Ligas
+                    .Include(l => l.Comisionado)
+                    .FirstOrDefaultAsync(l => l.IdLiga == dto.LigaId);
+                    
+                if (liga == null)
+                {
+                    return NotFound(new ErrorResponseDto
+                    {
+                        Mensaje = "Liga no encontrada"
+                    });
+                }
+
+                // Verificar contraseña
+                if (!BCrypt.Net.BCrypt.Verify(dto.Password, liga.PasswordHash))
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "Contraseña incorrecta"
+                    });
+                }
+
+                // Verificar que hay cupos disponibles
+                if (liga.CuposOcupados >= liga.CuposTotales)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "La liga está llena"
+                    });
+                }
+
+                // Validar que el usuario existe
+                var usuario = await _context.Usuarios.FindAsync(dto.UsuarioId);
+                if (usuario == null)
+                {
+                    return NotFound(new ErrorResponseDto
+                    {
+                        Mensaje = "Usuario no encontrado"
+                    });
+                }
+
+                // ✅ Validar equipo fantasy
+                var equipoFantasy = await _context.EquiposFantasy
+                    .FirstOrDefaultAsync(e => e.Id == dto.EquipoId);
+                    
+                if (equipoFantasy == null)
+                {
+                    return NotFound(new ErrorResponseDto
+                    {
+                        Mensaje = "Equipo fantasy no encontrado"
+                    });
+                }
+
+                // Verificar que el equipo pertenezca al usuario
+                if (equipoFantasy.UsuarioId != dto.UsuarioId)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "El equipo no pertenece al usuario"
+                    });
+                }
+
+                // Verificar que el equipo no esté en otra liga
+                if (equipoFantasy.LigaId.HasValue)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "El equipo ya está en otra liga"
+                    });
+                }
+
+                // Verificar que el usuario no esté ya en la liga
+                var yaEnLiga = await _context.EquiposFantasy
+                    .AnyAsync(e => e.UsuarioId == dto.UsuarioId && e.LigaId == dto.LigaId);
+                    
+                if (yaEnLiga)
+                {
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "Ya tienes un equipo en esta liga"
+                    });
+                }
+
+                // ✅ Vincular el equipo a la liga
+                equipoFantasy.LigaId = liga.IdLiga;
+                _context.EquiposFantasy.Update(equipoFantasy);
+
+                // Incrementar cupos ocupados
+                liga.CuposOcupados++;
+                _context.Ligas.Update(liga);
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    "Usuario {UsuarioId} se unió a liga {LigaId} con equipo {EquipoId}",
+                    dto.UsuarioId, dto.LigaId, dto.EquipoId);
+
+                return Ok(new
+                {
+                    mensaje = $"Te has unido exitosamente a la liga '{liga.NombreLiga}'",
+                    ligaId = liga.IdLiga,
+                    nombreLiga = liga.NombreLiga,
+                    equipoId = equipoFantasy.Id,
+                    alias = dto.Alias
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al unirse a la liga");
                 return StatusCode(500, new ErrorResponseDto
                 {
                     Mensaje = "Error interno del servidor"

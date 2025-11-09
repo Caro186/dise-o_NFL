@@ -9,9 +9,9 @@ public class Temporada
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }  // Identificador único autogenerado
 
-    [Range(1, 100)]
     [Required]
-    public int Nombre { get; set; }  // Número de 1 a 100
+    [MaxLength(100)]
+    public string Nombre { get; set; } 
 
     [Required]
     public DateTime FechaInicio { get; set; }

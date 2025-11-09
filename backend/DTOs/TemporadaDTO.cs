@@ -22,7 +22,7 @@ namespace NFLFantasyAPI.DTOs
     public class CrearTemporadaDto
     {
         [Required(ErrorMessage = "El nombre de la temporada es obligatorio")]
-        public int Nombre { get; set; }
+        public string Nombre { get; set; }
 
         [Required(ErrorMessage = "La fecha de inicio es obligatoria")]
         public DateTime FechaInicio { get; set; }
@@ -42,7 +42,7 @@ namespace NFLFantasyAPI.DTOs
     public class TemporadaResponseDto
     {
         public int Id { get; set; }
-        public int Nombre { get; set; }
+        public string Nombre { get; set; }
         public DateTime FechaInicio { get; set; }
         public DateTime FechaCierre { get; set; }
         public DateTime FechaCreacion { get; set; }

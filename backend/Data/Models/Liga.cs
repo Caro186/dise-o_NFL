@@ -1,11 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NFLFantasyAPI.Models
 {
-    /// <summary>
-    /// Modelo de Liga
-    /// </summary>
     public class Liga
     {
         [Key]
@@ -42,7 +40,6 @@ namespace NFLFantasyAPI.Models
         public DateTime? FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }
         
-        // ✅ ESTE ES EL CAMPO CORRECTO (usar este en lugar de IdComisionado)
         [Required]
         public int ComisionadoId { get; set; }
         
@@ -51,10 +48,8 @@ namespace NFLFantasyAPI.Models
         public string ConfigPlayoffs { get; set; } = string.Empty;
         public bool PermitirDecimales { get; set; } = true;
         
-        // Relaciones de navegación
+        // Propiedades de navegación (SIN [ForeignKey] aquí, se configura en DbContext)
         public Usuario? Comisionado { get; set; }
         public Temporada? Temporada { get; set; }
-        
-    
     }
 }
