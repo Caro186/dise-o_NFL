@@ -49,7 +49,8 @@ namespace NFLFantasyAPI.Controllers
         [HttpPost("{id}/imagen")]
         public async Task<IActionResult> Upload(int id, IFormFile imagen)
         {
-            var result = await _equipoService.UploadImagenAsync(id, imagen, _env.WebRootPath);
+            //var result = await _equipoService.UploadImagenAsync(id, imagen, _env.WebRootPath);
+            var result = await _equipoService.UploadImagenAsync(id, _env.WebRootPath);
             return StatusCode(result.StatusCode, result.Data);
         }
 

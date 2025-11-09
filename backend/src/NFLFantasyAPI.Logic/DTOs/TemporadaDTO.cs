@@ -22,7 +22,8 @@ namespace NFLFantasyAPI.Logic.DTOs
     public class CrearTemporadaDto
     {
         [Required(ErrorMessage = "El nombre de la temporada es obligatorio")]
-        public int Nombre { get; set; }
+        [StringLength(100, ErrorMessage = "El nombre no puede tener más de 100 caracteres.")]
+        public string Nombre { get; set; } = null!;
 
         [Required(ErrorMessage = "La fecha de inicio es obligatoria")]
         public DateTime FechaInicio { get; set; }
@@ -42,7 +43,7 @@ namespace NFLFantasyAPI.Logic.DTOs
     public class TemporadaResponseDto
     {
         public int Id { get; set; }
-        public int Nombre { get; set; }
+        public string Nombre { get; set; } = null!;
         public DateTime FechaInicio { get; set; }
         public DateTime FechaCierre { get; set; }
         public DateTime FechaCreacion { get; set; }

@@ -11,9 +11,9 @@ namespace NFLFantasyAPI.Persistence.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }  // Identificador único autogenerado
 
-        [Range(1, 100)]
         [Required]
-        public int Nombre { get; set; }  // Número de 1 a 100
+        [StringLength(100, ErrorMessage = "El nombre no puede tener más de 100 caracteres.")]
+        public string Nombre { get; set; } = null!;
 
         [Required]
         public DateTime FechaInicio { get; set; }
