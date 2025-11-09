@@ -5,8 +5,13 @@ using Serilog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Backend.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurar FileServer settings
+builder.Services.Configure<FileServerSettings>(
+    builder.Configuration.GetSection("FileServer"));
 
 // Configurar Serilog para logging
 Log.Logger = new LoggerConfiguration()

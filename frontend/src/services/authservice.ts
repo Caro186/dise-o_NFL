@@ -39,6 +39,7 @@ export interface UsuarioDto {
   email: string;
   nombreCompleto: string;
   fechaRegistro: Date;
+  rol?: string; // ← AGREGADO: Rol del usuario
 }
 
 /**
@@ -87,6 +88,22 @@ export class Authservice {
    */
   public get currentUserValue(): UsuarioDto | null {
     return this.currentUserSubject.value;
+  }
+
+  /**
+   * Verifica si el usuario actual es administrador
+   */
+  public isAdmin(): boolean {
+    const user = this.currentUserValue;
+    return user?.rol === 'Admin' || user?.rol === 'Administrador';
+  }
+
+  /**
+   * Verifica si hay un usuario logueado
+   * @returns true si hay un usuario logueado, false en caso contrario
+   */
+  public isLoggedIn(): boolean {
+    return this.currentUserValue !== null && this.getToken() !== null;
   }
 
   /**
@@ -211,14 +228,6 @@ export class Authservice {
     
     // Redirigir al login
     this.router.navigate(['/']);
-  }
-
-  /**
-   * Verifica si hay un usuario logueado
-   * @returns true si hay un usuario logueado, false en caso contrario
-   */
-  isLoggedIn(): boolean {
-    return this.currentUserValue !== null && this.getToken() !== null;
   }
 
   /**

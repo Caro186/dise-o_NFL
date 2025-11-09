@@ -1,115 +1,151 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { LigaResponse, LigaService } from '../../services/liga.service';
-
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { LigaService, LigaCreateDto, LigaResponseDto } from '../../services/liga.service';
+import { TemporadaService, TemporadaResponseDto } from '../../services/temporada.service';
 import { Authservice } from '../../services/authservice';
 
 @Component({
   selector: 'app-crear-liga',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './crear-liga.html',
   styleUrls: ['./crear-liga.css']
 })
 export class CrearLiga implements OnInit {
-  crearLigaForm: FormGroup;
+  nombreLiga: string = '';
+  descripcion: string = '';
+  password: string = '';
+  confirmPassword: string = '';
+  cuposTotales: number = 10;
+  idTemporada: number = 0;
+  nombreEquipoComisionado: string = '';
+  permitirDecimales: boolean = true;
+  configPlayoffs: string = '4-equipos';
+  
+  temporadas: TemporadaResponseDto[] = [];
+  cantidadesEquipos: number[] = [4, 6, 8, 10, 12, 14, 16, 18, 20];
+  opcionesPlayoffs = [
+    { valor: '4-equipos', texto: '4 equipos (Top 4)' },
+    { valor: '6-equipos', texto: '6 equipos (Top 6)' },
+    { valor: '8-equipos', texto: '8 equipos (Top 8)' }
+  ];
+  
   isLoading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
-  currentUser: any = null;
-
-  cantidadesEquipos = [4, 6, 8, 10, 12, 14, 16, 18, 20];
-  opcionesPlayoffs = [
-    { valor: 4, texto: '4 equipos (Semanas 16-17)' },
-    { valor: 6, texto: '6 equipos (Semanas 16-17-18)' }
-  ];
 
   constructor(
-    private fb: FormBuilder,
     private ligaService: LigaService,
+    private temporadaService: TemporadaService,
     private authService: Authservice,
     private router: Router
-  ) {
-    this.crearLigaForm = this.fb.group({
-      nombreLiga: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100)]],
-      descripcion: [''],
-      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), this.passwordValidator]],
-      cantidadEquipos: [10, [Validators.required]],
-      nombreEquipoComisionado: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100)]],
-      equiposEnPlayoffs: [4, [Validators.required]]
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarTemporadas();
+  }
+
+  /**
+   * Carga las temporadas disponibles
+   */
+  cargarTemporadas(): void {
+    this.temporadaService.obtenerTemporadas().subscribe({
+      next: (temporadas: TemporadaResponseDto[]) => {
+        this.temporadas = temporadas;
+        const temporadaActual = temporadas.find((t: TemporadaResponseDto) => t.actual);
+        if (temporadaActual) {
+          this.idTemporada = temporadaActual.id;
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al cargar temporadas:', error);
+        this.errorMessage = 'Error al cargar temporadas disponibles';
+      }
     });
   }
 
-  ngOnInit(): void {
-    this.currentUser = this.authService.currentUserValue;
-    if (!this.currentUser) {
-      this.router.navigate(['/']);
-    }
-  }
-
-  passwordValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value || '';
-    const hasUpper = /[A-Z]/.test(value);
-    const hasLower = /[a-z]/.test(value);
-    const hasAlphaNum = /^[a-zA-Z0-9]+$/.test(value);
-    
-    if (!hasUpper || !hasLower || !hasAlphaNum) {
-      return { passwordInvalid: true };
-    }
-    return null;
-  }
-
+  /**
+   * Crea una nueva liga
+   */
   onSubmit(): void {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (this.crearLigaForm.invalid) {
-      this.crearLigaForm.markAllAsTouched();
-      this.errorMessage = 'Por favor completa todos los campos correctamente';
+    // Validaciones
+    if (!this.nombreLiga.trim()) {
+      this.errorMessage = 'El nombre de la liga es obligatorio';
+      return;
+    }
+
+    if (!this.password.trim()) {
+      this.errorMessage = 'La contraseña es obligatoria';
+      return;
+    }
+
+    if (this.password.length < 8) {
+      this.errorMessage = 'La contraseña debe tener al menos 8 caracteres';
+      return;
+    }
+
+    if (this.password !== this.confirmPassword) {
+      this.errorMessage = 'Las contraseñas no coinciden';
+      return;
+    }
+
+    if (!this.nombreEquipoComisionado.trim()) {
+      this.errorMessage = 'El nombre de tu equipo es obligatorio';
+      return;
+    }
+
+    if (!this.idTemporada) {
+      this.errorMessage = 'Debes seleccionar una temporada';
+      return;
+    }
+
+    const currentUser = this.authService.currentUserValue;
+    if (!currentUser) {
+      this.errorMessage = 'Debes iniciar sesión';
       return;
     }
 
     this.isLoading = true;
 
-    const ligaData = {
-      nombreLiga: this.crearLigaForm.get('nombreLiga')?.value,
-      descripcion: this.crearLigaForm.get('descripcion')?.value || null,
-      password: this.crearLigaForm.get('password')?.value,
-      cantidadEquipos: this.crearLigaForm.get('cantidadEquipos')?.value,
-      idComisionado: this.currentUser.id,
-      nombreEquipoComisionado: this.crearLigaForm.get('nombreEquipoComisionado')?.value,
-      equiposEnPlayoffs: this.crearLigaForm.get('equiposEnPlayoffs')?.value
+    const ligaData: LigaCreateDto = {
+      nombreLiga: this.nombreLiga.trim(),
+      descripcion: this.descripcion.trim() || undefined,
+      passwordHash: this.password,
+      idTemporada: this.idTemporada,
+      cuposTotales: this.cuposTotales,
+      comisionadoId: currentUser.id,
+      formatoPosiciones: JSON.stringify({ QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 1, K: 1, DEF: 1 }),
+      esquemaPuntos: JSON.stringify({ passingYd: 0.04, passingTD: 4, rushingYd: 0.1, rushingTD: 6 }),
+      configPlayoffs: this.configPlayoffs,
+      permitirDecimales: this.permitirDecimales
     };
 
-    this.ligaService.crearLiga(ligaData).subscribe({
-      next: (response) => {
+    this.ligaService.crear(ligaData).subscribe({
+      next: (response: LigaResponseDto) => {
+        this.successMessage = `Liga "${response.nombreLiga}" creada exitosamente`;
         this.isLoading = false;
-        this.successMessage = `¡Liga "${response.nombreLiga}" creada exitosamente! Cupos disponibles: ${response.cuposDisponibles}`;
         
         setTimeout(() => {
-          this.router.navigate(['/mainpage/liga', response.idLiga]);
+          this.router.navigate(['/mainpage/liga']);
         }, 2000);
       },
-      error: (error) => {
-        this.isLoading = false;
+      error: (error: any) => {
         console.error('Error al crear liga:', error);
-        
-        if (error.error && error.error.mensaje) {
-          this.errorMessage = error.error.mensaje;
-        } else if (error.status === 400) {
-          this.errorMessage = 'Datos inválidos. Verifica que todos los campos estén correctos.';
-        } else if (error.status === 0) {
-          this.errorMessage = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
-        } else {
-          this.errorMessage = 'Error al crear la liga. Por favor intenta nuevamente.';
-        }
+        this.errorMessage = error.error?.mensaje || 'Error al crear la liga';
+        this.isLoading = false;
       }
     });
   }
 
+  /**
+   * Cancela la creación
+   */
   onCancel(): void {
-    this.router.navigate(['/mainpage']);
+    this.router.navigate(['/mainpage/liga']);
   }
 }

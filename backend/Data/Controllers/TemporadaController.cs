@@ -135,7 +135,7 @@ namespace NFLFantasyAPI.Controllers
                     Actual = temporada.Actual
                 };
 
-                return CreatedAtAction(nameof(ObtenerTemporada), new { id = temporada.Id }, response);
+                    return Ok(response);
             }
             catch (Exception ex)
             {

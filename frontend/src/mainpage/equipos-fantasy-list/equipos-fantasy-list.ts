@@ -1,20 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { EquipoService, EquipoResponseDto } from '../../services/equipo.service';
+import { EquipoFantasyService, EquipoFantasyResponseDto } from '../../services/equipo-fantasy.service';
 import { Authservice } from '../../services/authservice';
 
 /**
  * Componente para mostrar y gestionar equipos
  */
 @Component({
-  selector: 'app-teams',
-  templateUrl: './teams.html',
-  styleUrls: ['./teams.css'],
+  selector: 'app-equipos-fantasy-list',
+  templateUrl: './equipos-fantasy-list.html',
+  styleUrls: ['./equipos-fantasy-list.css'],
   imports: [CommonModule, RouterModule]
 })
-export class Teams implements OnInit {
-  equipos: EquipoResponseDto[] = [];
+export class EquipoFantasyList implements OnInit {
+  equipos: EquipoFantasyResponseDto[] = [];
   isLoading: boolean = true;
   errorMessage: string = '';
   baseUrl: string = 'http://localhost:5000';
@@ -25,7 +25,7 @@ export class Teams implements OnInit {
    * @param authService Servicio de autenticación
    */
   constructor(
-    private equipoService: EquipoService,
+    private equipoFantasyService: EquipoFantasyService,
     private authService: Authservice
   ) { }
 
@@ -53,7 +53,7 @@ export class Teams implements OnInit {
     }
 
     // Obtener equipos del usuario actual
-    this.equipoService.obtenerEquiposPorUsuario(currentUser.id).subscribe({
+    this.equipoFantasyService.obtenerPorUsuario(currentUser.id).subscribe({
       next: (equipos) => {
         console.log('Equipos cargados:', equipos);
         this.equipos = equipos;
@@ -77,11 +77,11 @@ export class Teams implements OnInit {
    * @param imagenUrl URL relativa de la imagen
    * @returns URL completa o imagen por defecto
    */
-  obtenerImagenUrl(imagenUrl: string | null): string {
-    if (imagenUrl) {
-      return `${this.baseUrl}${imagenUrl}`;
-    }
-    // Imagen por defecto si no hay imagen
-    return 'https://via.placeholder.com/150?text=Sin+Imagen';
+  obtenerImagenUrl(imagenUrl: string | null | undefined): string {
+  if (imagenUrl) {
+    return imagenUrl;
   }
+  return 'https://via.placeholder.com/150?text=Sin+Imagen';
+}
+
 }

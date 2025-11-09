@@ -75,10 +75,9 @@ export class Liga implements OnInit {
    * @returns URL completa o imagen por defecto
    */
   obtenerImagenUrl(imagenUrl: string | null): string {
-    if (imagenUrl) {
-      return `${this.baseUrl}${imagenUrl}`;
-    }
-    // Imagen por defecto si no hay imagen
-    return 'https://via.placeholder.com/150?text=Sin+Imagen';
+  if (imagenUrl) {
+    return imagenUrl; // Ya viene completa del backend
   }
+  return 'https://via.placeholder.com/150?text=Sin+Imagen';
+}
 }

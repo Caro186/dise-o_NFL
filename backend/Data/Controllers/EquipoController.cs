@@ -2,7 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NFLFantasyAPI.Data;
 using NFLFantasyAPI.Models;
+using Microsoft.Extensions.Options;
+
 using NFLFantasyAPI.DTOs;
+using Backend.Configuration;
 
 namespace NFLFantasyAPI.Controllers
 {
@@ -17,20 +20,26 @@ namespace NFLFantasyAPI.Controllers
         private readonly ILogger<EquipoController> _logger;
         private readonly IWebHostEnvironment _environment;
 
+        private readonly FileServerSettings _fileServerSettings;
+
+
         /// <summary>
         /// Constructor del controlador de equipos
         /// </summary>
         /// <param name="context">Contexto de base de datos</param>
         /// <param name="logger">Logger para registrar eventos</param>
         /// <param name="environment">Entorno de hosting para manejo de archivos</param>
+        /// <param name="fileServerSettings">Configuración del servidor de archivos</param>
         public EquipoController(
-            ApplicationDbContext context, 
+            ApplicationDbContext context,
             ILogger<EquipoController> logger,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            IOptions<FileServerSettings> fileServerSettings) 
         {
             _context = context;
             _logger = logger;
             _environment = environment;
+            _fileServerSettings = fileServerSettings.Value; 
         }
 
         /// <summary>
@@ -322,7 +331,8 @@ namespace NFLFantasyAPI.Controllers
                 }
 
                 // Actualizar URL en base de datos
-                equipo.ImagenUrl = $"/uploads/equipos/{fileName}";
+                equipo.ImagenUrl = $"{_fileServerSettings.BaseUrl}/{_fileServerSettings.UploadsPath}/{fileName}";
+
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Imagen actualizada para equipo {Id}: {ImagenUrl}", 

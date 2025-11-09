@@ -1,73 +1,80 @@
-<div class="wrapper">
-  <aside id="sidebar">
-    <div class="d-flex">
-      <button class="toggle-btn" type="button" (click)="toggleSidebar()">
-        <i class="bi bi-list"></i>
-      </button>
-      <div class="sidebar-logo">
-        <a href="#">NFL Fantasy</a>
+<div class="sidenav" [class.collapsed]="menuCollapsed">
+  <!-- Header del sidenav -->
+  <div class="sidenav-header">
+    <div class="user-info" *ngIf="usuario">
+      <i class="bi bi-person-circle user-icon"></i>
+      <div class="user-details" *ngIf="!menuCollapsed">
+        <strong>{{ usuario.nombreCompleto }}</strong>
+        <small class="text-muted">{{ usuario.email }}</small>
+        <span class="badge bg-primary mt-1" *ngIf="isAdmin">Administrador</span>
+        <span class="badge bg-secondary mt-1" *ngIf="!isAdmin">Usuario</span>
       </div>
     </div>
+    <button class="btn btn-sm btn-toggle" (click)="toggleMenu()">
+      <i class="bi" [class.bi-chevron-left]="!menuCollapsed" [class.bi-chevron-right]="menuCollapsed"></i>
+    </button>
+  </div>
 
-    <!-- Información del usuario -->
-    <div class="sidebar-user">
-      <div class="user-avatar">
-        {{ getUserInitials() }}
+  <hr>
+
+  <!-- Menú de navegación -->
+  <nav class="sidenav-nav">
+    <!-- Sección: Usuario (todos ven esto) -->
+    <div class="nav-section">
+      <div class="nav-section-title" *ngIf="!menuCollapsed">
+        <i class="bi bi-person"></i> Usuario
       </div>
-      <div class="user-info">
-        <span class="user-name">{{ currentUser?.nombreCompleto }}</span>
-        <span class="user-email">{{ currentUser?.email }}</span>
-      </div>
-    </div>
+      
+      <a routerLink="/mainpage/perfil" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-person-badge"></i>
+        <span *ngIf="!menuCollapsed">Mi Perfil</span>
+      </a>
 
-    <ul class="sidebar-nav">
-      <li class="sidebar-item">
-        <a routerLink="perfil" routerLinkActive="active" class="sidebar-link">
-          <i class="bi bi-person"></i>
-          <span>Perfil</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a routerLink="teams" routerLinkActive="active" class="sidebar-link">
-          <i class="bi bi-people-fill"></i>
-          <span>Mis Equipos</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a routerLink="form" routerLinkActive="active" class="sidebar-link">
-          <i class="bi bi-plus-circle-fill"></i>
-          <span>Crear Equipo</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a routerLink="temporada" routerLinkActive="active" class="sidebar-link">
-          <i class="bi bi-calendar-fill"></i>
-          <span>Crear Temporada</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a routerLink="crear-liga" routerLinkActive="active" class="sidebar-link">
-          <i class="bi bi-trophy-fill"></i>
-          <span>Crear Liga</span>
-        </a>
-      </li>
-      <li class="sidebar-item">
-        <a routerLink="buscar-liga" routerLinkActive="active" class="sidebar-link">
-          <i class="bi bi-search"></i>
-          <span>Buscar Liga</span>
-        </a>
-      </li>
-    </ul>
+      <a routerLink="/mainpage/equipos-fantasy" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-trophy"></i>
+        <span *ngIf="!menuCollapsed">Mis Equipos Fantasy</span>
+      </a>
 
-    <div class="sidebar-footer">
-      <a href="#" class="sidebar-link" (click)="logout(); $event.preventDefault()">
-        <i class="bi bi-box-arrow-left"></i>
-        <span>Salir</span>
+      <a routerLink="/mainpage/equipos-fantasy/crear" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-plus-circle"></i>
+        <span *ngIf="!menuCollapsed">Crear Equipo Fantasy</span>
+      </a>
+
+      <a routerLink="/mainpage/liga" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-flag"></i>
+        <span *ngIf="!menuCollapsed">Ligas</span>
       </a>
     </div>
-  </aside>
 
-  <div class="main p-3">
-    <router-outlet></router-outlet>
+    <!-- Sección: Administración (solo admins) -->
+    <div class="nav-section" *ngIf="isAdmin">
+      <hr>
+      <div class="nav-section-title" *ngIf="!menuCollapsed">
+        <i class="bi bi-shield-lock"></i> Administración
+      </div>
+
+      <a routerLink="/mainpage/admin/equipos-nfl" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-grid-3x3-gap"></i>
+        <span *ngIf="!menuCollapsed">Equipos NFL</span>
+      </a>
+
+      <a routerLink="/mainpage/admin/equipos-nfl/crear" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-plus-square"></i>
+        <span *ngIf="!menuCollapsed">Crear Equipo NFL</span>
+      </a>
+
+      <a routerLink="/mainpage/temporada" routerLinkActive="active" class="nav-item">
+        <i class="bi bi-calendar3"></i>
+        <span *ngIf="!menuCollapsed">Temporadas</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Footer del sidenav -->
+  <div class="sidenav-footer">
+    <button class="btn btn-danger w-100" (click)="logout()">
+      <i class="bi bi-box-arrow-right"></i>
+      <span *ngIf="!menuCollapsed">Cerrar Sesión</span>
+    </button>
   </div>
 </div>

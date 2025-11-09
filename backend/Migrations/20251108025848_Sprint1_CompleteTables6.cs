@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NFLFantasyAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Sprint1_CompleteTables : Migration
+    public partial class Sprint1_CompleteTables6 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

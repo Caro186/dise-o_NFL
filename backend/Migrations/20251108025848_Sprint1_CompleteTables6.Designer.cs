@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NFLFantasyAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251027220054_Sprint1_CompleteTables")]
-    partial class Sprint1_CompleteTables
+    [Migration("20251108025848_Sprint1_CompleteTables6")]
+    partial class Sprint1_CompleteTables6
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

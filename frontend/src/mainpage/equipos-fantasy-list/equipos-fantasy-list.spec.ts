@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Teams } from './teams';
+import { Teams } from './equipos-fantasy-list';
 
 describe('Teams', () => {
   let component: Teams;

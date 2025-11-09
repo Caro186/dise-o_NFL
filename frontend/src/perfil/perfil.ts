@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Authservice } from '../services/authservice';
-import { EquipoService, EquipoResponseDto } from '../services/equipo.service';
+import { Authservice, UsuarioDto } from '../services/authservice';
+import { EquipoFantasyService, EquipoFantasyResponseDto } from '../services/equipo-fantasy.service';
+import { LigaService, LigaResponseDto } from '../services/liga.service';
 
-/**
- * Componente de perfil de usuario
- * Muestra información del usuario logueado y sus equipos
- */
 @Component({
   selector: 'app-perfil',
   standalone: true,
@@ -16,72 +13,92 @@ import { EquipoService, EquipoResponseDto } from '../services/equipo.service';
   styleUrls: ['./perfil.css']
 })
 export class Perfil implements OnInit {
-  usuario: any = null;
-  equipos: EquipoResponseDto[] = [];
+  usuario: UsuarioDto | null = null;
+  equiposFantasy: EquipoFantasyResponseDto[] = [];
+  ligasComisionadas: LigaResponseDto[] = [];
   isLoadingEquipos: boolean = true;
-  errorMessage: string = '';
-  baseUrl: string = 'http://localhost:5000';
+  isLoadingLigas: boolean = true;
+  errorEquipos: string = '';
+  errorLigas: string = '';
 
   constructor(
     private authService: Authservice,
-    private equipoService: EquipoService
+    private equipoFantasyService: EquipoFantasyService,
+    private ligaService: LigaService
   ) {}
 
   ngOnInit(): void {
-    // Obtener usuario actual
     this.usuario = this.authService.currentUserValue;
-
-    // Cargar equipos del usuario
     if (this.usuario) {
-      this.cargarEquipos();
+      this.cargarDatos();
     }
   }
 
   /**
-   * Carga los equipos del usuario desde el backend
+   * Carga todos los datos del usuario
    */
-  cargarEquipos(): void {
-    this.isLoadingEquipos = true;
-    this.errorMessage = '';
+  cargarDatos(): void {
+    if (!this.usuario) return;
 
-    this.equipoService.obtenerEquiposPorUsuario(this.usuario.id).subscribe({
+    this.cargarEquiposFantasy();
+    this.cargarLigasComisionadas();
+  }
+
+  /**
+   * Carga los equipos fantasy del usuario
+   */
+  cargarEquiposFantasy(): void {
+    if (!this.usuario) return;
+
+    this.isLoadingEquipos = true;
+    this.errorEquipos = '';
+
+    this.equipoFantasyService.obtenerPorUsuario(this.usuario.id).subscribe({
       next: (equipos) => {
-        this.equipos = equipos;
+        this.equiposFantasy = equipos;
         this.isLoadingEquipos = false;
       },
       error: (error) => {
         console.error('Error al cargar equipos:', error);
+        this.errorEquipos = 'Error al cargar los equipos';
         this.isLoadingEquipos = false;
-        this.errorMessage = 'Error al cargar los equipos';
       }
     });
   }
 
   /**
-   * Obtiene la URL completa de la imagen del equipo
+   * Carga las ligas donde el usuario es comisionado
    */
-  obtenerImagenUrl(imagenUrl: string | null): string {
-    if (imagenUrl) {
-      return `${this.baseUrl}${imagenUrl}`;
-    }
-    return 'https://via.placeholder.com/150?text=Sin+Imagen';
-  }
+  cargarLigasComisionadas(): void {
+    if (!this.usuario) return;
 
-  /**
-   * Cierra la sesión del usuario
-   */
-  logout(): void {
-    this.authService.logout();
-  }
+    this.isLoadingLigas = true;
+    this.errorLigas = '';
 
-  /**
-   * Formatea la fecha de registro
-   */
-  formatearFecha(fecha: Date): string {
-    return new Date(fecha).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    this.ligaService.obtenerLigasPorComisionado(this.usuario.id).subscribe({
+      next: (ligas) => {
+        this.ligasComisionadas = ligas;
+        this.isLoadingLigas = false;
+        console.log('Ligas comisionadas:', ligas);
+      },
+      error: (error) => {
+        console.error('Error al cargar ligas:', error);
+        this.errorLigas = 'Error al cargar las ligas';
+        this.isLoadingLigas = false;
+      }
     });
+  }
+
+  /**
+   * Obtiene el badge de color según el estado de la liga
+   */
+  getBadgeClass(estado: string): string {
+    switch (estado) {
+      case 'Pre-Draft': return 'bg-info';
+      case 'En Draft': return 'bg-warning';
+      case 'Activa': return 'bg-success';
+      case 'Finalizada': return 'bg-secondary';
+      default: return 'bg-secondary';
+    }
   }
 }

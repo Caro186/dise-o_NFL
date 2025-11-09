@@ -1,121 +1,168 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { LigaService, LigaResponse } from '../../services/liga.service';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { LigaService, LigaResponseDto } from '../../services/liga.service';
+import { EquipoFantasyService, EquipoFantasyResponseDto } from '../../services/equipo-fantasy.service';
 import { Authservice } from '../../services/authservice';
 
 @Component({
   selector: 'app-buscar-unirse-liga',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './buscar-unirse-liga.html',
   styleUrls: ['./buscar-unirse-liga.css']
 })
 export class BuscarUnirseLiga implements OnInit {
-  buscarForm: FormGroup;
-  unirseForm: FormGroup;
+  ligasEncontradas: LigaResponseDto[] = [];
+  equiposDisponibles: EquipoFantasyResponseDto[] = [];
+  busqueda: string = '';
+  password: string = '';
+  alias: string = '';
+  equipoSeleccionadoId: number = 0;
+  ligaSeleccionada: LigaResponseDto | null = null;
   isLoading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
-  currentUser: any = null;
-  
-  ligasEncontradas: LigaResponse[] = [];
-  ligaSeleccionada: LigaResponse | null = null;
   mostrarFormularioUnirse: boolean = false;
 
   constructor(
-    private fb: FormBuilder,
     private ligaService: LigaService,
     private authService: Authservice,
-    private router: Router
-  ) {
-    this.buscarForm = this.fb.group({
-      nombreBusqueda: ['', [Validators.required, Validators.minLength(1)]]
-    });
-
-    this.unirseForm = this.fb.group({
-      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), this.passwordValidator]],
-      alias: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]],
-      nombreEquipo: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100)]]
-    });
-  }
+    private equipoFantasyService: EquipoFantasyService
+  ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.currentUserValue;
-    if (!this.currentUser) {
-      this.router.navigate(['/']);
-    }
-    this.buscarLigas();
+    this.cargarTodasLasLigas();
+    this.cargarEquiposUsuario();
   }
 
-  passwordValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value || '';
-    const hasUpper = /[A-Z]/.test(value);
-    const hasLower = /[a-z]/.test(value);
-    const hasAlphaNum = /^[a-zA-Z0-9]+$/.test(value);
-    
-    if (!hasUpper || !hasLower || !hasAlphaNum) {
-      return { passwordInvalid: true };
-    }
-    return null;
-  }
-
-  buscarLigas(): void {
+  /**
+   * Carga todas las ligas disponibles
+   */
+  cargarTodasLasLigas(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.ligaService.obtenerTodasLasLigas().subscribe({
-      next: (ligas) => {
-        const nombreBusqueda = this.buscarForm.get('nombreBusqueda')?.value?.toLowerCase() || '';
-        
-        if (nombreBusqueda) {
-          this.ligasEncontradas = ligas.filter(liga => 
-            liga.nombreLiga.toLowerCase().includes(nombreBusqueda) &&
-            liga.cuposDisponibles > 0 &&
-            liga.estado !== 'Finalizada'
+    this.ligaService.obtenerTodas().subscribe({
+      next: (ligas: LigaResponseDto[]) => {
+        if (this.busqueda.trim()) {
+          this.ligasEncontradas = ligas.filter((liga: LigaResponseDto) =>
+            liga.nombreLiga.toLowerCase().includes(this.busqueda.toLowerCase())
           );
         } else {
-          this.ligasEncontradas = ligas.filter(liga =>
-            liga.cuposDisponibles > 0 &&
-            liga.estado !== 'Finalizada'
+          // Mostrar solo ligas con cupos disponibles y en estados permitidos
+          this.ligasEncontradas = ligas.filter((liga: LigaResponseDto) =>
+            (liga.estado === 'Pre-Draft' || liga.estado === 'Activa') &&
+            liga.cuposOcupados < liga.cuposTotales
           );
         }
-
         this.isLoading = false;
-
-        if (this.ligasEncontradas.length === 0) {
-          this.errorMessage = nombreBusqueda 
-            ? 'No se encontraron ligas con ese nombre que tengan cupos disponibles'
-            : 'No hay ligas disponibles en este momento';
-        }
       },
-      error: (error) => {
+      error: (error: any) => {
+        console.error('Error al cargar ligas:', error);
+        this.errorMessage = 'Error al cargar las ligas disponibles';
         this.isLoading = false;
-        this.errorMessage = 'Error al buscar ligas';
-        console.error('Error:', error);
       }
     });
   }
 
-  seleccionarLiga(liga: LigaResponse): void {
+  /**
+   * Carga los equipos del usuario actual que no están en ninguna liga
+   */
+  cargarEquiposUsuario(): void {
+    const currentUser = this.authService.currentUserValue;
+    if (!currentUser) return;
+
+    this.equipoFantasyService.obtenerPorUsuario(currentUser.id).subscribe({
+      next: (equipos: EquipoFantasyResponseDto[]) => {
+        // Solo equipos sin liga
+        this.equiposDisponibles = equipos.filter(e => !e.ligaId);
+        console.log('Equipos disponibles:', this.equiposDisponibles);
+      },
+      error: (error: any) => {
+        console.error('Error al cargar equipos:', error);
+      }
+    });
+  }
+
+  /**
+   * Busca ligas por nombre
+   */
+  buscarLigas(): void {
+    this.cargarTodasLasLigas();
+  }
+
+  /**
+   * Calcula los cupos disponibles
+   */
+  getCuposDisponibles(liga: LigaResponseDto): number {
+    return liga.cuposTotales - liga.cuposOcupados;
+  }
+
+  /**
+   * Selecciona una liga para unirse
+   */
+  seleccionarLiga(liga: LigaResponseDto): void {
     this.ligaSeleccionada = liga;
     this.mostrarFormularioUnirse = true;
+    this.password = '';
+    this.alias = '';
+    this.equipoSeleccionadoId = 0;
     this.errorMessage = '';
     this.successMessage = '';
-    this.unirseForm.reset();
   }
 
-  cancelarUnirse(): void {
+  /**
+   * Cancela la unión a la liga
+   */
+  cancelarUnion(): void {
     this.mostrarFormularioUnirse = false;
     this.ligaSeleccionada = null;
-    this.unirseForm.reset();
+    this.password = '';
+    this.alias = '';
+    this.equipoSeleccionadoId = 0;
+    this.errorMessage = '';
+    this.successMessage = '';
   }
 
+  /**
+   * Confirma la unión a la liga
+   */
   onUnirse(): void {
-    if (this.unirseForm.invalid || !this.ligaSeleccionada) {
-      this.unirseForm.markAllAsTouched();
-      this.errorMessage = 'Por favor completa todos los campos correctamente';
+    if (!this.ligaSeleccionada) {
+      return;
+    }
+
+    // Validaciones
+    if (!this.password.trim()) {
+      this.errorMessage = 'La contraseña es obligatoria';
+      return;
+    }
+
+    if (this.password.length < 8) {
+      this.errorMessage = 'La contraseña debe tener al menos 8 caracteres';
+      return;
+    }
+
+    if (!this.alias.trim()) {
+      this.errorMessage = 'El alias es obligatorio';
+      return;
+    }
+
+    if (this.alias.length > 50) {
+      this.errorMessage = 'El alias no puede exceder 50 caracteres';
+      return;
+    }
+
+    if (!this.equipoSeleccionadoId || this.equipoSeleccionadoId === 0) {
+      this.errorMessage = 'Debes seleccionar un equipo';
+      return;
+    }
+
+    const currentUser = this.authService.currentUserValue;
+    if (!currentUser) {
+      this.errorMessage = 'Debes iniciar sesión';
       return;
     }
 
@@ -124,37 +171,52 @@ export class BuscarUnirseLiga implements OnInit {
     this.successMessage = '';
 
     const unirseData = {
-      idLiga: this.ligaSeleccionada.idLiga,
-      idUsuario: this.currentUser.id,
-      password: this.unirseForm.get('password')?.value,
-      alias: this.unirseForm.get('alias')?.value.trim(),
-      nombreEquipo: this.unirseForm.get('nombreEquipo')?.value.trim()
+      ligaId: this.ligaSeleccionada.idLiga,
+      password: this.password,
+      usuarioId: currentUser.id,
+      equipoId: this.equipoSeleccionadoId,
+      alias: this.alias.trim()
     };
 
+    console.log('Enviando datos para unirse a liga:', unirseData);
+
     this.ligaService.unirseALiga(unirseData).subscribe({
-      next: (response) => {
+      next: (response: any) => {
+        console.log('Unido a la liga exitosamente:', response);
+        this.successMessage = response.mensaje || 'Te has unido exitosamente a la liga';
         this.isLoading = false;
-        this.successMessage = `¡Te has unido exitosamente a la liga "${this.ligaSeleccionada?.nombreLiga}"!`;
         
+        // Limpiar formulario
+        this.password = '';
+        this.alias = '';
+        this.equipoSeleccionadoId = 0;
+        
+        // Recargar equipos y ligas
+        this.cargarEquiposUsuario();
+        this.cargarTodasLasLigas();
+        
+        // Ocultar formulario después de 2 segundos
         setTimeout(() => {
-          this.router.navigate(['/mainpage/liga', this.ligaSeleccionada?.idLiga]);
+          this.mostrarFormularioUnirse = false;
+          this.ligaSeleccionada = null;
+          this.successMessage = '';
         }, 2000);
       },
-      error: (error) => {
-        this.isLoading = false;
-        console.error('Error al unirse a liga:', error);
+      error: (error: any) => {
+        console.error('Error al unirse a la liga:', error);
         
-        if (error.error && error.error.mensaje) {
+        // Manejar diferentes tipos de errores
+        if (error.status === 400 && error.error?.mensaje) {
           this.errorMessage = error.error.mensaje;
-        } else if (error.status === 403) {
-          this.errorMessage = 'Contraseña incorrecta';
-        } else if (error.status === 400) {
-          this.errorMessage = error.error?.mensaje || 'No puedes unirte a esta liga';
+        } else if (error.status === 404) {
+          this.errorMessage = 'Liga o equipo no encontrado';
         } else if (error.status === 0) {
-          this.errorMessage = 'No se puede conectar con el servidor';
+          this.errorMessage = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
         } else {
-          this.errorMessage = 'Error al unirse a la liga';
+          this.errorMessage = 'Error al unirse a la liga. Inténtalo de nuevo.';
         }
+        
+        this.isLoading = false;
       }
     });
   }

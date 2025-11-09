@@ -1,158 +1,201 @@
-<div class="buscar-liga-container">
-  <!-- Formulario de búsqueda -->
+<div class="buscar-container">
+  <!-- Sección de búsqueda -->
   <div class="buscar-card" *ngIf="!mostrarFormularioUnirse">
     <h2>Buscar Liga</h2>
-    <p class="subtitle">Encuentra una liga y únete a la competencia</p>
+    <p class="subtitle">Encuentra una liga para unirte y comienza a competir</p>
 
-    <form [formGroup]="buscarForm" (ngSubmit)="buscarLigas()" class="buscar-form">
+    <form (ngSubmit)="buscarLigas()" class="search-form">
       <div class="search-group">
         <input
           type="text"
-          formControlName="nombreBusqueda"
-          class="form-control"
-          placeholder="Buscar por nombre de liga..."
+          [(ngModel)]="busqueda"
+          name="busqueda"
+          placeholder="Nombre de la liga..."
+          class="search-input"
         />
-        <button type="submit" class="btn btn-search" [disabled]="isLoading">
-          <span *ngIf="!isLoading">🔍 Buscar</span>
-          <span *ngIf="isLoading">Buscando...</span>
+        <button type="submit" class="btn-search">
+          <i class="bi bi-search"></i> Buscar
         </button>
       </div>
     </form>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+      <p>Buscando ligas...</p>
+    </div>
 
     <!-- Mensaje de error -->
     <div class="alert alert-danger" *ngIf="errorMessage && !mostrarFormularioUnirse">
       {{ errorMessage }}
     </div>
 
-    <!-- Lista de ligas encontradas -->
-    <div class="ligas-lista" *ngIf="ligasEncontradas.length > 0">
-      <h3>Ligas Disponibles ({{ ligasEncontradas.length }})</h3>
-      
-      <div class="liga-card" *ngFor="let liga of ligasEncontradas">
-        <div class="liga-header">
-          <h4>{{ liga.nombreLiga }}</h4>
-          <span class="liga-estado" [class.pre-draft]="liga.estado === 'Pre-Draft'">
-            {{ liga.estado }}
-          </span>
+    <!-- Resultados -->
+    <div class="resultados" *ngIf="!isLoading">
+      <h3>Ligas Disponibles</h3>
+
+      <div *ngIf="ligasEncontradas.length === 0" class="no-results">
+        <i class="bi bi-inbox"></i>
+        <p>No se encontraron ligas disponibles</p>
+      </div>
+
+      <div class="ligas-grid">
+        <div class="liga-card" *ngFor="let liga of ligasEncontradas">
+          <div class="liga-header">
+            <img
+              [src]="liga.imagenUrl || 'https://via.placeholder.com/80?text=Liga'"
+              [alt]="liga.nombreLiga"
+              class="liga-logo"
+            />
+            <div class="liga-info">
+              <h4>{{ liga.nombreLiga }}</h4>
+              <p class="liga-descripcion">{{ liga.descripcion || 'Sin descripción' }}</p>
+            </div>
+          </div>
+
+          <div class="liga-details">
+            <div class="detail-item">
+              <span class="label">Comisionado:</span>
+              <span class="value">{{ liga.nombreComisionado }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Estado:</span>
+              <span class="badge" [ngClass]="'badge-' + liga.estado.toLowerCase()">
+                {{ liga.estado }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Cupos:</span>
+              <span class="value cupos">{{ getCuposDisponibles(liga) }} de {{ liga.cuposTotales }} disponibles</span>
+            </div>
+          </div>
+
+          <button
+            class="btn-unirse"
+            (click)="seleccionarLiga(liga)"
+            [disabled]="getCuposDisponibles(liga) === 0">
+            {{ getCuposDisponibles(liga) === 0 ? 'Liga Llena' : 'Unirse' }}
+          </button>
         </div>
-
-        <p class="liga-descripcion" *ngIf="liga.descripcion">
-          {{ liga.descripcion }}
-        </p>
-
-        <div class="liga-info">
-          <div class="info-item">
-            <span class="label">Comisionado:</span>
-            <span class="value">{{ liga.nombreComisionado }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Equipos:</span>
-            <span class="value">{{ liga.cuposOcupados }} / {{ liga.cuposTotales }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Cupos disponibles:</span>
-            <span class="value cupos">{{ liga.cuposDisponibles }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Creada:</span>
-            <span class="value">{{ liga.fechaCreacion | date: 'dd/MM/yyyy' }}</span>
-          </div>
-        </div>
-
-        <button 
-          class="btn btn-primary btn-unirse" 
-          (click)="seleccionarLiga(liga)"
-          [disabled]="liga.cuposDisponibles === 0">
-          Unirse a esta liga
-        </button>
       </div>
     </div>
   </div>
 
-  <!-- Formulario para unirse -->
+  <!-- Formulario de unirse -->
   <div class="unirse-card" *ngIf="mostrarFormularioUnirse && ligaSeleccionada">
-    <button class="btn-back" (click)="cancelarUnirse()">← Volver</button>
-    
-    <h2>Unirse a {{ ligaSeleccionada.nombreLiga }}</h2>
-    <p class="subtitle">Completa la información para unirte</p>
+    <button class="btn-back" (click)="cancelarUnion()">← Volver</button>
 
-    <div class="liga-info-box">
-      <p><strong>Comisionado:</strong> {{ ligaSeleccionada.nombreComisionado }}</p>
-      <p><strong>Cupos disponibles:</strong> {{ ligaSeleccionada.cuposDisponibles }} de {{ ligaSeleccionada.cuposTotales }}</p>
+    <h2>Unirse a la Liga</h2>
+    <div class="liga-seleccionada">
+      <h3>{{ ligaSeleccionada.nombreLiga }}</h3>
+      <p>{{ ligaSeleccionada.descripcion }}</p>
+      <p class="cupos-info">
+        <strong>{{ getCuposDisponibles(ligaSeleccionada) }}</strong> de <strong>{{ ligaSeleccionada.cuposTotales }}</strong> cupos disponibles
+      </p>
     </div>
 
-    <form [formGroup]="unirseForm" (ngSubmit)="onUnirse()">
-      <!-- Contraseña -->
+    <form (ngSubmit)="onUnirse()">
+      <!-- Contraseña de la liga -->
       <div class="form-group">
-        <label for="password">Contraseña de la Liga *</label>
+        <label for="password">
+          <i class="bi bi-lock"></i> Contraseña de la Liga:
+        </label>
         <input
-          type="password"
           id="password"
-          formControlName="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Ingresa la contraseña de la liga"
           class="form-control"
-          placeholder="Ingresa la contraseña"
-          maxlength="12"
+          required
+          minlength="8"
         />
-        <div class="error-message" *ngIf="unirseForm.get('password')?.invalid && unirseForm.get('password')?.touched">
-          <span *ngIf="unirseForm.get('password')?.errors?.['required']">La contraseña es obligatoria</span>
-          <span *ngIf="unirseForm.get('password')?.errors?.['minlength']">Mínimo 8 caracteres</span>
-          <span *ngIf="unirseForm.get('password')?.errors?.['passwordInvalid']">Formato de contraseña inválido</span>
+        <div class="error-message" *ngIf="!password && errorMessage">
+          <span>La contraseña es obligatoria</span>
         </div>
       </div>
 
-      <!-- Alias -->
+      <!-- Alias en la liga -->
       <div class="form-group">
-        <label for="alias">Tu Alias en esta Liga *</label>
+        <label for="alias">
+          <i class="bi bi-tag"></i> Alias en la Liga:
+        </label>
         <input
-          type="text"
           id="alias"
-          formControlName="alias"
+          type="text"
+          [(ngModel)]="alias"
+          name="alias"
+          placeholder="Ej: ElCampeón"
           class="form-control"
-          placeholder="Ej: El Estratega"
+          required
           maxlength="50"
         />
-        <small class="form-hint">Este será tu apodo visible en la liga</small>
-        <div class="error-message" *ngIf="unirseForm.get('alias')?.invalid && unirseForm.get('alias')?.touched">
-          <span *ngIf="unirseForm.get('alias')?.errors?.['required']">El alias es obligatorio</span>
-          <span *ngIf="unirseForm.get('alias')?.errors?.['maxlength']">Máximo 50 caracteres</span>
+        <small class="text-muted">
+          Tu alias será visible para otros managers de la liga (máx. 50 caracteres)
+        </small>
+        <div class="error-message" *ngIf="!alias && errorMessage">
+          <span>El alias es obligatorio</span>
         </div>
       </div>
 
-      <!-- Nombre del Equipo -->
+      <!-- Selector de equipo -->
       <div class="form-group">
-        <label for="nombreEquipo">Nombre de tu Equipo *</label>
-        <input
-          type="text"
-          id="nombreEquipo"
-          formControlName="nombreEquipo"
+        <label for="equipoSeleccionado">
+          <i class="bi bi-trophy"></i> Selecciona tu Equipo:
+        </label>
+        <select 
+          id="equipoSeleccionado" 
+          [(ngModel)]="equipoSeleccionadoId" 
+          name="equipoSeleccionado" 
           class="form-control"
-          placeholder="Ej: Los Campeones"
-          maxlength="100"
-        />
-        <small class="form-hint">Debe ser único dentro de esta liga</small>
-        <div class="error-message" *ngIf="unirseForm.get('nombreEquipo')?.invalid && unirseForm.get('nombreEquipo')?.touched">
-          <span *ngIf="unirseForm.get('nombreEquipo')?.errors?.['required']">El nombre del equipo es obligatorio</span>
-          <span *ngIf="unirseForm.get('nombreEquipo')?.errors?.['maxlength']">Máximo 100 caracteres</span>
+          required
+        >
+          <option value="0" disabled>-- Selecciona un equipo --</option>
+          <option *ngFor="let equipo of equiposDisponibles" [value]="equipo.id">
+            {{ equipo.nombre }}
+          </option>
+        </select>
+        <small class="text-muted">
+          Solo se muestran equipos que no están en ninguna liga
+        </small>
+        
+        <div *ngIf="equiposDisponibles.length === 0" class="alert alert-warning mt-2">
+          <i class="bi bi-info-circle"></i> 
+          No tienes equipos disponibles. 
+          <a routerLink="/mainpage/equipos-fantasy/crear" class="alert-link">Crea uno aquí</a>
         </div>
       </div>
 
-      <!-- Mensajes -->
+      <!-- Mensaje de éxito -->
       <div class="alert alert-success" *ngIf="successMessage">
+        <i class="bi bi-check-circle"></i>
         {{ successMessage }}
       </div>
 
+      <!-- Mensaje de error -->
       <div class="alert alert-danger" *ngIf="errorMessage">
+        <i class="bi bi-exclamation-triangle"></i>
         {{ errorMessage }}
       </div>
 
       <!-- Botones -->
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="cancelarUnirse()" [disabled]="isLoading">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarUnion()"
+          [disabled]="isLoading">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading || unirseForm.invalid">
-          <span *ngIf="isLoading">Uniéndose...</span>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || !password || !alias || equipoSeleccionadoId === 0 || equiposDisponibles.length === 0">
           <span *ngIf="!isLoading">Unirse a la Liga</span>
+          <span *ngIf="isLoading">
+            <span class="spinner-border spinner-border-sm"></span>
+            Uniéndose...
+          </span>
         </button>
       </div>
     </form>

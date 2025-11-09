@@ -1,113 +1,193 @@
 <div class="crear-liga-container">
   <div class="crear-liga-card">
     <h2>Crear Nueva Liga</h2>
-    <p class="subtitle">Configura tu liga de Fantasy NFL</p>
+    <p class="subtitle">Configura tu liga de fantasy football</p>
 
-    <form [formGroup]="crearLigaForm" (ngSubmit)="onSubmit()">
-      <!-- Nombre de la Liga -->
+    <form (ngSubmit)="onSubmit()">
+      <!-- Nombre de la liga -->
       <div class="form-group">
-        <label for="nombreLiga">Nombre de la Liga *</label>
+        <label for="nombreLiga">
+          <i class="bi bi-trophy"></i> Nombre de la Liga:
+        </label>
         <input
-          type="text"
           id="nombreLiga"
-          formControlName="nombreLiga"
+          type="text"
+          [(ngModel)]="nombreLiga"
+          name="nombreLiga"
+          placeholder="Ej: Liga de Campeones 2025"
           class="form-control"
-          placeholder="Ej: Liga de los Campeones 2024"
+          required
           maxlength="100"
         />
-        <div class="error-message" *ngIf="crearLigaForm.get('nombreLiga')?.invalid && crearLigaForm.get('nombreLiga')?.touched">
-          <span *ngIf="crearLigaForm.get('nombreLiga')?.errors?.['required']">El nombre es obligatorio</span>
-          <span *ngIf="crearLigaForm.get('nombreLiga')?.errors?.['maxlength']">Máximo 100 caracteres</span>
-        </div>
+        <small class="text-muted">El nombre debe ser único (1-100 caracteres)</small>
       </div>
 
       <!-- Descripción -->
       <div class="form-group">
-        <label for="descripcion">Descripción (Opcional)</label>
+        <label for="descripcion">
+          <i class="bi bi-card-text"></i> Descripción (opcional):
+        </label>
         <textarea
           id="descripcion"
-          formControlName="descripcion"
+          [(ngModel)]="descripcion"
+          name="descripcion"
+          placeholder="Descripción de la liga..."
           class="form-control"
-          placeholder="Describe tu liga..."
           rows="3"
+          maxlength="500"
         ></textarea>
       </div>
 
       <!-- Contraseña -->
       <div class="form-group">
-        <label for="password">Contraseña de la Liga *</label>
+        <label for="password">
+          <i class="bi bi-lock"></i> Contraseña de la Liga:
+        </label>
         <input
-          type="password"
           id="password"
-          formControlName="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Mínimo 8 caracteres"
           class="form-control"
-          placeholder="8-12 caracteres, alfanumérica"
-          maxlength="12"
+          required
+          minlength="8"
         />
-        <small class="form-hint">8-12 caracteres, alfanumérica, con mayúsculas y minúsculas</small>
-        <div class="error-message" *ngIf="crearLigaForm.get('password')?.invalid && crearLigaForm.get('password')?.touched">
-          <span *ngIf="crearLigaForm.get('password')?.errors?.['required']">La contraseña es obligatoria</span>
-          <span *ngIf="crearLigaForm.get('password')?.errors?.['minlength']">Mínimo 8 caracteres</span>
-          <span *ngIf="crearLigaForm.get('password')?.errors?.['maxlength']">Máximo 12 caracteres</span>
-          <span *ngIf="crearLigaForm.get('password')?.errors?.['passwordInvalid']">Debe ser alfanumérica con mayúsculas y minúsculas</span>
-        </div>
+        <small class="text-muted">Los usuarios necesitarán esta contraseña para unirse</small>
       </div>
 
-      <!-- Cantidad de Equipos -->
+      <!-- Confirmar contraseña -->
       <div class="form-group">
-        <label for="cantidadEquipos">Cantidad de Equipos *</label>
-        <select id="cantidadEquipos" formControlName="cantidadEquipos" class="form-control">
+        <label for="confirmPassword">
+          <i class="bi bi-lock-fill"></i> Confirmar Contraseña:
+        </label>
+        <input
+          id="confirmPassword"
+          type="password"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          placeholder="Repite la contraseña"
+          class="form-control"
+          required
+        />
+      </div>
+
+      <!-- Cupos totales -->
+      <div class="form-group">
+        <label for="cuposTotales">
+          <i class="bi bi-people"></i> Cantidad de Equipos:
+        </label>
+        <select
+          id="cuposTotales"
+          [(ngModel)]="cuposTotales"
+          name="cuposTotales"
+          class="form-control"
+          required
+        >
           <option *ngFor="let cantidad of cantidadesEquipos" [value]="cantidad">
             {{ cantidad }} equipos
           </option>
         </select>
       </div>
 
-      <!-- Nombre del Equipo del Comisionado -->
+      <!-- Nombre del equipo del comisionado -->
       <div class="form-group">
-        <label for="nombreEquipoComisionado">Nombre de tu Equipo *</label>
+        <label for="nombreEquipoComisionado">
+          <i class="bi bi-shield"></i> Nombre de tu Equipo:
+        </label>
         <input
-          type="text"
           id="nombreEquipoComisionado"
-          formControlName="nombreEquipoComisionado"
-          class="form-control"
+          type="text"
+          [(ngModel)]="nombreEquipoComisionado"
+          name="nombreEquipoComisionado"
           placeholder="Ej: Los Invencibles"
+          class="form-control"
+          required
           maxlength="100"
         />
-        <small class="form-hint">Como comisionado, serás el primer equipo de la liga</small>
-        <div class="error-message" *ngIf="crearLigaForm.get('nombreEquipoComisionado')?.invalid && crearLigaForm.get('nombreEquipoComisionado')?.touched">
-          <span *ngIf="crearLigaForm.get('nombreEquipoComisionado')?.errors?.['required']">El nombre del equipo es obligatorio</span>
-          <span *ngIf="crearLigaForm.get('nombreEquipoComisionado')?.errors?.['maxlength']">Máximo 100 caracteres</span>
-        </div>
+        <small class="text-muted">Como comisionado, también participarás con tu equipo</small>
       </div>
 
-      <!-- Configuración de Playoffs -->
+      <!-- Configuración de playoffs -->
       <div class="form-group">
-        <label for="equiposEnPlayoffs">Playoffs *</label>
-        <select id="equiposEnPlayoffs" formControlName="equiposEnPlayoffs" class="form-control">
+        <label for="configPlayoffs">
+          <i class="bi bi-calendar-check"></i> Configuración de Playoffs:
+        </label>
+        <select
+          id="configPlayoffs"
+          [(ngModel)]="configPlayoffs"
+          name="configPlayoffs"
+          class="form-control"
+        >
           <option *ngFor="let opcion of opcionesPlayoffs" [value]="opcion.valor">
             {{ opcion.texto }}
           </option>
         </select>
       </div>
 
-      <!-- Mensajes -->
+      <!-- Temporada -->
+      <div class="form-group">
+        <label for="idTemporada">
+          <i class="bi bi-calendar3"></i> Temporada:
+        </label>
+        <select
+          id="idTemporada"
+          [(ngModel)]="idTemporada"
+          name="idTemporada"
+          class="form-control"
+          required
+        >
+          <option value="0" disabled>-- Selecciona una temporada --</option>
+          <option *ngFor="let temp of temporadas" [value]="temp.id">
+            Temporada {{ temp.nombre }} {{ temp.actual ? '(Actual)' : '' }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Permitir decimales -->
+      <div class="form-check">
+        <input
+          id="permitirDecimales"
+          type="checkbox"
+          [(ngModel)]="permitirDecimales"
+          name="permitirDecimales"
+          class="form-check-input"
+        />
+        <label for="permitirDecimales" class="form-check-label">
+          Permitir decimales en puntuación
+        </label>
+      </div>
+
+      <!-- Mensaje de éxito -->
       <div class="alert alert-success" *ngIf="successMessage">
+        <i class="bi bi-check-circle"></i>
         {{ successMessage }}
       </div>
 
+      <!-- Mensaje de error -->
       <div class="alert alert-danger" *ngIf="errorMessage">
+        <i class="bi bi-exclamation-triangle"></i>
         {{ errorMessage }}
       </div>
 
       <!-- Botones -->
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="isLoading">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isLoading">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading || crearLigaForm.invalid">
-          <span *ngIf="isLoading">Creando...</span>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || !nombreLiga || !password || !confirmPassword || !nombreEquipoComisionado || !idTemporada">
           <span *ngIf="!isLoading">Crear Liga</span>
+          <span *ngIf="isLoading">
+            <span class="spinner-border spinner-border-sm"></span>
+            Creando...
+          </span>
         </button>
       </div>
     </form>
