@@ -4,6 +4,9 @@ using Serilog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using NFLFantasyAPI.Logic.DbContextProvider;
+using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.Logic.Services;
+using NFLFantasyAPI.CrossCutting.Interface;
 using System.Text;
 
 
@@ -29,8 +32,15 @@ namespace NFLFantasyAPI.Presentation
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
-            // Registrar el servicio JWT
+            // Registrar servicios
             builder.Services.AddScoped<IJwtService, JwtService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IEquipoService, EquipoService>();
+            builder.Services.AddScoped<ILigaService, LigaService>();
+            builder.Services.AddScoped<ITemporadaService, TemporadaService>();
+
+            IDbContextProvider contextProvider = new DbContextProvider();
+            contextProvider.registerRepositories(builder.Services);
 
             // Configuración de autenticación JWT
             var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key no configurada");
@@ -114,8 +124,7 @@ namespace NFLFantasyAPI.Presentation
             }
 
 
-            var dbProvider = new DbContextProvider();
-            dbProvider.ConfigureDatabase(builder.Services, connectionString);
+            contextProvider.ConfigureDatabase(builder.Services, connectionString);
 
 
             // Configuración de CORS

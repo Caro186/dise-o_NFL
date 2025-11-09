@@ -1,12 +1,13 @@
 using NFLFantasyAPI.CrossCutting;
 using NFLFantasyAPI.Logic.DTOs;
+using NFLFantasyAPI.Logic.Interfaces;
 using NFLFantasyAPI.Persistence.Models;
 using NFLFantasyAPI.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace NFLFantasyAPI.Logic.Service
 {
-    public class TemporadaService
+    public class TemporadaService : ITemporadaService
     {
         private readonly ITemporadaRepository _temporadaRepo;
         private readonly ILogger<TemporadaService> _logger;
@@ -120,7 +121,7 @@ namespace NFLFantasyAPI.Logic.Service
                 return ServiceResult.BadRequest("Temporada no encontrada");
 
             var actual = await _temporadaRepo.GetActualesAsync();
-            if(actual != null) actual.Actual = false;
+            if (actual != null) actual.Actual = false;
 
             temporada.Actual = true;
             await _temporadaRepo.SaveChangesAsync();

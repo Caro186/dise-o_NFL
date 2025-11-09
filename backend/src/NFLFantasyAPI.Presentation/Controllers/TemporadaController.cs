@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using NFLFantasyAPI.Logic.Service;
+using NFLFantasyAPI.Logic.Interfaces;
 using NFLFantasyAPI.Logic.DTOs;
 
 namespace NFLFantasyAPI.Controllers
@@ -8,9 +8,9 @@ namespace NFLFantasyAPI.Controllers
     [Route("api/[controller]")]
     public class TemporadaController : ControllerBase
     {
-        private readonly TemporadaService _temporadaService;
+        private readonly ITemporadaService _temporadaService;
 
-        public TemporadaController(TemporadaService temporadaService)
+        public TemporadaController(ITemporadaService temporadaService)
         {
             _temporadaService = temporadaService;
         }
