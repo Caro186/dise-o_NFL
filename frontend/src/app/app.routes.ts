@@ -9,39 +9,47 @@ import { Liga } from '../mainpage/liga/liga';
 import { TemporadaComponent } from '../mainpage/temporada/temporada';
 import { EquiposNFLListComponent } from '../mainpage/equipos-nfl-list/equipos-nfl-list.component';
 import { EquiposNFLFormComponent } from '../mainpage/equipos-nfl-form/equipos-nfl-form.component';
+import { authGuard } from '../guards/auth.guard';
+import { adminGuard } from '../guards/admin.guard';
 
 export const routes: Routes = [
-    // ===== Rutas públicas (sin autenticación) =====
+    // ===== Rutas públicas =====
     { path: '', component: Login },
     { path: 'login', component: Login },
     { path: 'register', component: Register },
     
-    // ===== Rutas protegidas (requieren autenticación) =====
-    // Mainpage es el layout principal con sidenav
+    // ===== Rutas protegidas =====
     {
         path: 'mainpage',
         component: Mainpage,
+        canActivate: [authGuard],
         children: [
-            // Ruta por defecto cuando entran a /mainpage
             { path: '', redirectTo: 'perfil', pathMatch: 'full' },
             
-            // Perfil (página de inicio después del login)
+            // Rutas de usuarios normales
             { path: 'perfil', component: Perfil },
-            
-            // ===== Equipos Fantasy (todos los usuarios) =====
             { path: 'equipos-fantasy', component: EquipoFantasyList },
             { path: 'equipos-fantasy/crear', component: EquiposFantasyForm },
-            
-            // ===== Ligas =====
             { path: 'liga', component: Liga },
             
-            // ===== Administración (solo admins) =====
-            { path: 'admin/equipos-nfl', component: EquiposNFLListComponent },
-            { path: 'admin/equipos-nfl/crear', component: EquiposNFLFormComponent },
-            { path: 'temporada', component: TemporadaComponent }
+         
+            { 
+                path: 'admin/equipos-nfl', 
+                component: EquiposNFLListComponent,
+                canActivate: [adminGuard] 
+            },
+            { 
+                path: 'admin/equipos-nfl/crear', 
+                component: EquiposNFLFormComponent,
+                canActivate: [adminGuard]
+            },
+            { 
+                path: 'temporada', 
+                component: TemporadaComponent,
+                canActivate: [adminGuard] 
+            }
         ]
     },
     
-    // Redirección por defecto
     { path: '**', redirectTo: 'login' }
 ];

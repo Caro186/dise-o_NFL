@@ -9,9 +9,11 @@ using Backend.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar FileServer settings
-builder.Services.Configure<FileServerSettings>(
-    builder.Configuration.GetSection("FileServer"));
+// ✅ Configurar JwtSettings
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
+// ✅ Configurar FileServer settings
+builder.Services.Configure<FileServerSettings>(builder.Configuration.GetSection("FileServer"));
 
 // Configurar Serilog para logging
 Log.Logger = new LoggerConfiguration()

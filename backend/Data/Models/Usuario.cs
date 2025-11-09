@@ -65,5 +65,9 @@ namespace NFLFantasyAPI.Models
         /// Fecha y hora de la última actividad del usuario (para control de inactividad)
         /// </summary>
         public DateTime? UltimaActividad { get; set; }
+
+        
+        public string Rol { get; set; } = "Usuario"; // Valores: "Usuario", "Admin"
+
     }
 }

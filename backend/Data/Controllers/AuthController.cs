@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using NFLFantasyAPI.Data;
 using NFLFantasyAPI.Models;
-using BCrypt.Net;
 using NFLFantasyAPI.DTOs;
-using NFLFantasyAPI.Services;
+using Backend.Configuration;
 
 namespace NFLFantasyAPI.Controllers
 {
@@ -17,17 +21,25 @@ namespace NFLFantasyAPI.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AuthController> _logger;
-        private readonly IJwtService _jwtService;
+        private readonly JwtSettings _jwtSettings;
 
-        public AuthController(ApplicationDbContext context, ILogger<AuthController> logger, IJwtService jwtService)
+        public AuthController(
+            ApplicationDbContext context, 
+            ILogger<AuthController> logger,
+            IOptions<JwtSettings> jwtSettings)
         {
             _context = context;
             _logger = logger;
-            _jwtService = jwtService;
+            _jwtSettings = jwtSettings.Value;
         }
 
+        /// <summary>
+        /// Registra un nuevo usuario (siempre como "Usuario", nunca como "Admin")
+        /// </summary>
         [HttpPost("register")]
-        public async Task<ActionResult> Register(RegistroDto registroDto)
+        [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Register([FromBody] RegistroDto registroDto)
         {
             try
             {
@@ -35,52 +47,75 @@ namespace NFLFantasyAPI.Controllers
                 {
                     return BadRequest(new ErrorResponseDto
                     {
-                        Mensaje = "Datos de registro inválidos",
-                        Errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()
+                        Mensaje = "Datos inválidos",
+                        Errores = ModelState.Values
+                            .SelectMany(v => v.Errors)
+                            .Select(e => e.ErrorMessage)
+                            .ToList()
                     });
                 }
 
-                if (await _context.Usuarios.AnyAsync(u => u.Email == registroDto.Email))
+                // Verificar si el email ya existe
+                var usuarioExiste = await _context.Usuarios.AnyAsync(u => u.Email == registroDto.Email);
+                if (usuarioExiste)
                 {
-                    _logger.LogWarning("Intento de registro con email duplicado: {Email}", registroDto.Email);
-                    return BadRequest(new ErrorResponseDto { Mensaje = "El email ya está registrado" });
+                    return BadRequest(new ErrorResponseDto
+                    {
+                        Mensaje = "El email ya está registrado"
+                    });
                 }
 
+                // Hashear contraseña
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(registroDto.Password);
+
+                // Crear usuario (siempre con rol "Usuario")
                 var usuario = new Usuario
                 {
                     Email = registroDto.Email,
-                    Password = BCrypt.Net.BCrypt.HashPassword(registroDto.Password),
+                    Password = passwordHash,
                     NombreCompleto = registroDto.NombreCompleto,
                     FechaRegistro = DateTime.UtcNow,
+                    EstadoCuenta = "Activa",
                     IntentosFailidos = 0,
-                    EstadoCuenta = "Activa"
+                    Rol = "Usuario"
                 };
 
                 _context.Usuarios.Add(usuario);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Usuario registrado exitosamente: {Email}", usuario.Email);
 
-                return Ok(new
+                _logger.LogInformation("Usuario registrado: {Email} con rol {Rol}", usuario.Email, usuario.Rol);
+
+                return Created("", new
                 {
                     mensaje = "Usuario registrado exitosamente",
-                    usuario = new UsuarioResponseDto
+                    usuario = new UsuarioDto
                     {
                         Id = usuario.Id,
                         Email = usuario.Email,
                         NombreCompleto = usuario.NombreCompleto,
-                        FechaRegistro = usuario.FechaRegistro
+                        FechaRegistro = usuario.FechaRegistro,
+                        Rol = usuario.Rol
                     }
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al registrar usuario");
-                return StatusCode(500, new ErrorResponseDto { Mensaje = "Error interno del servidor al registrar usuario" });
+                return StatusCode(500, new ErrorResponseDto
+                {
+                    Mensaje = "Error interno del servidor"
+                });
             }
         }
 
+        /// <summary>
+        /// Inicia sesión de un usuario
+        /// </summary>
         [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginDto loginDto)
+        [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
         {
             try
             {
@@ -88,30 +123,40 @@ namespace NFLFantasyAPI.Controllers
                 {
                     return BadRequest(new ErrorResponseDto
                     {
-                        Mensaje = "Datos de login inválidos",
-                        Errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()
+                        Mensaje = "Datos inválidos",
+                        Errores = ModelState.Values
+                            .SelectMany(v => v.Errors)
+                            .Select(e => e.ErrorMessage)
+                            .ToList()
                     });
                 }
 
+                // Buscar usuario por email
                 var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
                 if (usuario == null)
                 {
-                    _logger.LogWarning("Intento de login con email no existente: {Email}", loginDto.Email);
-                    return Unauthorized(new ErrorResponseDto { Mensaje = "Email o contraseña incorrectos" });
-                }
-
-                if (usuario.EstadoCuenta == "Bloqueada")
-                {
-                    _logger.LogWarning("Intento de login con cuenta bloqueada: {Email}", loginDto.Email);
-                    return StatusCode(403, new ErrorResponseDto
+                    return Unauthorized(new ErrorResponseDto
                     {
-                        Mensaje = "Tu cuenta ha sido bloqueada por múltiples intentos fallidos de inicio de sesión. Por favor, contacta al administrador."
+                        Mensaje = "Credenciales inválidas"
                     });
                 }
 
-                if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, usuario.Password))
+                // Verificar estado de la cuenta
+                if (usuario.EstadoCuenta != "Activa")
                 {
+                    return Unauthorized(new ErrorResponseDto
+                    {
+                        Mensaje = "Cuenta bloqueada. Contacta al administrador."
+                    });
+                }
+
+                // Verificar contraseña
+                bool passwordValido = BCrypt.Net.BCrypt.Verify(loginDto.Password, usuario.Password);
+
+                if (!passwordValido)
+                {
+                    // Incrementar intentos fallidos
                     usuario.IntentosFailidos++;
                     usuario.FechaUltimoIntentoFallido = DateTime.UtcNow;
 
@@ -119,49 +164,86 @@ namespace NFLFantasyAPI.Controllers
                     {
                         usuario.EstadoCuenta = "Bloqueada";
                         usuario.FechaBloqueo = DateTime.UtcNow;
-                        await _context.SaveChangesAsync();
-                        _logger.LogWarning("Cuenta bloqueada por intentos fallidos: {Email}", loginDto.Email);
-                        return StatusCode(403, new ErrorResponseDto
-                        {
-                            Mensaje = "Tu cuenta ha sido bloqueada por múltiples intentos fallidos de inicio de sesión. Por favor, contacta al administrador."
-                        });
+                        _logger.LogWarning("Cuenta bloqueada por intentos fallidos: {Email}", usuario.Email);
                     }
 
                     await _context.SaveChangesAsync();
-                    _logger.LogWarning("Intento de login con contraseña incorrecta para: {Email}. Intentos: {Intentos}", loginDto.Email, usuario.IntentosFailidos);
-                    return Unauthorized(new ErrorResponseDto { Mensaje = "Email o contraseña incorrectos" });
+
+                    return Unauthorized(new ErrorResponseDto
+                    {
+                        Mensaje = "Credenciales inválidas"
+                    });
                 }
 
+                // Login exitoso - resetear intentos fallidos
                 usuario.IntentosFailidos = 0;
                 usuario.FechaUltimoIntentoFallido = null;
                 usuario.UltimaActividad = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                var token = _jwtService.GenerateToken(usuario);
+                // Generar token JWT
+                var token = GenerateJwtToken(usuario);
                 var tokenExpiracion = DateTime.UtcNow.AddHours(12);
-                _logger.LogInformation("Login exitoso para usuario: {Email}", usuario.Email);
+
+                _logger.LogInformation("Login exitoso: {Email} con rol {Rol}", usuario.Email, usuario.Rol);
 
                 return Ok(new LoginResponseDto
                 {
                     Status = "ok",
-                    Usuario = new UsuarioResponseDto
+                    Token = token,
+                    TokenExpiracion = tokenExpiracion.ToString("o"),
+                    Usuario = new UsuarioDto
                     {
                         Id = usuario.Id,
                         Email = usuario.Email,
                         NombreCompleto = usuario.NombreCompleto,
-                        FechaRegistro = usuario.FechaRegistro
-                    },
-                    Token = token,
-                    TokenExpiracion = tokenExpiracion
+                        FechaRegistro = usuario.FechaRegistro,
+                        Rol = usuario.Rol
+                    }
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al procesar login");
-                return StatusCode(500, new ErrorResponseDto { Mensaje = "Error interno del servidor al procesar login" });
+                _logger.LogError(ex, "Error en login");
+                return StatusCode(500, new ErrorResponseDto
+                {
+                    Mensaje = "Error interno del servidor"
+                });
             }
         }
 
+        /// <summary>
+        /// Genera un token JWT para el usuario
+        /// </summary>
+        private string GenerateJwtToken(Usuario usuario)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                    new Claim(ClaimTypes.Email, usuario.Email),
+                    new Claim(ClaimTypes.Name, usuario.NombreCompleto),
+                    new Claim(ClaimTypes.Role, usuario.Rol)
+                }),
+                Expires = DateTime.UtcNow.AddHours(12),
+                Issuer = _jwtSettings.Issuer,
+                Audience = _jwtSettings.Audience,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        /// <summary>
+        /// Desbloquea una cuenta de usuario
+        /// </summary>
         [HttpPost("desbloquear")]
         public async Task<ActionResult> DesbloquearCuenta([FromBody] DesbloquearCuentaDto dto)
         {
@@ -190,6 +272,9 @@ namespace NFLFantasyAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Obtiene todos los usuarios
+        /// </summary>
         [HttpGet("usuarios")]
         public async Task<ActionResult> GetUsuarios()
         {
@@ -214,6 +299,9 @@ namespace NFLFantasyAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Obtiene un usuario por ID
+        /// </summary>
         [HttpGet("usuario/{id}")]
         public async Task<ActionResult> GetUsuario(int id)
         {
@@ -241,6 +329,9 @@ namespace NFLFantasyAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Elimina un usuario
+        /// </summary>
         [HttpDelete("usuario/{id}")]
         public async Task<ActionResult> DeleteUsuario(int id)
         {
