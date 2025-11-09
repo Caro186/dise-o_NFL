@@ -6,6 +6,8 @@ import { Perfil } from '../perfil/perfil';
 import { EquipoFantasyList } from '../mainpage/equipos-fantasy-list/equipos-fantasy-list';
 import { EquiposFantasyForm } from '../mainpage/equipos-fantasy-form/equipos-fantasy-form';
 import { Liga } from '../mainpage/liga/liga';
+import { CrearLiga } from '../mainpage/crear-liga/crear-liga';
+import { BuscarUnirseLiga } from '../mainpage/buscar-unirse-liga/buscar-unirse-liga';
 import { TemporadaComponent } from '../mainpage/temporada/temporada';
 import { EquiposNFLListComponent } from '../mainpage/equipos-nfl-list/equipos-nfl-list.component';
 import { EquiposNFLFormComponent } from '../mainpage/equipos-nfl-form/equipos-nfl-form.component';
@@ -26,13 +28,19 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'perfil', pathMatch: 'full' },
             
-            // Rutas de usuarios normales
+            // ===== Rutas de Perfil =====
             { path: 'perfil', component: Perfil },
+            
+            // ===== Rutas de Equipos Fantasy =====
             { path: 'equipos-fantasy', component: EquipoFantasyList },
             { path: 'equipos-fantasy/crear', component: EquiposFantasyForm },
-            { path: 'liga', component: Liga },
             
-         
+            // ===== Rutas de Ligas =====
+            { path: 'ligas', component: Liga },
+            { path: 'ligas/crear', component: CrearLiga },
+            { path: 'ligas/buscar', component: BuscarUnirseLiga },
+            
+            // ===== Rutas de Administrador =====
             { 
                 path: 'admin/equipos-nfl', 
                 component: EquiposNFLListComponent,
@@ -51,5 +59,6 @@ export const routes: Routes = [
         ]
     },
     
+    // ===== Ruta por defecto =====
     { path: '**', redirectTo: 'login' }
 ];

@@ -17,7 +17,6 @@ namespace NFLFantasyAPI.Data
         public DbSet<Liga> Ligas { get; set; }
         public DbSet<Temporada> Temporadas { get; set; }
         public DbSet<Semana> Semanas { get; set; }
-        public DbSet<EquipoLiga> EquiposLigas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -110,30 +109,7 @@ namespace NFLFantasyAPI.Data
                 entity.HasIndex(l => l.NombreLiga);
             });
 
-            // Configurar tabla de equipo-liga
-            modelBuilder.Entity<EquipoLiga>(entity =>
-            {
-                entity.ToTable("equipos_ligas");
-                entity.HasKey(el => el.Id);
-                entity.Property(el => el.IdEquipo).IsRequired();
-                entity.Property(el => el.IdLiga).IsRequired();
-                entity.Property(el => el.Alias).IsRequired().HasMaxLength(50);
-                entity.Property(el => el.FechaUnion).IsRequired();
-                entity.Property(el => el.EsComisionado).IsRequired().HasDefaultValue(false);
-
-                entity.HasOne(el => el)
-                    .WithMany()
-                    .HasForeignKey(el => el.IdEquipo)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(el => el.Liga)
-                    .WithMany()
-                    .HasForeignKey(el => el.IdLiga)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasIndex(el => new { el.IdEquipo, el.IdLiga }).IsUnique();
-            });
-
+            
             // Configurar tabla de temporadas
             modelBuilder.Entity<Temporada>(entity =>
             {

@@ -163,40 +163,9 @@ namespace NFLFantasyAPI.Controllers
                 }
 
                 // Verificar que el usuario no esté ya en la liga
-                var yaEstaEnLiga = await _context.EquiposLigas
-                    .AnyAsync(el => el.IdLiga == dto.LigaId && el.IdEquipo == dto.EquipoId);
-
-                if (yaEstaEnLiga)
-                {
-                    return BadRequest(new ErrorResponseDto
-                    {
-                        Mensaje = "Ya estás en esta liga con este equipo"
-                    });
-                }
-
-                // Verificar que el alias sea único en la liga
-                var aliasExiste = await _context.EquiposLigas
-                    .AnyAsync(el => el.IdLiga == dto.LigaId && el.Alias == dto.Alias);
-
-                if (aliasExiste)
-                {
-                    return BadRequest(new ErrorResponseDto
-                    {
-                        Mensaje = "El alias ya está en uso en esta liga"
-                    });
-                }
-
-                // Crear la relación equipo-liga
-                var equipoLiga = new EquipoLiga
-                {
-                    IdEquipo = dto.EquipoId,
-                    IdLiga = dto.LigaId,
-                    Alias = dto.Alias,
-                    FechaUnion = DateTime.UtcNow,
-                    EsComisionado = false
-                };
-
-                _context.EquiposLigas.Add(equipoLiga);
+               
+               
+               
 
                 // Actualizar cupos ocupados
                 liga.CuposOcupados++;

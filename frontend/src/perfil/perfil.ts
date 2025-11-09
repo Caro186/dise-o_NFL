@@ -22,7 +22,7 @@ export class Perfil implements OnInit {
   errorLigas: string = '';
 
   constructor(
-    private authService: Authservice,
+    public authService: Authservice,  // ✅ Cambiado de private a public
     private equipoFantasyService: EquipoFantasyService,
     private ligaService: LigaService
   ) {}
@@ -100,5 +100,12 @@ export class Perfil implements OnInit {
       case 'Finalizada': return 'bg-secondary';
       default: return 'bg-secondary';
     }
+  }
+
+  /**
+   * Cierra la sesión del usuario
+   */
+  logout(): void {
+    this.authService.logout();
   }
 }

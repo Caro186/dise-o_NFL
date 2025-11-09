@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LigaService, LigaCreateDto, LigaResponseDto } from '../../services/liga.service';
+import { LigaService, LigaCreateDto } from '../../services/liga.service';
+import { EquipoFantasyService, EquipoFantasyResponseDto, EquipoFantasyCreateDto } from '../../services/equipo-fantasy.service';
 import { TemporadaService, TemporadaResponseDto } from '../../services/temporada.service';
 import { Authservice } from '../../services/authservice';
 
@@ -14,17 +15,28 @@ import { Authservice } from '../../services/authservice';
   styleUrls: ['./crear-liga.css']
 })
 export class CrearLiga implements OnInit {
+  // Datos de la liga
   nombreLiga: string = '';
   descripcion: string = '';
   password: string = '';
   confirmPassword: string = '';
   cuposTotales: number = 10;
   idTemporada: number = 0;
-  nombreEquipoComisionado: string = '';
   permitirDecimales: boolean = true;
   configPlayoffs: string = '4-equipos';
   
+  // Opciones para el equipo
+  opcionEquipo: 'existente' | 'nuevo' = 'existente';
+  equipoSeleccionadoId: number = 0;
+  
+  // Datos para crear equipo nuevo
+  nombreEquipoNuevo: string = '';
+  selectedFile: File | null = null;
+  imagenPreview: string | null = null;
+  
+  // Catálogos
   temporadas: TemporadaResponseDto[] = [];
+  equiposDisponibles: EquipoFantasyResponseDto[] = [];
   cantidadesEquipos: number[] = [4, 6, 8, 10, 12, 14, 16, 18, 20];
   opcionesPlayoffs = [
     { valor: '4-equipos', texto: '4 equipos (Top 4)' },
@@ -38,6 +50,7 @@ export class CrearLiga implements OnInit {
 
   constructor(
     private ligaService: LigaService,
+    private equipoFantasyService: EquipoFantasyService,
     private temporadaService: TemporadaService,
     private authService: Authservice,
     private router: Router
@@ -45,6 +58,7 @@ export class CrearLiga implements OnInit {
 
   ngOnInit(): void {
     this.cargarTemporadas();
+    this.cargarEquiposDisponibles();
   }
 
   /**
@@ -52,14 +66,14 @@ export class CrearLiga implements OnInit {
    */
   cargarTemporadas(): void {
     this.temporadaService.obtenerTemporadas().subscribe({
-      next: (temporadas: TemporadaResponseDto[]) => {
+      next: (temporadas) => {
         this.temporadas = temporadas;
-        const temporadaActual = temporadas.find((t: TemporadaResponseDto) => t.actual);
+        const temporadaActual = temporadas.find(t => t.actual);
         if (temporadaActual) {
           this.idTemporada = temporadaActual.id;
         }
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Error al cargar temporadas:', error);
         this.errorMessage = 'Error al cargar temporadas disponibles';
       }
@@ -67,85 +81,177 @@ export class CrearLiga implements OnInit {
   }
 
   /**
-   * Crea una nueva liga
+   * Carga equipos fantasy del usuario que NO están en ninguna liga
+   */
+  cargarEquiposDisponibles(): void {
+    const currentUser = this.authService.currentUserValue;
+    if (!currentUser) return;
+
+    this.equipoFantasyService.obtenerPorUsuario(currentUser.id).subscribe({
+      next: (equipos) => {
+        // Filtrar solo equipos sin liga
+        this.equiposDisponibles = equipos.filter(e => !e.ligaId);
+      },
+      error: (error) => {
+        console.error('Error al cargar equipos:', error);
+      }
+    });
+  }
+
+  /**
+   * Maneja la selección de archivo de imagen para equipo nuevo
+   */
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      
+      // Vista previa
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagenPreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  /**
+   * Crea la liga
    */
   onSubmit(): void {
     this.errorMessage = '';
     this.successMessage = '';
 
     // Validaciones
-    if (!this.nombreLiga.trim()) {
-      this.errorMessage = 'El nombre de la liga es obligatorio';
-      return;
-    }
-
-    if (!this.password.trim()) {
-      this.errorMessage = 'La contraseña es obligatoria';
-      return;
-    }
-
-    if (this.password.length < 8) {
-      this.errorMessage = 'La contraseña debe tener al menos 8 caracteres';
-      return;
-    }
-
-    if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden';
-      return;
-    }
-
-    if (!this.nombreEquipoComisionado.trim()) {
-      this.errorMessage = 'El nombre de tu equipo es obligatorio';
-      return;
-    }
-
-    if (!this.idTemporada) {
-      this.errorMessage = 'Debes seleccionar una temporada';
-      return;
-    }
-
-    const currentUser = this.authService.currentUserValue;
-    if (!currentUser) {
-      this.errorMessage = 'Debes iniciar sesión';
+    if (!this.validarFormulario()) {
       return;
     }
 
     this.isLoading = true;
+    const currentUser = this.authService.currentUserValue!;
 
-    const ligaData: LigaCreateDto = {
-      nombreLiga: this.nombreLiga.trim(),
-      descripcion: this.descripcion.trim() || undefined,
-      passwordHash: this.password,
-      idTemporada: this.idTemporada,
-      cuposTotales: this.cuposTotales,
-      comisionadoId: currentUser.id,
-      formatoPosiciones: JSON.stringify({ QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 1, K: 1, DEF: 1 }),
-      esquemaPuntos: JSON.stringify({ passingYd: 0.04, passingTD: 4, rushingYd: 0.1, rushingTD: 6 }),
-      configPlayoffs: this.configPlayoffs,
-      permitirDecimales: this.permitirDecimales
+    if (this.opcionEquipo === 'nuevo') {
+      // Primero crear el equipo nuevo
+      this.crearEquipoYLiga(currentUser.id);
+    } else {
+      // Usar equipo existente
+      this.crearLiga(currentUser.id, this.equipoSeleccionadoId);
+    }
+  }
+
+  /**
+   * Crea un equipo nuevo y luego la liga
+   */
+  private crearEquipoYLiga(usuarioId: number): void {
+    const equipoDto: EquipoFantasyCreateDto = {
+      nombre: this.nombreEquipoNuevo,
+      usuarioId: usuarioId,
+      ligaId: undefined // Sin liga por ahora
     };
 
-    this.ligaService.crear(ligaData).subscribe({
-      next: (response: LigaResponseDto) => {
-        this.successMessage = `Liga "${response.nombreLiga}" creada exitosamente`;
-        this.isLoading = false;
-        
-        setTimeout(() => {
-          this.router.navigate(['/mainpage/liga']);
-        }, 2000);
+    this.equipoFantasyService.crear(equipoDto).subscribe({
+      next: (equipoCreado) => {
+        // Si hay imagen, subirla
+        if (this.selectedFile) {
+          this.equipoFantasyService.subirImagen(equipoCreado.id, this.selectedFile).subscribe({
+            next: () => {
+              this.crearLiga(usuarioId, equipoCreado.id);
+            },
+            error: () => {
+              // Continuar aunque falle la imagen
+              this.crearLiga(usuarioId, equipoCreado.id);
+            }
+          });
+        } else {
+          this.crearLiga(usuarioId, equipoCreado.id);
+        }
       },
-      error: (error: any) => {
-        console.error('Error al crear liga:', error);
-        this.errorMessage = error.error?.mensaje || 'Error al crear la liga';
+      error: (error) => {
+        console.error('Error al crear equipo:', error);
         this.isLoading = false;
+        this.errorMessage = 'Error al crear el equipo. Inténtalo de nuevo.';
       }
     });
   }
 
   /**
-   * Cancela la creación
+   * Crea la liga con el equipo especificado
    */
-  onCancel(): void {
-    this.router.navigate(['/mainpage/liga']);
+  private crearLiga(usuarioId: number, equipoFantasyId: number): void {
+    const ligaDto: LigaCreateDto = {
+      nombreLiga: this.nombreLiga,
+      descripcion: this.descripcion,
+      passwordHash: this.password,
+      idTemporada: this.idTemporada,
+      cuposTotales: this.cuposTotales,
+      comisionadoId: usuarioId,
+      formatoPosiciones: 'QB,RB,RB,WR,WR,TE,FLEX,K,DEF',
+      esquemaPuntos: 'PPR',
+      configPlayoffs: this.configPlayoffs,
+      permitirDecimales: this.permitirDecimales
+    };
+
+    this.ligaService.crear(ligaDto).subscribe({
+      next: (ligaCreada) => {
+        this.isLoading = false;
+        this.successMessage = '¡Liga creada exitosamente!';
+        
+        // TODO: Vincular el equipo a la liga (necesita endpoint del backend)
+        // Por ahora redirigir después de 2 segundos
+        setTimeout(() => {
+          this.router.navigate(['/mainpage/ligas']);
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('Error al crear liga:', error);
+        this.isLoading = false;
+        
+        if (error.status === 400 && error.error?.mensaje) {
+          this.errorMessage = error.error.mensaje;
+        } else {
+          this.errorMessage = 'Error al crear la liga. Inténtalo de nuevo.';
+        }
+      }
+    });
+  }
+
+  /**
+   * Valida el formulario
+   */
+  private validarFormulario(): boolean {
+    if (!this.nombreLiga.trim()) {
+      this.errorMessage = 'El nombre de la liga es obligatorio';
+      return false;
+    }
+
+    if (!this.password.trim() || this.password.length < 8) {
+      this.errorMessage = 'La contraseña debe tener al menos 8 caracteres';
+      return false;
+    }
+
+    if (this.password !== this.confirmPassword) {
+      this.errorMessage = 'Las contraseñas no coinciden';
+      return false;
+    }
+
+    if (!this.idTemporada) {
+      this.errorMessage = 'Debes seleccionar una temporada';
+      return false;
+    }
+
+    // Validaciones según opción de equipo
+    if (this.opcionEquipo === 'existente') {
+      if (!this.equipoSeleccionadoId || this.equipoSeleccionadoId === 0) {
+        this.errorMessage = 'Debes seleccionar un equipo';
+        return false;
+      }
+    } else {
+      if (!this.nombreEquipoNuevo.trim()) {
+        this.errorMessage = 'El nombre del equipo es obligatorio';
+        return false;
+      }
+    }
+
+    return true;
   }
 }
