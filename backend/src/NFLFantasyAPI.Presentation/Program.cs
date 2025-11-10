@@ -200,7 +200,11 @@ namespace NFLFantasyAPI.Presentation
 
             app.UseStaticFiles();
 
-            app.UseHttpsRedirection();
+            // Solo usar redirección HTTPS en producción
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseCors(myAllowSpecificOrigins);
 

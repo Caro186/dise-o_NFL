@@ -49,5 +49,11 @@ namespace NFLFantasyAPI.Persistence.Repositories
         }
 
         public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
+
+        public Task UpdateAsync(EquipoFantasy equipo)
+        {
+            _context.EquiposFantasy.Update(equipo);
+            return Task.CompletedTask;
+        }
     }
 }

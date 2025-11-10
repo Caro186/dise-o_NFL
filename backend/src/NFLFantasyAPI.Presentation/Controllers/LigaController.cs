@@ -36,11 +36,27 @@ namespace NFLFantasyAPI.Presentation.Controllers
             return StatusCode(result.StatusCode, result.Data);
         }
 
+
+        [HttpGet("usuario/{usuarioId}")]
+        [ProducesResponseType(typeof(List<LigaResponseDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetLigasPorUsuario(int usuarioId){
+            var result = await _ligaService.GetByUsuarioAsync(usuarioId);
+            return StatusCode(result.StatusCode,result.Data);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] LigaCreateDto dto)
         {
             var result = await _ligaService.CreateAsync(dto);
             return StatusCode(result.StatusCode, result.Data);
+        }
+
+
+        [HttpPost("unirse")]
+        public async Task<ActionResult> UnirseLiga([FromBody] UnirseLigaDto dto){
+            var result = await _ligaService.UnirseLigaAsync(dto);
+            return StatusCode(result.StatusCode, result.Data);
+
         }
 
         [HttpPut("{id}")]

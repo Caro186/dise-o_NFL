@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NFLFantasyAPI.Persistence.Context;
 using NFLFantasyAPI.Persistence.Models;
+using NFLFantasyAPI.Persistence.Interfaces;
 
 namespace NFLFantasyAPI.Persistence.Repositories
 {

@@ -12,5 +12,6 @@ namespace NFLFantasyAPI.Persistence.Interfaces
         Task DeleteAsync(EquipoFantasy equipo);
         Task<bool> UsuarioExisteAsync(int usuarioId);
         Task SaveChangesAsync();
+        Task UpdateAsync(EquipoFantasy equipo);
     }
 }

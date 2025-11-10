@@ -2,7 +2,7 @@ using NFLFantasyAPI.Persistence.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace NFLFantasyAPI.Persistence.Repositories
+namespace NFLFantasyAPI.Persistence.Interfaces
 {
     public interface ILigaRepository
     {
