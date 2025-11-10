@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NFLFantasyAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251027220054_Sprint1_CompleteTables")]
-    partial class Sprint1_CompleteTables
+    [Migration("20251109230042_cambiarTemporada")]
+    partial class cambiarTemporada
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace NFLFantasyAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("NFLFantasyAPI.Models.Equipo", b =>
+            modelBuilder.Entity("NFLFantasyAPI.Models.EquipoFantasy", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -47,9 +47,8 @@ namespace NFLFantasyAPI.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<string>("Liga")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<int?>("LigaId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -61,12 +60,14 @@ namespace NFLFantasyAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LigaId");
+
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("equipos", (string)null);
+                    b.ToTable("equipos_fantasy", (string)null);
                 });
 
-            modelBuilder.Entity("NFLFantasyAPI.Models.EquipoLiga", b =>
+            modelBuilder.Entity("NFLFantasyAPI.Models.EquipoNFL", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,33 +75,36 @@ namespace NFLFantasyAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Alias")
+                    b.Property<string>("Ciudad")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<bool>("EsComisionado")
+                    b.Property<string>("Estado")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Activo");
 
-                    b.Property<DateTime>("FechaUnion")
+                    b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("IdEquipo")
-                        .HasColumnType("integer");
+                    b.Property<string>("ImagenUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
-                    b.Property<int>("IdLiga")
-                        .HasColumnType("integer");
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdLiga");
-
-                    b.HasIndex("IdEquipo", "IdLiga")
+                    b.HasIndex("Nombre")
                         .IsUnique();
 
-                    b.ToTable("equipos_ligas", (string)null);
+                    b.ToTable("equipos_nfl", (string)null);
                 });
 
             modelBuilder.Entity("NFLFantasyAPI.Models.Liga", b =>
@@ -111,7 +115,7 @@ namespace NFLFantasyAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdLiga"));
 
-                    b.Property<int?>("ComisionadoId")
+                    b.Property<int>("ComisionadoId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ConfigPlayoffs")
@@ -149,15 +153,9 @@ namespace NFLFantasyAPI.Migrations
                     b.Property<DateTime?>("FechaInicio")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("FechaLimiteIntercambios")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("FormatoPosiciones")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("IdComisionado")
-                        .HasColumnType("integer");
 
                     b.Property<int>("IdTemporada")
                         .HasColumnType("integer");
@@ -165,12 +163,6 @@ namespace NFLFantasyAPI.Migrations
                     b.Property<string>("ImagenUrl")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
-
-                    b.Property<int?>("LimiteMaximoCambios")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("LimiteMaximoContrataciones")
-                        .HasColumnType("integer");
 
                     b.Property<string>("NombreLiga")
                         .IsRequired()
@@ -187,20 +179,13 @@ namespace NFLFantasyAPI.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
-                    b.Property<int?>("TemporadaId")
-                        .HasColumnType("integer");
-
                     b.HasKey("IdLiga");
 
                     b.HasIndex("ComisionadoId");
 
-                    b.HasIndex("IdComisionado");
-
                     b.HasIndex("IdTemporada");
 
                     b.HasIndex("NombreLiga");
-
-                    b.HasIndex("TemporadaId");
 
                     b.ToTable("ligas", (string)null);
                 });
@@ -248,6 +233,13 @@ namespace NFLFantasyAPI.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Usuario");
 
                     b.Property<DateTime?>("UltimaActividad")
                         .HasColumnType("timestamp with time zone");
@@ -306,65 +298,47 @@ namespace NFLFantasyAPI.Migrations
                     b.Property<DateTime>("FechaInicio")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Nombre")
-                        .HasColumnType("integer");
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
                     b.ToTable("temporadas", (string)null);
                 });
 
-            modelBuilder.Entity("NFLFantasyAPI.Models.Equipo", b =>
+            modelBuilder.Entity("NFLFantasyAPI.Models.EquipoFantasy", b =>
                 {
+                    b.HasOne("NFLFantasyAPI.Models.Liga", "Liga")
+                        .WithMany()
+                        .HasForeignKey("LigaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("NFLFantasyAPI.Models.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("NFLFantasyAPI.Models.EquipoLiga", b =>
-                {
-                    b.HasOne("NFLFantasyAPI.Models.Equipo", "Equipo")
-                        .WithMany()
-                        .HasForeignKey("IdEquipo")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NFLFantasyAPI.Models.Liga", "Liga")
-                        .WithMany()
-                        .HasForeignKey("IdLiga")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Equipo");
 
                     b.Navigation("Liga");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("NFLFantasyAPI.Models.Liga", b =>
                 {
                     b.HasOne("NFLFantasyAPI.Models.Usuario", "Comisionado")
                         .WithMany()
-                        .HasForeignKey("ComisionadoId");
-
-                    b.HasOne("NFLFantasyAPI.Models.Usuario", null)
-                        .WithMany()
-                        .HasForeignKey("IdComisionado")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Temporada", null)
-                        .WithMany()
-                        .HasForeignKey("IdTemporada")
+                        .HasForeignKey("ComisionadoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Temporada", "Temporada")
                         .WithMany()
-                        .HasForeignKey("TemporadaId");
+                        .HasForeignKey("IdTemporada")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Comisionado");
 

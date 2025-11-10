@@ -7,18 +7,35 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NFLFantasyAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Sprint1_CompleteTables : Migration
+    public partial class cambiarTemporada : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "equipos_nfl",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nombre = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Ciudad = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ImagenUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Activo")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_equipos_nfl", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "temporadas",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nombre = table.Column<int>(type: "integer", nullable: false),
+                    Nombre = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     FechaInicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FechaCierre = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -43,7 +60,8 @@ namespace NFLFantasyAPI.Migrations
                     FechaUltimoIntentoFallido = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EstadoCuenta = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Activa"),
                     FechaBloqueo = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UltimaActividad = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    UltimaActividad = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Rol = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Usuario")
                 },
                 constraints: table =>
                 {
@@ -72,30 +90,6 @@ namespace NFLFantasyAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "equipos",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nombre = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    ImagenUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UsuarioId = table.Column<int>(type: "integer", nullable: false),
-                    Estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Activo"),
-                    Liga = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_equipos", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_equipos_usuarios_UsuarioId",
-                        column: x => x.UsuarioId,
-                        principalTable: "usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ligas",
                 columns: table => new
                 {
@@ -112,16 +106,11 @@ namespace NFLFantasyAPI.Migrations
                     FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FechaInicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     FechaFin = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    IdComisionado = table.Column<int>(type: "integer", nullable: false),
+                    ComisionadoId = table.Column<int>(type: "integer", nullable: false),
                     FormatoPosiciones = table.Column<string>(type: "text", nullable: false),
                     EsquemaPuntos = table.Column<string>(type: "text", nullable: false),
                     ConfigPlayoffs = table.Column<string>(type: "text", nullable: false),
-                    FechaLimiteIntercambios = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    LimiteMaximoCambios = table.Column<int>(type: "integer", nullable: true),
-                    LimiteMaximoContrataciones = table.Column<int>(type: "integer", nullable: true),
-                    PermitirDecimales = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    ComisionadoId = table.Column<int>(type: "integer", nullable: true),
-                    TemporadaId = table.Column<int>(type: "integer", nullable: true)
+                    PermitirDecimales = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -133,77 +122,63 @@ namespace NFLFantasyAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ligas_temporadas_TemporadaId",
-                        column: x => x.TemporadaId,
-                        principalTable: "temporadas",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_ligas_usuarios_ComisionadoId",
                         column: x => x.ComisionadoId,
-                        principalTable: "usuarios",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ligas_usuarios_IdComisionado",
-                        column: x => x.IdComisionado,
                         principalTable: "usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "equipos_ligas",
+                name: "equipos_fantasy",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    IdEquipo = table.Column<int>(type: "integer", nullable: false),
-                    IdLiga = table.Column<int>(type: "integer", nullable: false),
-                    Alias = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    FechaUnion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EsComisionado = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                    Nombre = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    UsuarioId = table.Column<int>(type: "integer", nullable: false),
+                    LigaId = table.Column<int>(type: "integer", nullable: true),
+                    ImagenUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Activo")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_equipos_ligas", x => x.Id);
+                    table.PrimaryKey("PK_equipos_fantasy", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_equipos_ligas_equipos_IdEquipo",
-                        column: x => x.IdEquipo,
-                        principalTable: "equipos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_equipos_ligas_ligas_IdLiga",
-                        column: x => x.IdLiga,
+                        name: "FK_equipos_fantasy_ligas_LigaId",
+                        column: x => x.LigaId,
                         principalTable: "ligas",
                         principalColumn: "IdLiga",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_equipos_fantasy_usuarios_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "usuarios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_equipos_UsuarioId",
-                table: "equipos",
+                name: "IX_equipos_fantasy_LigaId",
+                table: "equipos_fantasy",
+                column: "LigaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_equipos_fantasy_UsuarioId",
+                table: "equipos_fantasy",
                 column: "UsuarioId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_equipos_ligas_IdEquipo_IdLiga",
-                table: "equipos_ligas",
-                columns: new[] { "IdEquipo", "IdLiga" },
+                name: "IX_equipos_nfl_Nombre",
+                table: "equipos_nfl",
+                column: "Nombre",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_equipos_ligas_IdLiga",
-                table: "equipos_ligas",
-                column: "IdLiga");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ligas_ComisionadoId",
                 table: "ligas",
                 column: "ComisionadoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ligas_IdComisionado",
-                table: "ligas",
-                column: "IdComisionado");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ligas_IdTemporada",
@@ -214,11 +189,6 @@ namespace NFLFantasyAPI.Migrations
                 name: "IX_ligas_NombreLiga",
                 table: "ligas",
                 column: "NombreLiga");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ligas_TemporadaId",
-                table: "ligas",
-                column: "TemporadaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_semanas_TemporadaId",
@@ -236,13 +206,13 @@ namespace NFLFantasyAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "equipos_ligas");
+                name: "equipos_fantasy");
+
+            migrationBuilder.DropTable(
+                name: "equipos_nfl");
 
             migrationBuilder.DropTable(
                 name: "semanas");
-
-            migrationBuilder.DropTable(
-                name: "equipos");
 
             migrationBuilder.DropTable(
                 name: "ligas");
