@@ -95,8 +95,13 @@
       </a>
 
       <a routerLink="/mainpage/jugadores" routerLinkActive="active" class="nav-item">
-        <i class="bi bi-calendar3"></i>
+        <i class="bi bi-person-badge"></i>
         <span *ngIf="!menuCollapsed">Jugadores</span>
+      </a>
+
+      <a routerLink="/mainpage/jugadores/batch-upload" routerLinkActive="active" class="nav-item">
+         <i class="bi bi-people"></i>
+        <span *ngIf="!menuCollapsed">Batch Jugadores</span>
       </a>
     </div>
   </nav>

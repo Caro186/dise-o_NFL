@@ -14,6 +14,7 @@ import { EquiposNFLFormComponent } from '../mainpage/equipos-nfl-form/equipos-nf
 import { authGuard } from '../guards/auth.guard';
 import { adminGuard } from '../guards/admin.guard';
 import { JugadoresComponent } from '../mainpage/jugadores/jugadores.component';
+import { JugadorBatchUpload } from '../mainpage/jugador-batch-upload/jugador-batch-upload';
 
 export const routes: Routes = [
     // ===== Rutas públicas =====
@@ -61,7 +62,15 @@ export const routes: Routes = [
 
                 path:'jugadores',
                 component: JugadoresComponent,
+                canActivate: [adminGuard]
+            
                 
+            },
+            {
+
+                path:'jugadores/batch-upload',
+                component: JugadorBatchUpload,
+                canActivate: [adminGuard]
             }
 
         ]

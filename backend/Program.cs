@@ -48,13 +48,20 @@ builder.Services.Configure<FileServerSettings>(
     builder.Configuration.GetSection("FileServer"));
 
 // ==========================================
-// CONFIGURACIÓN JWT CORREGIDA
+// CONFIGURACIÓN JWT - CORREGIDA
 // ==========================================
+// 1. Registrar JwtSettings en el contenedor de dependencias
+builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection("JwtSettings"));
+
+// 2. Leer configuración para autenticación
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["Secret"];  // ← CAMBIADO: Ahora usa "Secret" no "SecretKey"
+var secretKey = jwtSettings["Secret"];
 
 if (!string.IsNullOrEmpty(secretKey))
 {
+    Log.Information("Configurando autenticación JWT...");
+    
     builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -76,6 +83,11 @@ if (!string.IsNullOrEmpty(secretKey))
     });
 
     builder.Services.AddAuthorization();
+    Log.Information("Autenticación JWT configurada correctamente");
+}
+else
+{
+    Log.Warning("JWT Secret no configurado. Autenticación deshabilitada.");
 }
 // ==========================================
 

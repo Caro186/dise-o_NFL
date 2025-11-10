@@ -47,6 +47,48 @@ export interface EquipoNFL {
   estado: string;
 }
 
+
+
+// ============ INTERFACES PARA BATCH ============
+export interface JugadorBatchItemDto {
+  id: number;
+  nombre: string;
+  posicion: string;
+  equipoNFLId: number;
+  imagenUrl?: string;
+}
+
+export interface JugadorBatchRequestDto {
+  jugadores: JugadorBatchItemDto[];
+}
+
+export interface JugadorBatchResultDto {
+  exito: boolean;
+  mensaje: string;
+  totalProcesados: number;
+  totalExitosos: number;
+  totalErrores: number;
+  errores: JugadorBatchErrorDto[];
+  jugadoresCreados: JugadorCreatedDto[];
+  archivoMovidoA: string;
+}
+
+export interface JugadorBatchErrorDto {
+  id?: number;
+  nombre?: string;
+  error: string;
+}
+
+export interface JugadorCreatedDto {
+  id: number;
+  nombre: string;
+  posicion: string;
+  nombreEquipoNFL: string;
+}
+
+
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -223,4 +265,20 @@ export class JugadorService {
     console.error('Error completo:', error);
     return throwError(() => new Error(errorMessage));
   }
+
+  // ============ AGREGAR ESTE MÉTODO A LA CLASE JugadorService ============
+  /**
+   * Crear jugadores en lote desde archivo JSON
+   */
+  crearJugadoresBatch(archivo: File): Observable<JugadorBatchResultDto> {
+    const formData = new FormData();
+    formData.append('file', archivo, archivo.name);
+
+    return this.http.post<JugadorBatchResultDto>(`${this.apiUrl}/batch`, formData).pipe(
+      tap(response => console.log('Batch procesado:', response)),
+      catchError(this.handleError)
+    );
+  }
+
+  
 }
