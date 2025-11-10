@@ -68,7 +68,7 @@ namespace NFLFantasyAPI.Logic.Service
 
             _logger.LogInformation("Temporada creada: {Nombre}", temporada.Nombre);
 
-            return ServiceResult.Ok(new TemporadaResponseDto
+            var response = new TemporadaResponseDto
             {
                 Id = temporada.Id,
                 Nombre = temporada.Nombre,
@@ -76,7 +76,9 @@ namespace NFLFantasyAPI.Logic.Service
                 FechaCierre = temporada.FechaCierre,
                 FechaCreacion = temporada.FechaCreacion,
                 Actual = temporada.Actual
-            });
+            };
+
+            return ServiceResult.Ok(response);
         }
 
         public async Task<ServiceResult> ObtenerTemporadasAsync()
