@@ -3,54 +3,22 @@ using NFLFantasyAPI.Persistence.Models;
 
 namespace NFLFantasyAPI.Persistence.Context
 {
-    /// <summary>
-    /// Contexto de base de datos para la aplicación Fantasy NFL
-    /// </summary>
     public class ApplicationDbContext : DbContext
     {
-        /// <summary>
-        /// Constructor que recibe las opciones de configuración del contexto
-        /// </summary>
-        /// <param name="options">Opciones de configuración del DbContext</param>
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        /// <summary>
-        /// Colección de usuarios en la base de datos
-        /// </summary>
+        // DbSets
         public DbSet<Usuario> Usuarios { get; set; }
-
-        /// <summary>
-        /// Colección de equipos en la base de datos
-        /// </summary>
-        public DbSet<Equipo> Equipos { get; set; }
-
-        /// <summary>
-        /// Colección de ligas en la base de datos
-        /// </summary>
+        public DbSet<EquipoNFL> EquiposNFL { get; set; }
+        public DbSet<EquipoFantasy> EquiposFantasy { get; set; }
         public DbSet<Liga> Ligas { get; set; }
-
-        /// <summary>
-        /// Colección de temporadas en la base de datos
-        /// </summary>
         public DbSet<Temporada> Temporadas { get; set; }
-
-        /// <summary>
-        /// Colección de semanas en la base de datos
-        /// </summary>
         public DbSet<Semana> Semanas { get; set; }
+        public DbSet<Jugador> Jugadores { get; set; }  // NUEVO
 
-        /// <summary>
-        /// Colección de relaciones equipo-liga en la base de datos
-        /// </summary>
-        public DbSet<EquipoLiga> EquiposLigas { get; set; }
-
-        /// <summary>
-        /// Configuración adicional del modelo de datos
-        /// </summary>
-        /// <param name="modelBuilder">Constructor del modelo</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -70,26 +38,43 @@ namespace NFLFantasyAPI.Persistence.Context
                 entity.Property(u => u.EstadoCuenta).IsRequired().HasMaxLength(20).HasDefaultValue("Activa");
                 entity.Property(u => u.FechaBloqueo).IsRequired(false);
                 entity.Property(u => u.UltimaActividad).IsRequired(false);
+                entity.Property(u => u.Rol).IsRequired().HasMaxLength(20).HasDefaultValue("Usuario");
             });
 
-            // Configurar tabla de equipos
-            modelBuilder.Entity<Equipo>(entity =>
+            // Configurar tabla de equipos NFL
+            modelBuilder.Entity<EquipoNFL>(entity =>
             {
-                entity.ToTable("equipos");
+                entity.ToTable("equipos_nfl");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Ciudad).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.ImagenUrl).HasMaxLength(500);
-                entity.Property(e => e.FechaCreacion).IsRequired();
                 entity.Property(e => e.Estado).IsRequired().HasMaxLength(20).HasDefaultValue("Activo");
-                entity.Property(e => e.Liga).HasMaxLength(50);
+                entity.Property(e => e.FechaCreacion).IsRequired();
+                entity.HasIndex(e => e.Nombre).IsUnique();
+            });
 
-                // Relación con Usuario
+            // Configurar tabla de equipos Fantasy
+            modelBuilder.Entity<EquipoFantasy>(entity =>
+            {
+                entity.ToTable("equipos_fantasy");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.UsuarioId).IsRequired();
+                entity.Property(e => e.ImagenUrl).HasMaxLength(500);
+                entity.Property(e => e.Estado).IsRequired().HasMaxLength(20).HasDefaultValue("Activo");
+                entity.Property(e => e.FechaCreacion).IsRequired();
+
                 entity.HasOne(e => e.Usuario)
                     .WithMany()
                     .HasForeignKey(e => e.UsuarioId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Restrict);
 
-                // Índice para mejorar búsquedas por usuario
+                entity.HasOne(e => e.Liga)
+                    .WithMany()
+                    .HasForeignKey(e => e.LigaId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
                 entity.HasIndex(e => e.UsuarioId);
             });
 
@@ -106,59 +91,26 @@ namespace NFLFantasyAPI.Persistence.Context
                 entity.Property(l => l.CuposTotales).IsRequired();
                 entity.Property(l => l.CuposOcupados).HasDefaultValue(1);
                 entity.Property(l => l.FechaCreacion).IsRequired();
-                entity.Property(l => l.IdComisionado).IsRequired();
+                entity.Property(l => l.ComisionadoId).IsRequired();
                 entity.Property(l => l.FormatoPosiciones).IsRequired();
                 entity.Property(l => l.EsquemaPuntos).IsRequired();
                 entity.Property(l => l.ConfigPlayoffs).IsRequired();
                 entity.Property(l => l.PermitirDecimales).HasDefaultValue(true);
 
-                // Relación con Usuario (comisionado)
-                entity.HasOne<Usuario>()
+                entity.HasOne(l => l.Comisionado)
                     .WithMany()
-                    .HasForeignKey(l => l.IdComisionado)
+                    .HasForeignKey(l => l.ComisionadoId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Relación con Temporada
-                entity.HasOne<Temporada>()
+                entity.HasOne(l => l.Temporada)
                     .WithMany()
                     .HasForeignKey(l => l.IdTemporada)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Índice para búsquedas por nombre
                 entity.HasIndex(l => l.NombreLiga);
             });
 
-            // Configurar tabla de equipo-liga
-            modelBuilder.Entity<EquipoLiga>(entity =>
-            {
-                entity.ToTable("equipos_ligas");
-                entity.HasKey(el => el.Id);
-                entity.Property(el => el.IdEquipo).IsRequired();
-                entity.Property(el => el.IdLiga).IsRequired();
-                entity.Property(el => el.Alias).IsRequired().HasMaxLength(50);
-                entity.Property(el => el.FechaUnion).IsRequired();
-                entity.Property(el => el.EsComisionado).HasDefaultValue(false);
-
-                // Relación con Equipo
-                entity.HasOne(el => el.Equipo)
-                    .WithMany()
-                    .HasForeignKey(el => el.IdEquipo)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // Relación con Liga
-                entity.HasOne(el => el.Liga)
-                    .WithMany()
-                    .HasForeignKey(el => el.IdLiga)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // Índice único para evitar que un equipo se una dos veces a la misma liga
-                entity.HasIndex(el => new { el.IdEquipo, el.IdLiga }).IsUnique();
-
-                // Índice para búsquedas por liga
-                entity.HasIndex(el => el.IdLiga);
-            });
-
-            // Configuración de Temporada
+            // Configurar tabla de temporadas
             modelBuilder.Entity<Temporada>(entity =>
             {
                 entity.ToTable("temporadas");
@@ -168,22 +120,50 @@ namespace NFLFantasyAPI.Persistence.Context
                 entity.Property(t => t.FechaCierre).IsRequired();
                 entity.Property(t => t.FechaCreacion).IsRequired();
                 entity.Property(t => t.Actual).HasDefaultValue(false);
-
-                // Relación uno a muchos con Semana
-                entity.HasMany(t => t.Semanas)
-                      .WithOne(s => s.Temporada)
-                      .HasForeignKey(s => s.TemporadaId)
-                      .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuración de Semana
+            // Configurar tabla de semanas
             modelBuilder.Entity<Semana>(entity =>
             {
                 entity.ToTable("semanas");
                 entity.HasKey(s => s.Id);
+                entity.Property(s => s.TemporadaId).IsRequired();
                 entity.Property(s => s.FechaInicio).IsRequired();
                 entity.Property(s => s.FechaFin).IsRequired();
-                entity.Property(s => s.TemporadaId).IsRequired();
+
+                entity.HasOne(s => s.Temporada)
+                    .WithMany(t => t.Semanas)
+                    .HasForeignKey(s => s.TemporadaId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(s => s.TemporadaId);
+            });
+
+            // NUEVA CONFIGURACIÓN: Tabla de jugadores
+            modelBuilder.Entity<Jugador>(entity =>
+            {
+                entity.ToTable("jugadores");
+                entity.HasKey(j => j.Id);
+                entity.Property(j => j.Nombre).IsRequired().HasMaxLength(100);
+                entity.Property(j => j.Posicion).IsRequired().HasMaxLength(50);
+                entity.Property(j => j.EquipoNFLId).IsRequired();
+                entity.Property(j => j.ImagenUrl).HasMaxLength(500);
+                entity.Property(j => j.ThumbnailUrl).HasMaxLength(500);
+                entity.Property(j => j.Estado).IsRequired().HasMaxLength(20).HasDefaultValue("Activo");
+                entity.Property(j => j.FechaCreacion).IsRequired();
+                entity.Property(j => j.FechaActualizacion).IsRequired(false);
+
+                // Relación con EquipoNFL
+                entity.HasOne(j => j.EquipoNFL)
+                    .WithMany()
+                    .HasForeignKey(j => j.EquipoNFLId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Índices
+                entity.HasIndex(j => j.EquipoNFLId);
+                entity.HasIndex(j => new { j.Nombre, j.EquipoNFLId }).IsUnique();
+                entity.HasIndex(j => j.Posicion);
+                entity.HasIndex(j => j.Estado);
             });
         }
     }

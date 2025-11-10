@@ -710,11 +710,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.Persistence/NFLFantasyAPI.Persistence.csproj",
+      "projectUniqueName": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/NFLFantasyAPI.Persistence.csproj",
       "projectName": "NFLFantasyAPI.Persistence",
-      "projectPath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.Persistence/NFLFantasyAPI.Persistence.csproj",
+      "projectPath": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/NFLFantasyAPI.Persistence.csproj",
       "packagesPath": "/home/jaam/.nuget/packages/",
-      "outputPath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.Persistence/obj/",
+      "outputPath": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/jaam/.nuget/NuGet/NuGet.Config"
@@ -729,8 +729,8 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj": {
-              "projectPath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj"
+            "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj": {
+              "projectPath": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj"
             }
           }
         }

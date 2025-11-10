@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "B9ebwOpRjOs=",
+  "dgSpecHash": "5vyZlkgdEOE=",
   "success": true,
-  "projectFilePath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.Persistence/NFLFantasyAPI.Persistence.csproj",
+  "projectFilePath": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/NFLFantasyAPI.Persistence.csproj",
   "expectedPackageFiles": [
     "/home/jaam/.nuget/packages/microsoft.entityframeworkcore/9.0.10/microsoft.entityframeworkcore.9.0.10.nupkg.sha512",
     "/home/jaam/.nuget/packages/microsoft.entityframeworkcore.abstractions/9.0.10/microsoft.entityframeworkcore.abstractions.9.0.10.nupkg.sha512",

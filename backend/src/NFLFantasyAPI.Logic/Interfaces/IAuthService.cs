@@ -1,4 +1,5 @@
 using NFLFantasyAPI.Logic.DTOs;
+using NFLFantasyAPI.CrossCutting;
 
 namespace NFLFantasyAPI.Logic.Interfaces
 {
@@ -12,3 +13,6 @@ namespace NFLFantasyAPI.Logic.Interfaces
         Task<ServiceResult> DeleteUsuarioAsync(int id);
     }
 }
+
+
+

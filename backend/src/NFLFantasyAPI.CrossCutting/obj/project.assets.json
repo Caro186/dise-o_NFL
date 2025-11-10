@@ -112,11 +112,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj",
+      "projectUniqueName": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj",
       "projectName": "NFLFantasyAPI.CrossCutting",
-      "projectPath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj",
+      "projectPath": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.CrossCutting/NFLFantasyAPI.CrossCutting.csproj",
       "packagesPath": "/home/jaam/.nuget/packages/",
-      "outputPath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.CrossCutting/obj/",
+      "outputPath": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.CrossCutting/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/jaam/.nuget/NuGet/NuGet.Config"

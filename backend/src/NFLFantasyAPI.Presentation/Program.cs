@@ -7,6 +7,7 @@ using NFLFantasyAPI.Logic.DbContextProvider;
 using NFLFantasyAPI.Logic.Interfaces;
 using NFLFantasyAPI.Logic.Services;
 using NFLFantasyAPI.CrossCutting.Interface;
+using NFLFantasyAPI.CrossCutting.Configuration;
 using System.Text;
 
 
@@ -17,6 +18,12 @@ namespace NFLFantasyAPI.Presentation
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Configurar JwtSettings
+            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
+            // Configurar FileServer settings
+            builder.Services.Configure<FileServerSettings>(builder.Configuration.GetSection("FileServer"));
 
             // Configurar Serilog para logging
             Log.Logger = new LoggerConfiguration()

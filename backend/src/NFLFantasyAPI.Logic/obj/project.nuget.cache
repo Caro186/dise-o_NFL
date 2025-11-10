@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "E6l2dlzw2u4=",
+  "dgSpecHash": "UGYIc4IQp8s=",
   "success": true,
-  "projectFilePath": "/home/jaam/Documents/Angular/dise-o_NFL.git/JoseArroyo-Reestructuracion/backend/src/NFLFantasyAPI.Logic/NFLFantasyAPI.Logic.csproj",
+  "projectFilePath": "/home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Logic/NFLFantasyAPI.Logic.csproj",
   "expectedPackageFiles": [
     "/home/jaam/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/home/jaam/.nuget/packages/microsoft.entityframeworkcore/9.0.10/microsoft.entityframeworkcore.9.0.10.nupkg.sha512",

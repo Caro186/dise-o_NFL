@@ -12,8 +12,8 @@ namespace NFLFantasyAPI.Persistence.Models
         public int Id { get; set; }  // Identificador único autogenerado
 
         [Required]
-        [StringLength(100, ErrorMessage = "El nombre no puede tener más de 100 caracteres.")]
-        public string Nombre { get; set; } = null!;
+        [MaxLength(100)]
+        public string Nombre { get; set; }
 
         [Required]
         public DateTime FechaInicio { get; set; }

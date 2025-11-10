@@ -6,10 +6,11 @@ namespace NFLFantasyAPI.Persistence.Interfaces
     {
         Task<Usuario?> GetByEmailAsync(string email);
         Task<Usuario?> GetByIdAsync(int id);
-        Task<bool> ExistsByEmailAsync(string email);
-        Task<IEnumerable<Usuario>> GetAllAsync();
+        Task<List<Usuario>> GetAllAsync();
         Task AddAsync(Usuario usuario);
-        void Remove(Usuario usuario);
+        Task UpdateAsync(Usuario usuario);
+        Task DeleteAsync(Usuario usuario);
+        Task<bool> ExistsByEmailAsync(string email);
         Task SaveChangesAsync();
     }
 }

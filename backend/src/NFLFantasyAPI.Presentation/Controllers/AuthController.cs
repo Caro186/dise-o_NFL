@@ -1,40 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
-using NFLFantasyAPI.Logic.DTOs;
 using NFLFantasyAPI.Logic.Interfaces;
-using Microsoft.Extensions.Logging;
+using NFLFantasyAPI.Logic.DTOs;
 
-namespace NFLFantasyAPI.Presentation.Controllers
+namespace NFLFantasyAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly ILogger<AuthController> _logger;
-
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
-        {
-            _authService = authService;
-            _logger = logger;
-        }
+        public AuthController(IAuthService authService) => _authService = authService;
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegistroDto registroDto)
+        public async Task<IActionResult> Register([FromBody] RegistroDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _authService.RegisterAsync(registroDto);
+            var result = await _authService.RegisterAsync(dto);
             return StatusCode(result.StatusCode, result.Data);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _authService.LoginAsync(loginDto);
+            var result = await _authService.LoginAsync(dto);
             return StatusCode(result.StatusCode, result.Data);
         }
 

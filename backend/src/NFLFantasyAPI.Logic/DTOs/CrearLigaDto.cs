@@ -25,7 +25,7 @@ namespace NFLFantasyAPI.Logic.DTOs
         /// </summary>
         [Required(ErrorMessage = "La contraseña es obligatoria")]
         [StringLength(12, MinimumLength = 8, ErrorMessage = "La contraseña debe tener entre 8 y 12 caracteres")]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]{8,12}$", 
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]{8,12}$",
             ErrorMessage = "La contraseña debe ser alfanumérica con al menos una mayúscula y una minúscula")]
         public string Password { get; set; } = string.Empty;
 
@@ -60,5 +60,5 @@ namespace NFLFantasyAPI.Logic.DTOs
     /// <summary>
     /// DTO para la respuesta de creación de liga
     /// </summary>
-    
+
 }

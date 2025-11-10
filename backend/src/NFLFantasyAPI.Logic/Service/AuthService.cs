@@ -1,172 +1,251 @@
-using NFLFantasyAPI.Logic.Interfaces;
-using NFLFantasyAPI.Logic.DTOs;
-using NFLFantasyAPI.Persistence.Interfaces;
-using NFLFantasyAPI.Persistence.Models;
 using Microsoft.Extensions.Logging;
-using BCrypt.Net;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.CrossCutting;
+using NFLFantasyAPI.Persistence.Interfaces;
+using NFLFantasyAPI.Logic.DTOs;
+using NFLFantasyAPI.Persistence.Models;
+using NFLFantasyAPI.CrossCutting.Configuration;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
-namespace NFLFantasyAPI.Logic.Service
+namespace NFLFantasyAPI.Application.Services
 {
     public class AuthService : IAuthService
     {
         private readonly IUsuarioRepository _usuarioRepo;
-        private readonly IJwtService _jwtService;
         private readonly ILogger<AuthService> _logger;
+        private readonly JwtSettings _jwtSettings;
 
-        public AuthService(IUsuarioRepository usuarioRepo, IJwtService jwtService, ILogger<AuthService> logger)
+        public AuthService(
+            IUsuarioRepository usuarioRepo,
+            ILogger<AuthService> logger,
+            IOptions<JwtSettings> jwtSettings)
         {
             _usuarioRepo = usuarioRepo;
-            _jwtService = jwtService;
             _logger = logger;
+            _jwtSettings = jwtSettings.Value;
         }
 
         public async Task<ServiceResult> RegisterAsync(RegistroDto dto)
         {
-            if (await _usuarioRepo.ExistsByEmailAsync(dto.Email))
-                return ServiceResult.BadRequest("El email ya está registrado");
-
-            var usuario = new Usuario
+            try
             {
-                Email = dto.Email,
-                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                NombreCompleto = dto.NombreCompleto,
-                FechaRegistro = DateTime.UtcNow,
-                EstadoCuenta = "Activa"
-            };
+                if (await _usuarioRepo.ExistsByEmailAsync(dto.Email))
+                    return ServiceResult.BadRequest("El email ya está registrado");
 
-            await _usuarioRepo.AddAsync(usuario);
-            await _usuarioRepo.SaveChangesAsync();
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
-            _logger.LogInformation("Usuario registrado: {Email}", usuario.Email);
+                var usuario = new Usuario
+                {
+                    Email = dto.Email,
+                    Password = passwordHash,
+                    NombreCompleto = dto.NombreCompleto,
+                    FechaRegistro = DateTime.UtcNow,
+                    EstadoCuenta = "Activa",
+                    IntentosFailidos = 0,
+                    Rol = "Usuario"
+                };
 
-            return ServiceResult.Ok(new UsuarioResponseDto
+                await _usuarioRepo.AddAsync(usuario);
+                await _usuarioRepo.SaveChangesAsync();
+
+                return ServiceResult.Ok(new
+                {
+                    mensaje = "Usuario registrado exitosamente",
+                    usuario = new UsuarioDto
+                    {
+                        Id = usuario.Id,
+                        Email = usuario.Email,
+                        NombreCompleto = usuario.NombreCompleto,
+                        FechaRegistro = usuario.FechaRegistro,
+                        Rol = usuario.Rol
+                    }
+                });
+            }
+            catch (Exception ex)
             {
-                Id = usuario.Id,
-                Email = usuario.Email,
-                NombreCompleto = usuario.NombreCompleto,
-                FechaRegistro = usuario.FechaRegistro
-            });
+                _logger.LogError(ex, "Error al registrar usuario");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
         public async Task<ServiceResult> LoginAsync(LoginDto dto)
         {
-            var usuario = await _usuarioRepo.GetByEmailAsync(dto.Email);
-
-            if (usuario == null)
+            try
             {
-                _logger.LogWarning("Login fallido: usuario no encontrado {Email}", dto.Email);
-                return ServiceResult.BadRequest("Email o contraseña incorrectos");
-            }
+                var usuario = await _usuarioRepo.GetByEmailAsync(dto.Email);
+                if (usuario == null)
+                    return ServiceResult.BadRequest("Credenciales inválidas");
 
-            if (usuario.EstadoCuenta == "Bloqueada")
-                return ServiceResult.BadRequest("Tu cuenta está bloqueada. Contacta al administrador.");
+                if (usuario.EstadoCuenta != "Activa")
+                    return ServiceResult.BadRequest("Cuenta bloqueada. Contacta al administrador.");
 
-            if (!BCrypt.Net.BCrypt.Verify(dto.Password, usuario.Password))
-            {
-                usuario.IntentosFailidos++;
-                usuario.FechaUltimoIntentoFallido = DateTime.UtcNow;
+                bool passwordValido = BCrypt.Net.BCrypt.Verify(dto.Password, usuario.Password);
 
-                if (usuario.IntentosFailidos >= 5)
+                if (!passwordValido)
                 {
-                    usuario.EstadoCuenta = "Bloqueada";
-                    usuario.FechaBloqueo = DateTime.UtcNow;
-                    _logger.LogWarning("Cuenta bloqueada: {Email}", usuario.Email);
+                    usuario.IntentosFailidos++;
+                    usuario.FechaUltimoIntentoFallido = DateTime.UtcNow;
+
+                    if (usuario.IntentosFailidos >= 5)
+                    {
+                        usuario.EstadoCuenta = "Bloqueada";
+                        usuario.FechaBloqueo = DateTime.UtcNow;
+                    }
+
+                    await _usuarioRepo.UpdateAsync(usuario);
+                    await _usuarioRepo.SaveChangesAsync();
+
+                    return ServiceResult.BadRequest("Credenciales inválidas");
                 }
 
+                usuario.IntentosFailidos = 0;
+                usuario.FechaUltimoIntentoFallido = null;
+                usuario.UltimaActividad = DateTime.UtcNow;
+                await _usuarioRepo.UpdateAsync(usuario);
                 await _usuarioRepo.SaveChangesAsync();
-                return ServiceResult.BadRequest("Email o contraseña incorrectos");
+
+                var token = GenerateJwtToken(usuario);
+                var expiracion = DateTime.UtcNow.AddHours(12);
+
+                return ServiceResult.Ok(new LoginResponseDto
+                {
+                    Status = "ok",
+                    Token = token,
+                    TokenExpiracion = expiracion.ToString("o"),
+                    Usuario = new UsuarioDto
+                    {
+                        Id = usuario.Id,
+                        Email = usuario.Email,
+                        NombreCompleto = usuario.NombreCompleto,
+                        FechaRegistro = usuario.FechaRegistro,
+                        Rol = usuario.Rol
+                    }
+                });
             }
-
-            // Éxito
-            usuario.IntentosFailidos = 0;
-            usuario.FechaUltimoIntentoFallido = null;
-            usuario.UltimaActividad = DateTime.UtcNow;
-            await _usuarioRepo.SaveChangesAsync();
-
-            var token = _jwtService.GenerateToken(usuario);
-            var tokenExpiracion = DateTime.UtcNow.AddHours(12);
-
-            _logger.LogInformation("Login exitoso: {Email}", usuario.Email);
-
-            return ServiceResult.Ok(new LoginResponseDto
+            catch (Exception ex)
             {
-                Status = "ok",
-                Usuario = new UsuarioResponseDto
+                _logger.LogError(ex, "Error en login");
+                return ServiceResult.Error("Error interno del servidor");
+            }
+        }
+
+        public async Task<ServiceResult> DesbloquearCuentaAsync(string email)
+        {
+            try
+            {
+                var usuario = await _usuarioRepo.GetByEmailAsync(email);
+                if (usuario == null)
+                    return ServiceResult.BadRequest("Usuario no encontrado");
+
+                usuario.EstadoCuenta = "Activa";
+                usuario.IntentosFailidos = 0;
+                usuario.FechaUltimoIntentoFallido = null;
+                usuario.FechaBloqueo = null;
+                await _usuarioRepo.UpdateAsync(usuario);
+                await _usuarioRepo.SaveChangesAsync();
+
+                return ServiceResult.Ok(new { mensaje = "Cuenta desbloqueada exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al desbloquear cuenta");
+                return ServiceResult.Error("Error interno del servidor");
+            }
+        }
+
+        public async Task<ServiceResult> GetUsuariosAsync()
+        {
+            try
+            {
+                var usuarios = await _usuarioRepo.GetAllAsync();
+                var data = usuarios.Select(u => new UsuarioResponseDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    NombreCompleto = u.NombreCompleto,
+                    FechaRegistro = u.FechaRegistro
+                }).ToList();
+
+                return ServiceResult.Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener usuarios");
+                return ServiceResult.Error("Error interno del servidor");
+            }
+        }
+
+        public async Task<ServiceResult> GetUsuarioAsync(int id)
+        {
+            try
+            {
+                var usuario = await _usuarioRepo.GetByIdAsync(id);
+                if (usuario == null)
+                    return ServiceResult.BadRequest("Usuario no encontrado");
+
+                var data = new UsuarioResponseDto
                 {
                     Id = usuario.Id,
                     Email = usuario.Email,
                     NombreCompleto = usuario.NombreCompleto,
                     FechaRegistro = usuario.FechaRegistro
-                },
-                Token = token,
-                TokenExpiracion = tokenExpiracion
-            });
-        }
+                };
 
-        public async Task<ServiceResult> DesbloquearCuentaAsync(string email)
-        {
-            var usuario = await _usuarioRepo.GetByEmailAsync(email);
-
-            if (usuario == null)
-                return ServiceResult.BadRequest("Usuario no encontrado");
-
-            usuario.EstadoCuenta = "Activa";
-            usuario.IntentosFailidos = 0;
-            usuario.FechaUltimoIntentoFallido = null;
-            usuario.FechaBloqueo = null;
-
-            await _usuarioRepo.SaveChangesAsync();
-
-            _logger.LogInformation("Cuenta desbloqueada: {Email}", email);
-            return ServiceResult.Ok("Cuenta desbloqueada exitosamente");
-        }
-
-        public async Task<ServiceResult> GetUsuariosAsync()
-        {
-            var usuarios = await _usuarioRepo.GetAllAsync();
-
-            var lista = usuarios.Select(u => new UsuarioResponseDto
+                return ServiceResult.Ok(data);
+            }
+            catch (Exception ex)
             {
-                Id = u.Id,
-                Email = u.Email,
-                NombreCompleto = u.NombreCompleto,
-                FechaRegistro = u.FechaRegistro
-            }).ToList();
-
-            return ServiceResult.Ok(lista);
-        }
-
-        public async Task<ServiceResult> GetUsuarioAsync(int id)
-        {
-            var usuario = await _usuarioRepo.GetByIdAsync(id);
-
-            if (usuario == null)
-                return ServiceResult.BadRequest("Usuario no encontrado");
-
-            var dto = new UsuarioResponseDto
-            {
-                Id = usuario.Id,
-                Email = usuario.Email,
-                NombreCompleto = usuario.NombreCompleto,
-                FechaRegistro = usuario.FechaRegistro
-            };
-
-            return ServiceResult.Ok(dto);
+                _logger.LogError(ex, "Error al obtener usuario");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
         public async Task<ServiceResult> DeleteUsuarioAsync(int id)
         {
-            var usuario = await _usuarioRepo.GetByIdAsync(id);
+            try
+            {
+                var usuario = await _usuarioRepo.GetByIdAsync(id);
+                if (usuario == null)
+                    return ServiceResult.BadRequest("Usuario no encontrado");
 
-            if (usuario == null)
-                return ServiceResult.BadRequest("Usuario no encontrado");
+                await _usuarioRepo.DeleteAsync(usuario);
+                await _usuarioRepo.SaveChangesAsync();
 
-            _usuarioRepo.Remove(usuario);
-            await _usuarioRepo.SaveChangesAsync();
-
-            _logger.LogInformation("Usuario eliminado: {Id}", id);
-            return ServiceResult.Ok("Usuario eliminado exitosamente");
+                return ServiceResult.Ok(new { mensaje = "Usuario eliminado exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al eliminar usuario");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
+        private string GenerateJwtToken(Usuario usuario)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                    new Claim(ClaimTypes.Email, usuario.Email),
+                    new Claim(ClaimTypes.Name, usuario.NombreCompleto),
+                    new Claim(ClaimTypes.Role, usuario.Rol)
+                }),
+                Expires = DateTime.UtcNow.AddHours(12),
+                Issuer = _jwtSettings.Issuer,
+                Audience = _jwtSettings.Audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
     }
 }
