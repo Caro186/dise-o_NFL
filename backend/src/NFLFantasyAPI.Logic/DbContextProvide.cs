@@ -16,11 +16,13 @@ namespace NFLFantasyAPI.Logic.DbContextProvider
 
         public void registerRepositories(IServiceCollection services)
         {
+            // Repositorios
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-            services.AddScoped<IEquipoRepository, EquipoRepository>();
+            services.AddScoped<IEquipoFantasyRepository, EquipoFantasyRepository>();
+            services.AddScoped<IEquipoNFLRepository, EquipoNFLRepository>();
+            services.AddScoped<IJugadorRepository, JugadorRepository>();
             services.AddScoped<ILigaRepository, LigaRepository>();
             services.AddScoped<ITemporadaRepository, TemporadaRepository>();
-            services.AddScoped<IEquipoLigaRepository, EquipoLigaRepository>();
         }
     }
 }

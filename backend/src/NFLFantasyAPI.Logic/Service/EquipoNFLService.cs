@@ -13,7 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NFLFantasyAPI.Services
+namespace NFLFantasyAPI.Logic.Services
 {
     public class EquipoNFLService : IEquipoNFLService
     {

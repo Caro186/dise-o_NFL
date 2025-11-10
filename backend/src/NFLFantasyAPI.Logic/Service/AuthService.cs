@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace NFLFantasyAPI.Application.Services
+namespace NFLFantasyAPI.Logic.Services
 {
     public class AuthService : IAuthService
     {

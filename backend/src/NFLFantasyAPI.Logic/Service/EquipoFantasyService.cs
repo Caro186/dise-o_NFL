@@ -6,7 +6,7 @@ using NFLFantasyAPI.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 
-namespace NFLFantasyAPI.Services
+namespace NFLFantasyAPI.Logic.Services
 {
     public class EquipoFantasyService : IEquipoFantasyService
     {

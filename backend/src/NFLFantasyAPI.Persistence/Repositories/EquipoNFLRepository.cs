@@ -5,7 +5,7 @@ using NFLFantasyAPI.Persistence.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace NFLFantasyAPI.Persistence
+namespace NFLFantasyAPI.Persistence.Repositories
 {
     public class EquipoNFLRepository : IEquipoNFLRepository
     {

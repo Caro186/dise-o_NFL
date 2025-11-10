@@ -3,7 +3,7 @@ using NFLFantasyAPI.Persistence.Context;
 using NFLFantasyAPI.Persistence.Interfaces;
 using NFLFantasyAPI.Persistence.Models;
 
-namespace NFLFantasyAPI.Infrastructure.Repositories
+namespace NFLFantasyAPI.Persistence.Repositories
 {
     public class UsuarioRepository : IUsuarioRepository
     {

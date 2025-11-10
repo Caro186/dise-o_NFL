@@ -40,9 +40,11 @@ namespace NFLFantasyAPI.Presentation
             builder.Services.AddEndpointsApiExplorer();
 
             // Registrar servicios
-            builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IEquipoService, EquipoService>();
+            builder.Services.AddScoped<IEquipoFantasyService, EquipoFantasyService>();
+            builder.Services.AddScoped<IEquipoNFLService, EquipoNFLService>();
+            builder.Services.AddScoped<IJwtService, JwtService>();
+            builder.Services.AddScoped<IJugadorService, JugadorService>();
             builder.Services.AddScoped<ILigaService, LigaService>();
             builder.Services.AddScoped<ITemporadaService, TemporadaService>();
 
