@@ -18,4 +18,12 @@ dotnet add package Serilog.Sinks.File --version 7.0.0
 dotnet add package Swashbuckle.AspNetCore --version 9.0.6
 dotnet add package xunit --version 2.9.3
 dotnet add package xunit.runner.visualstudio --version 3.1.5
+
+dotnet ef migrations add AgregaRol \
+  --project src/NFLFantasyAPI.Persistence/NFLFantasyAPI.Persistence.csproj  \
+  --startup-project src/NFLFantasyAPI.Presentation/NFLFantasyAPI.Presentation.csproj 
+
+dotnet-ef database update \
+    --project src/NFLFantasyAPI.Persistence/NFLFantasyAPI.Persistence.csproj \
+    --startup-project src/NFLFantasyAPI.Presentation/NFLFantasyAPI.Presentation.csproj 
 ```

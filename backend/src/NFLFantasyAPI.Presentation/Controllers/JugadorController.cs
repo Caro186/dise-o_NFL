@@ -3,7 +3,7 @@ using NFLFantasyAPI.CrossCutting;
 using NFLFantasyAPI.Logic.DTOs;
 using NFLFantasyAPI.Logic.Interfaces;
 
-namespace NFLFantasyAPI.Controllers
+namespace NFLFantasyAPI.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

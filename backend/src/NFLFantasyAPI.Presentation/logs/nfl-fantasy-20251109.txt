@@ -360,3 +360,607 @@ SELECT l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."
 SELECT l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FechaLimiteIntercambios", l."FormatoPosiciones", l."IdComisionado", l."IdTemporada", l."ImagenUrl", l."LimiteMaximoCambios", l."LimiteMaximoContrata2025-11-09 17:53:36.354 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collect2025-11-09 17:53:36.354 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collections.Generic.List`1[[NFLFantasyAPI.Persistence.2025-11-09 17:53:36.355 -06:00 [INF] Executed action NFLFantasyAPI.Controllers.LigaController.Obte2025-11-09 17:53:36.355 -06:00 [INF] Executed acti2025-11-09 17:53:36.356 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Controllers.LigaController.O2025-11-09 17:53:36.356 -06:00 [INF] Execu2025-11-09 17:53:36.357 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/Liga 2025-11-09 17:53:36.357 -06:00 [INF] Request finishe2025-11-09 17:54:12.239 -06:00 [INF] Application is shutting down...
 json; charset=utf-8 8.2184ms
 2025-11-09 17:54:12.239 -06:00 [INF] Application is shutting down...
+2025-11-09 21:53:15.207 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-11-09 21:53:15.354 -06:00 [INF] User profile is available. Using '/home/jaam/.aspnet/DataProt2025-11-09 21:53:15.354 -06:00 [INF] User profile is available. Usin2025-11-09 21:53:15.466 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-11-09 21:53:15.469 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-09 21:53:15.470 -06:00 [INF] Hosting environment: Development
+2025-11-09 21:53:15.471 -06:00 [INF] Content root path: /home/jaam/Documents/Angular/dise-o_NFL/ba2025-11-09 21:53:15.471 -06:00 [INF] 2025-11-09 21:54:42.132 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/Equip2025-11-09 21:54:42.132 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/EquipoFantasy/usuario/5 - null null
+2025-11-09 21:54:42.133 -02025-11-09 21:54:42.243 -06:00 [WRN] Failed to determine the https port for redirect.
+2025-11-09 21:54:42.247 -06:00 [INF] CORS policy execution successful.
+2025-11-09 21:54:42.247 -06:00 [INF] CORS policy execution successful.
+2025-11-09 21:54:42.281 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Eq2025-11-09 21:54:42.281 -06:00 [INF] Executing endpoint 'NFLFanta2025-11-09 21:54:42.281 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Li2025-11-09 21:54:42.281 -06:00 [INF] Executing endpoint 'NFL2025-11-09 21:54:42.318 -06:00 [INF] Route matched with {action = "GetByComisionado", controller =2025-11-09 21:54:42.318 -06:00 [INF] Route matched with {action = "GetByComisionado", controller = "Liga"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetByComisionado(Int32) 2025-11-09 21:54:42.318 -06:00 [INF] Route matched with {action = "GetByUsuario", controller = "Eq2025-11-09 21:54:42.318 -06:00 [INF] Route matched with {action = "GetByUsuario", controller = "EquipoFantasy"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetByUsuario(Int32) on contro2025-11-09 21:54:44.481 -06:00 [ERR] Failed executing DbCommand (81ms) [Parameters=[@__usuarioId_02025-11-09 21:54:44.481 -06:00 [ERR] Failed executing DbCommand (81ms) [Parameters=[@__usuarioId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FormatoPosiciones", l."IdTemporada", l."ImagenUrl", l."NombreLiga", l."PasswordHash", l."PermitirDecimales", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad", t."Id", t."Actual", t."FechaCierre", t."FechaCreacion", t."FechaInicio", t."Nombre"
+FROM ligas AS l
+INNER JOIN usuarios AS u ON l."ComisionadoId" = u."Id"
+INNER JOIN temporadas AS t ON l."IdTemporada" = t."Id"
+WHERE l."ComisionadoId" = @__usuarioId_0
+2025-11-09 21:54:44.481 -06:00 [ERR] Failed executing DbCommand (81ms) [Parameters=[@__usuarioId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT e."Id", e."Estado", e."FechaCreacion", e."ImagenUrl", e."LigaId", e."Nombre", e."UsuarioId", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad", l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FormatoPosiciones", l."IdTemporada", l."ImagenUrl", l."NombreLiga", l."PasswordHash", l."PermitirDecimales"
+FROM equipos_fantasy AS e
+INNER JOIN usuarios AS u ON e."Usuario2025-11-09 21:54:44.518 -06:00 [ERR] An exception occurred while iterating over the results of a q2025-11-09 21:54:44.518 -06:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NFLFantasyAPI.Persistence.Context.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42P01: relation "equipos_fantasy" does not exist
+
+POSITION: 594
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "equipos_fantasy" does not exist
+    Position: 594
+    File: parse_relation.c
+    Line: 1449
+    Routine: parserOpenTable
+Npgsql.PostgresException (0x80004005): 42P01: relation "equipos_fantasy" does not exist
+
+POSITION: 594
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "equipos_fantasy" does not exist
+    Position: 594
+    File: parse_relation.c
+    Line: 1449
+    Routine: parserOpenTable
+2025-11-09 21:54:44.518 -06:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NFLFantasyAPI.Persistence.Context.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column u.Rol does not exist
+
+POSITION: 467
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.Rol does not exist
+    Position: 467
+    File: parse_relation.c
+    Line: 3722
+    Routine: errorMissingColumn
+Npgsql.PostgresException (0x80004005): 42703: column u.Rol does not exist
+
+POSITION: 467
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.Rol does not 2025-11-09 21:54:44.541 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.Equipo2025-11-09 21:54:44.541 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.EquipoFantasyController.GetByUsuario (NFLFantasyAPI.Presentation) in 2217.3905ms
+2025-11-09 21:54:44.541 -06:00 [INF] Executed action NFLFantasyAPI.Pre2025-11-09 21:54:44.549 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.Lig2025-11-09 21:54:44.549 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.LigaController.GetByComisionado (NFLFantasyAPI.Presentation)'
+2025-11-09 21:54:44.549 -06:00 [INF] Executed endpoint 'NFLFanta2025-11-09 21:54:44.552 -06:00 [ERR] An unhandled exception has occurred while executing the reque2025-11-09 21:54:44.552 -06:00 [ERR] An unhandled exception has occurred while executing the request.
+Npgsql.PostgresException (0x80004005): 42703: column u.Rol does not exist
+
+POSITION: 467
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NFLFantasyAPI.Persistence.Repositories.LigaRepository.GetByComisionadoAsync(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/Repositories/LigaRepository.cs:line 29
+   at NFLFantasyAPI.Logic.Services.LigaService.GetByComisionadoAsync(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Logic/Service/LigaService.cs:line 50
+   at NFLFantasyAPI.Presentation.Controllers.LigaController.GetByComisionado(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Presentation/Controllers/LigaController.cs:line 35
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.Rol does not exist
+    Position: 467
+    File: parse_relation.c
+    Line: 3722
+    Routine: errorMissingColumn
+2025-11-09 21:54:44.552 -06:00 [ERR] An unhandled exception has occurred while executing the request.
+Npgsql.PostgresException (0x80004005): 42P01: relation "equipos_fantasy" does not exist
+
+POSITION: 594
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NFLFantasyAPI.Persistence.Repositories.EquipoFantasyRepository.GetByUsuarioIdAsync(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/Repositories/EquipoFantasyRepository.cs:line 30
+   at NFLFantasyAPI.Logic.Services.EquipoFantasyService.GetEquiposByUsuarioAsync(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Logic/Service/EquipoFantasyService.cs:line 74
+   at NFLFantasyAPI.Presentation.Controllers.EquipoFantasyController.GetByUsuario(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Presentation/Controllers/EquipoFantasyController.cs:line 44
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "equipos_fantasy" does n2025-11-09 21:54:44.593 -06:00 [ERR] Error no manejado en la aplicación
+Npgsql.PostgresException 2025-11-09 21:54:44.593 -06:00 [ERR] Error no manejado en la aplicación
+Npgsql.PostgresException (0x80004005): 42703: column u.Rol does not exist
+
+POSITION: 467
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NFLFantasyAPI.Persistence.Repositories.LigaRepository.GetByComisionadoAsync(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/Repositories/LigaRepository.cs:line 29
+   at NFLFantasyAPI.Logic.Services.LigaService.GetByComisionadoAsync(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Logic/Service/LigaService.cs:line 50
+   at NFLFantasyAPI.Presentation.Controllers.LigaController.GetByComisionado(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Presentation/Controllers/LigaController.cs:line 35
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.Rol does not exist
+    Position: 467
+    File: parse_relation.c
+    Line: 3722
+    Routine: errorMissingColumn
+2025-11-09 21:54:44.598 -06:00 [ERR] Error no manejado en la aplicación
+Npgsql.PostgresException (0x80004005): 42P01: relation "equipos_fantasy" does not exist
+
+POSITION: 594
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NFLFantasyAPI.Persistence.Repositories.EquipoFantasyRepository.GetByUsuarioIdAsync(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/Repositories/EquipoFantasyRepository.cs:line 30
+   at NFLFantasyAPI.Logic.Services.EquipoFantasyService.GetEquiposByUsuarioAsync(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Logic/Service/EquipoFantasyService.cs:line 74
+   at NFLFantasyAPI.Presentation.Controllers.EquipoFantasyController.GetByUsuario(Int32 usuarioId) in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Presentation/Controllers/EquipoFantasyController.cs:line 44
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "equipos_fantasy" does n2025-11-09 21:54:44.663 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/Equip2025-11-09 21:54:44.663 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/EquipoFantasy/usuario/5 - 500 null application/json; charset=utf-8 2533.8957ms
+2025-11-09 21:54:44.663 -06:00 [INF] Request finished HTTP/1.1 GET ht2025-11-09 21:56:37.465 -06:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/A2025-11-09 21:56:37.465 -2025-11-09 21:56:37.476 -06:00 [INF] CORS policy execution successful.
+2025-11-09 21:56:37.480 -06:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/A2025-11-09 21:56:37.480 -06:00 [INF] Re2025-11-09 21:56:37.485 -06:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/Auth2025-11-09 21:56:37.485 -06:00 [2025-11-09 21:56:37.489 -06:00 [INF] CORS policy execution successful.
+2025-11-09 21:56:37.493 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Au2025-11-09 21:56:37.493 -06:00 [INF] Executing endpo2025-11-09 21:56:37.505 -06:00 [INF] Route matched with {action = "Register", controller = "Auth"}2025-11-09 21:56:37.505 -06:00 [INF] Route matched with {action = "Register", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Register(NFLFantasyAPI.Logic.DTOs.RegistroDto) 2025-11-09 21:56:37.673 -06:00 [INF] Executed DbCommand (9ms) [Parameters=[@__email_0='?'], Comman2025-11-09 21:56:37.673 -06:00 [INF] Executed DbCommand (9ms) [Parameters=[@__email_0='?'], CommandType='"Text"', CommandTi2025-11-09 21:56:38.454 -06:00 [ERR] Failed executing DbCommand (6ms) [Parameters=[@p0='?', @p1='?2025-11-09 21:56:38.454 -06:00 [ERR] Failed executing DbCommand (6ms) [Parameters=[@p0='?', @p1='?', @p2='?' (DbType = DateTime), @p3='?' (DbType = DateTime), @p4='?' (DbType = DateTime), @p5='?', @p6='?', @p7='?', @p8='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO usuarios ("Email", "EstadoCuenta", "FechaBloqueo", "FechaRegistro", "FechaUltimoIntentoFallido", "NombreCompleto", "Password", "Rol", "UltimaAct2025-11-09 21:56:38.462 -06:00 [ERR] An exception occurred in the database while saving changes fo2025-11-09 21:56:38.462 -06:00 [ERR] An exception occurred in the database while saving changes for context type 'NFLFantasyAPI.Persistence.Context.ApplicationDbContext'.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Npgsql.PostgresException (0x80004005): 42703: column "Rol" of relation "usuarios" does not exist
+
+POSITION: 140
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column "Rol" of relation "usuarios" does not exist
+    Position: 140
+    File: parse_target.c
+    Line: 1066
+    Routine: checkInsertTargets
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Npgsql.PostgresException (0x80004005): 42703: column "Rol" of relation "usuarios" does not exist
+
+POSITION: 140
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column "Rol" of relation "usuarios" does not exist
+    Position: 140
+    File: parse_target.c
+    Line: 1066
+    Routine: checkInsertTargets
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.D2025-11-09 21:56:38.472 -06:00 [ERR] Error al registrar usuario
+Microsoft.EntityFrameworkCore.DbUp2025-11-09 21:56:38.472 -06:00 [ERR] Error al registrar usuario
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Npgsql.PostgresException (0x80004005): 42703: column "Rol" of relation "usuarios" does not exist
+
+POSITION: 140
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column "Rol" of relation "usuarios" does not exist
+    Position: 140
+    File: parse_target.c
+    Line: 1066
+    Routine: checkInsertTargets
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at NFLFantasyAPI.Persistence.Repositories.UsuarioRepository.SaveChangesAsync() in /home/jaam/Documents/Angular/dise-o_NFL/backend/src/NFLFantasyAPI.Persistence/Repositories/UsuarioRepository.cs:line 45
+   at NFLFantasyAPI.Logic.Services.AuthService.RegisterAsync(RegistroDto dto) in /home2025-11-09 21:56:38.494 -06:00 [INF] Executing ObjectResult, writing value of type '<>f__Anonymous2025-11-09 21:56:38.494 -06:00 [INF] Executing ObjectResult, writing value of type '<>f__AnonymousType0`1[[System.Stri2025-11-09 21:56:38.497 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.AuthCo2025-11-09 21:56:38.497 -06:00 [INF] Executed action NFLFanta2025-11-09 21:56:38.497 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.Aut2025-11-09 21:56:38.497 -06:00 [INF] Executed endpo2025-11-09 21:56:38.498 -06:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/Auth2025-11-09 21:56:38.498 -06:00 [INF] Request finished HTTP/1.1 PO2025-11-09 21:57:11.281 -06:00 [INF] Application is shutting down...
+n; charset=utf-8 1012.5641ms
+2025-11-09 21:57:11.281 -06:00 [INF] Application is shutting down...
+2025-11-09 22:06:58.440 -06:00 [INF] Executed DbCommand (42ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2025-11-09 22:06:58.543 -06:00 [INF] No migrations were found in assembly 'NFLFantasyAPI.Persistence'. A migration needs to be added before the database can be updated.
+2025-11-09 22:06:58.689 -06:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(1502025-11-09 22:06:58.689 -06:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF 2025-11-09 22:06:58.700 -06:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2025-11-09 22:06:58.708 -06:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2025-11-09 22:06:58.709 -06:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2025-11-09 22:06:58.715 -06:00 [INF] No migrations were applied. The database is already up to date.
+CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2025-11-09 22:06:58.715 -06:00 [INF] No migrations were applied. The database is already up to date.
+2025-11-09 22:07:55.031 -06:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2025-11-09 22:07:55.339 -06:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150)2025-11-09 22:07:55.339 -06:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF 2025-11-09 22:07:55.349 -06:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2025-11-09 22:07:55.352 -06:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2025-11-09 22:07:55.354 -06:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2025-11-09 22:07:55.364 -06:00 [INF] Applying migration '20251110040740_AgregaRol'.
+2025-11-09 22:07:55.669 -06:00 [INF] Executed DbCommand (260ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE equipos_nfl (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Nombre" 2025-11-09 22:07:55.669 -06:00 [INF] Executed DbCommand (260ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE equipos_nfl (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Nombre" character varying(100) NOT NULL,
+    "Ciudad" character varying(100) NOT NUL2025-11-09 22:07:55.676 -06:00 [ERR] Failed executing DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE temporadas (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Nom2025-11-09 22:07:55.676 -06:00 [ERR] Failed executing DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE temporadas (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Nombre" character varying(100) NOT NULL,
+    "FechaInicio" timestamp with time zone NOT NULL,
+    "FechaCierre" timestamp with time zone NOT NULL,
+    "FechaCreacion" timestamp with time zone NOT NULL,
+    "Actual" boolean NOT NULL DEFAULT FALSE,
+    CONSTRAINT "PK_temporadas" PRIMARY KEY ("Id")
+);
+2025-11-09 22:10:44.271 -06:00 [ERR] An error occurred using the connection to database 'nfl_fantasy_dev' on server 'tcp://localhost:5432'.
+2025-11-09 22:10:45.603 -06:00 [INF] Executed DbCommand (941ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE DATABASE n2025-11-09 22:102025-11-09 22:10:45.766 -06:00 [INF] Executed DbCommand (56ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NO2025-11-09 22:10:45.766 -06:00 [INF] Executed DbCommand (56ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(12025-11-09 22:10:45.779 -06:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock f2025-11-09 22:10:45.779 -06:00 [INF] Acquiri2025-11-09 22:10:45.782 -06:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMig2025-11-09 22:10:45.782 -06:00 [INF] Exec2025-11-09 22:10:45.786 -06:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId2025-11-09 22:10:45.786 -06:00 [INF] Executed DbCommand (3ms) [Parameters2025-11-09 22:10:45.803 -06:00 [INF] Applying migration '20251110040740_AgregaRol'.
+2025-11-09 22:10:45.940 -06:00 [INF] Executed DbCommand (95ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE equip2025-11-09 22:10:45.940 -06:00 [INF] Executed DbCommand (95ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE equipos_nfl (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Nombre" character varying(100) NOT NULL,
+    "Ciudad" character varying(100) NOT NULL,
+    "ImagenUrl" character varying(500),
+    "FechaCreacion" timestamp w2025-11-09 22:10:45.982 -06:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE tempo2025-11-09 22:10:45.982 -06:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE temporadas (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Nombre" character varying(100) NOT NULL,
+    "FechaInicio" timestamp with time zone NOT NULL,
+    "FechaCierre" timestamp with time zone NOT NULL,
+    "FechaCre2025-11-09 22:10:46.040 -06:00 [INF] Executed DbCommand (51ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE usuar2025-11-09 22:10:46.040 -06:00 [INF] Executed DbCommand (51ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE usuarios (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Email" character varying(50) NOT NULL,
+    "Password" character varying(255) NOT NULL,
+    "NombreCompleto" character varying(50) NOT NULL,
+    "FechaRegistro" timestamp with time zone NOT NULL,
+    "IntentosFailidos" integer NOT NULL DEFAULT 0,
+    "FechaUltimoIntentoFallido" timestamp with time zone,
+    "EstadoCuenta" character varying(20) NOT NULL DEFAULT 'Activa',
+    "FechaBloqueo" timestamp with time zone,
+    "UltimaActivida2025-11-09 22:10:46.135 -06:00 [INF] Executed DbCommand (93ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE jugad2025-11-09 22:10:46.135 -06:00 [INF] Executed DbCommand (93ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE jugadores (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Nombre" character varying(100) NOT NULL,
+    "Posicion" character varying(50) NOT NULL,
+    "EquipoNFLId" integer NOT NULL,
+    "ImagenUrl" character varying(500),
+    "ThumbnailUrl" character varying(500),
+    "Estado" character varying(20) NOT NULL DEFAULT 'Activo',
+    "FechaCreacion" timestamp with time zone NOT NULL,
+    "FechaActualizacion" timestamp with time zone,
+    CONSTRAINT "PK_jugadores" PRIMARY KEY ("2025-11-09 22:10:46.184 -06:00 [INF] Executed DbCommand (47ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE seman2025-11-09 22:10:46.184 -06:00 [INF] Executed DbCommand (47ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE semanas (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "FechaInicio" timestamp with time zone NOT NULL,
+    "FechaFin" timestamp with time zone NOT NULL,
+    "TemporadaId" integer NOT NULL,
+    CONSTRAINT "PK_semanas" PRIMARY K2025-11-09 22:10:46.277 -06:00 [INF] Executed DbCommand (92ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE ligas2025-11-09 22:10:46.277 -06:00 [INF] Executed DbCommand (92ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE ligas (
+    "IdLiga" integer GENERATED BY DEFAULT AS IDENTITY,
+    "ImagenUrl" character varying(500),
+    "NombreLiga" character varying(100) NOT NULL,
+    "Descripcion" text,
+    "PasswordHash" character varying(255) NOT NULL,
+    "IdTemporada" integer NOT NULL,
+    "Estado" character varying(20) NOT NULL DEFAULT 'Pre-Draft',
+    "CuposTotales" integer NOT NULL,
+    "CuposOcupados" integer NOT NULL DEFAULT 1,
+    "FechaCreacion" timestamp with time zone NOT NULL,
+    "FechaInicio" timestamp with time zone,
+    "FechaFin" timestamp with time zone,
+    "ComisionadoId" integer NOT NULL,
+    "FormatoPosiciones" text NOT NULL,
+    "EsquemaPuntos" text NOT NULL,
+    "ConfigPlayoffs" text NOT NULL,
+    "PermitirDecimales" boolean NOT NULL DEFAULT TRUE,
+    CONSTRAINT "PK_ligas" PRIMARY KEY ("IdLiga"),
+    CONSTRAINT "FK_ligas_temporadas_IdTemporada" FOREIGN KEY ("IdTemporada") REFERENCES temporadas ("Id") ON DELET2025-11-09 22:10:46.461 -06:00 [INF] Executed DbCommand (181ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE equi2025-11-09 22:10:46.461 -06:00 [INF] Executed DbCommand (181ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE equipos_fantasy (
+    "Id" integer GENERATED BY DEFAULT AS IDENTITY,
+    "Nombre" character varying(100) NOT NULL,
+    "UsuarioId" integer NOT NULL,
+    "LigaId" integer,
+    "ImagenUrl" character varying(500),
+    "FechaCreacion" timestamp with time zone NOT NULL,
+    "Estado" character varying(20) NOT NULL DEFAULT 'Activo',
+    CONSTRAINT "PK_equipos_fantasy" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_equipos_fantasy_ligas_LigaId" FOREIGN KEY ("LigaId") REFERENCES ligas ("IdLiga") ON DELETE 2025-11-09 22:10:46.527 -06:00 [INF] Executed DbCommand (66ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_e2025-11-09 22:10:46.527 -06:00 [INF] Executed DbComman2025-11-09 22:10:46.569 -06:00 [INF] Executed DbCommand (39ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_e2025-11-09 22:10:46.569 -06:00 [INF] Executed DbCommand (39m2025-11-09 22:10:46.611 -06:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDE2025-11-09 22:10:46.611 -06:00 [INF] Executed DbComma2025-11-09 22:10:46.653 -06:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_j2025-11-09 22:10:46.653 -06:00 [INF] Executed DbComm2025-11-09 22:10:46.695 -06:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_j2025-11-09 22:10:46.695 -06:00 [INF] Execu2025-11-09 22:10:46.746 -06:00 [INF] Executed DbCommand (49ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDE2025-11-09 22:10:46.746 -06:00 [INF] Executed DbCommand (49ms) [Parameters=[2025-11-09 22:10:46.820 -06:00 [INF] Executed DbCommand (72ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_j2025-11-09 22:10:46.820 -06:00 [INF] Executed 2025-11-09 22:10:46.871 -06:00 [INF] Executed DbCommand (50ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_l2025-11-09 22:10:46.871 -06:00 [INF] Executed Db2025-11-09 22:10:46.913 -06:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_l2025-11-09 22:10:46.913 -06:00 [INF] Execute2025-11-09 22:10:46.964 -06:00 [INF] Executed DbCommand (49ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_l2025-11-09 22:10:46.964 -06:00 [INF] Execu2025-11-09 22:10:47.005 -06:00 [INF] Executed DbCommand (40ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_s2025-11-09 22:10:47.005 -06:00 [INF] Executed Db2025-11-09 22:10:47.048 -06:00 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDE2025-11-09 22:10:47.048 -06:00 [INF] Executed2025-11-09 22:10:47.049 -06:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMi2025-11-09 22:10:47.049 -06:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20251110040740_AgregaRol', '9.0.10');
+2025-11-09 22:11:26.093 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-11-09 22:11:26.195 -06:00 [INF] User profile is available. Using '/home/jaam/.aspnet/DataProt2025-11-09 22:11:26.195 -06:00 [INF] User profile is available. Usin2025-11-09 22:11:26.300 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-11-09 22:11:26.303 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-09 22:11:26.304 -06:00 [INF] Hosting environment: Development
+2025-11-09 22:11:26.305 -06:00 [INF] Content root path: /home/jaam/Documents/Angular/dise-o_NFL/ba2025-11-09 22:11:26.305 -06:00 [INF] 2025-11-09 22:11:42.755 -06:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/A2025-11-09 22:11:42.755 -2025-11-09 22:11:42.850 -06:00 [WRN] Failed to determine the https port for redirect.
+2025-11-09 22:11:42.852 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:11:42.860 -06:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/A2025-11-09 22:11:42.860 -06:00 [INF] Req2025-11-09 22:11:42.879 -06:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/Auth2025-11-09 22:11:42.879 -06:00 [2025-11-09 22:11:42.883 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:11:42.908 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Au2025-11-09 22:11:42.908 -06:00 [INF] Executing endpo2025-11-09 22:11:42.928 -06:00 [INF] Route matched with {action = "Register", controller = "Auth"}2025-11-09 22:11:42.928 -06:00 [INF] Route matched with {action = "Register", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Register(NFLFantasyAPI.Logic.DTOs.RegistroDto) 2025-11-09 22:11:44.686 -06:00 [INF] Executed DbCommand (53ms) [Parameters=[@__email_0='?'], Comma2025-11-09 22:11:44.686 -06:00 [INF] Executed DbCommand (53ms) [Parameters=[@__email_0='?'], CommandType='"Text"', CommandTi2025-11-09 22:11:45.501 -06:00 [INF] Executed DbCommand (20ms) [Parameters=[@p0='?', @p1='?', @p2=2025-11-09 22:11:45.501 -06:00 [INF] Executed DbCommand (20ms) [Parameters=[@p0='?', @p1='?', @p2='?' (DbType = DateTime), @p3='?' (DbType = DateTime), @p4='?' (DbType = DateTime), @p5='?', @p6='?', @p7='?', @p8='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO usuarios ("Email", "EstadoCuenta", "FechaBloqueo", "FechaRegistro", "FechaUltimoIntentoFallido", "NombreCompleto", "Password", "Rol", "UltimaAct2025-11-09 22:11:45.548 -06:00 [INF] Executing ObjectResult, writing value of type '<>f__Anonymous2025-11-09 22:11:45.548 -06:00 [INF] Executing ObjectResult, writing value of type '<>f__AnonymousType0`2[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[NFLFantasyAPI.Logi2025-11-09 22:11:45.589 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.AuthCo2025-11-09 22:11:45.589 -06:00 [INF] Executed action NFLFantas2025-11-09 22:11:45.589 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.Aut2025-11-09 22:11:45.589 -06:00 [INF] Executed endpo2025-11-09 22:11:45.599 -06:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/Auth2025-11-09 22:11:45.599 -06:00 [INF] Request finished HTTP/1.1 PO2025-11-09 22:14:28.104 -06:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/A2025-11-09 22:14:28.102025-11-09 22:14:28.107 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:14:28.108 -06:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/A2025-11-09 22:14:28.108 -06:00 [INF2025-11-09 22:14:28.111 -06:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/Auth2025-11-09 22:14:28.111 -06:02025-11-09 22:14:28.111 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:14:28.113 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Au2025-11-09 22:14:28.113 -06:00 [INF] Executing en2025-11-09 22:14:28.122 -06:00 [INF] Route matched with {action = "Login", controller = "Auth"}. E2025-11-09 22:14:28.122 -06:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(NFLFantasyAPI.Logic.DTOs.LoginDto) 2025-11-09 22:14:28.238 -06:00 [INF] Executed DbCommand (2ms) [Parameters=[@__email_0='?'], Comman2025-11-09 22:14:28.238 -06:00 [INF] Executed DbCommand (2ms) [Parameters=[@__email_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u2025-11-09 22:14:28.897 -06:00 [INF] Executed DbCommand (21ms) [Parameters=[@p10='?' (DbType = Int2025-11-09 22:14:28.897 -06:00 [INF] Executed DbCommand (21ms) [Parameters=[@p10='?' (DbType = Int32), @p0='?', @p1='?', @p2='?' (DbType = DateTime), @p3='?' (DbType = DateTime), @p4='?' (DbType = DateTime), @p5='?' (DbType = Int32), @p6='?', @p7='?', @p8='?', @p9='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE usuarios SET "Email" = @p0, "EstadoCuenta" = @p1, "FechaBloqueo" = @p2, "FechaRegistro" = @p3, "FechaUltimoIntentoFallido" = @p4, "IntentosFailidos" = @p5, 2025-11-09 22:14:28.922 -06:00 [INF] Executing ObjectResult, writing value of type 'NFLFantasyAPI.2025-11-09 22:14:28.922 -06:002025-11-09 22:14:28.924 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.AuthCo2025-11-09 22:14:28.924 -06:00 [INF] Executed action NFLFa2025-11-09 22:14:28.924 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.Aut2025-11-09 22:14:28.924 -06:00 [INF] Executed en2025-11-09 22:14:28.925 -06:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/Auth2025-11-09 22:14:28.925 -06:00 [INF] Request finished HTTP/1.2025-11-09 22:14:28.944 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/Equip2025-11-09 22:14:28.944 -06:00 2025-11-09 22:14:28.945 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/Liga/2025-11-09 22:14:28.945 -02025-11-09 22:14:28.955 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:14:28.955 -062025-11-09 22:14:28.955 -06:00 [INF] CORS po2025-11-09 22:14:28.957 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Li2025-11-09 22:14:28.957 -06:00 [INF] Executing endpoint 'NFL2025-11-09 22:14:28.957 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Eq2025-11-09 22:14:28.957 -06:00 [INF] Executing endpoint 'NFLFanta2025-11-09 22:14:28.962 -06:00 [INF] Route matched with {action = "GetByComisionado", controller =2025-11-09 22:14:28.962 -06:00 [INF] Route matched with {action = "GetByComisionado", controller = "Liga"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetByComisionado(Int32) on controller NFLFantasyAPI.Presentation.Controllers.LigaController (NFLFantasyAPI.Presentation).
+2025-11-09 22:14:28.962 -06:00 [INF] Route matched with {action = "GetByUsuario", controller = "EquipoFantasy"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetByUsuario(Int32) on contro2025-11-09 22:14:29.181 -06:00 [INF] Executed DbCommand (3ms) [Parameters=[@__usuarioId_0='?' (DbT2025-11-09 22:14:29.181 -06:00 [INF] Executed DbCommand (3ms) [Parameters=[@__usuarioId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FormatoPosiciones", l."IdTemporada", l."ImagenUrl", l."NombreLiga", l."PasswordHash", l."PermitirDecimales", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad", t."Id", t."Actual", t."FechaCierre", t."FechaCreacion", t."FechaInicio", t."Nombre"
+FROM ligas AS l
+INNER JOIN usuarios AS u ON l."ComisionadoId" = u."Id2025-11-09 22:14:29.185 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collect2025-11-09 22:14:29.185 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collections.Generic.List`1[[NFLFantasyAPI.Persistence.2025-11-09 22:14:29.210 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.LigaCo2025-11-09 22:14:29.210 -06:00 [INF] Executed action NFLFantasyAPI.Pr2025-11-09 22:14:29.210 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.Lig2025-11-09 22:14:29.210 -06:00 [INF] Executed endpoint 'NFL2025-11-09 22:14:29.211 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/Liga/2025-11-09 22:14:29.211 -06:00 [INF] Request finished HTTP/1.1 GET h2025-11-09 22:14:29.221 -06:00 [INF] Executed DbCommand (8ms) [Parameters=[@__usuarioId_0='?' (DbT2025-11-09 22:14:29.221 -06:00 [INF] Executed DbCommand (8ms) [Parameters=[@__usuarioId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT e."Id", e."Estado", e."FechaCreacion", e."ImagenUrl", e."LigaId", e."Nombre", e."UsuarioId", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad", l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FormatoPosiciones", l."IdTemporada", l."ImagenUrl", l."NombreLiga", l."PasswordHash", l."PermitirDecimales"
+FROM equipos_fantasy AS e
+INNER JOIN usuarios AS u ON e."Usuario2025-11-09 22:14:29.223 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collect2025-11-09 22:14:29.223 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collections.Generic.List`1[[NFLFantasyAPI.Logic.DTOs.EquipoF2025-11-09 22:14:29.231 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.Equipo2025-11-09 22:14:29.231 -06:00 [INF] Executed action NFLFantasyAPI.Present2025-11-09 22:14:29.232 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.Equ2025-11-09 22:14:29.232 -06:00 [INF] Executed endpoint 'NFLFanta2025-11-09 22:14:29.232 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/Equip2025-11-09 22:14:29.232 -06:00 [INF] Request finished HTTP/1.1 GET http:/2025-11-09 22:15:02.527 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/Liga/2025-11-09 22:15:02.522025-11-09 22:15:02.533 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:15:02.537 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/Liga/2025-11-09 22:15:02.537 -06:00 [I2025-11-09 22:15:02.539 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:15:02.539 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:15:55.801 -06:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/A2025-11-09 22:15:55.802025-11-09 22:15:55.803 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:15:55.806 -06:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/A2025-11-09 22:15:55.806 -06:00 [INF2025-11-09 22:15:55.823 -06:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/Auth2025-11-09 22:15:55.823 -06:02025-11-09 22:15:55.831 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:15:55.833 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Au2025-11-09 22:15:55.833 -06:00 [INF] Executing en2025-11-09 22:15:55.837 -06:00 [INF] Route matched with {action = "Login", controller = "Auth"}. E2025-11-09 22:15:55.837 -06:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(NFLFantasyAPI.Logic.DTOs.LoginDto) 2025-11-09 22:15:55.880 -06:00 [INF] Executed DbCommand (4ms) [Parameters=[@__email_0='?'], Comman2025-11-09 22:15:55.880 -06:00 [INF] Executed DbCommand (4ms) [Parameters=[@__email_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u2025-11-09 22:15:56.296 -06:00 [INF] Executed DbCommand (12ms) [Parameters=[@p10='?' (DbType = Int2025-11-09 22:15:56.296 -06:00 [INF] Executed DbCommand (12ms) [Parameters=[@p10='?' (DbType = Int32), @p0='?', @p1='?', @p2='?' (DbType = DateTime), @p3='?' (DbType = DateTime), @p4='?' (DbType = DateTime), @p5='?' (DbType = Int32), @p6='?', @p7='?', @p8='?', @p9='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE usuarios SET "Email" = @p0, "EstadoCuenta" = @p1, "FechaBloqueo" = @p2, "FechaRegistro" = @p3, "FechaUltimoIntentoFallido" = @p4, "IntentosFailidos" = @p5, 2025-11-09 22:15:56.299 -06:00 [INF] Executing ObjectResult, writing value of type 'NFLFantasyAPI.2025-11-09 22:15:56.299 -06:002025-11-09 22:15:56.299 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.AuthCo2025-11-09 22:15:56.299 -06:00 [INF] Executed action NFLFa2025-11-09 22:15:56.300 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.Aut2025-11-09 22:15:56.300 -06:00 [INF] Executed en2025-11-09 22:15:56.304 -06:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/Auth2025-11-09 22:15:56.304 -06:00 [INF] Request finished HTTP/1.2025-11-09 22:15:56.425 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/Equip2025-11-09 22:15:56.425 -06:00 2025-11-09 22:15:56.426 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:15:56.426 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Eq2025-11-09 22:15:56.426 -06:00 [INF] Executing endpoint 'NFLFanta2025-11-09 22:15:56.426 -06:00 [INF] Route matched with {action = "GetByUsuario", controller = "Eq2025-11-09 22:15:56.426 -06:00 [INF] Route matched with {action = "GetByUsuario", controller = "EquipoFantasy"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetByUsuario(Int32) on contro2025-11-09 22:15:56.433 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/Liga/2025-11-09 22:15:56.433 -02025-11-09 22:15:56.435 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:15:56.438 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.Li2025-11-09 22:15:56.438 -06:00 [INF] Executing endpoint 'NFL2025-11-09 22:15:56.440 -06:00 [INF] Route matched with {action = "GetByComisionado", controller =2025-11-09 22:15:56.440 -06:00 [INF] Route matched with {action = "GetByComisionado", controller = "Liga"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetByComisionado(Int32) 2025-11-09 22:15:56.441 -06:00 [INF] Executed DbCommand (2ms) [Parameters=[@__usuarioId_0='?' (DbT2025-11-09 22:15:56.441 -06:00 [INF] Executed DbCommand (2ms) [Parameters=[@__usuarioId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT e."Id", e."Estado", e."FechaCreacion", e."ImagenUrl", e."LigaId", e."Nombre", e."UsuarioId", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad", l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FormatoPosiciones", l."IdTemporada", l."ImagenUrl", l."NombreLiga", l."PasswordHash", l."PermitirDecimales"
+FROM equipos_fantasy AS e
+INNER JOIN usuarios AS u ON e."Usuario2025-11-09 22:15:56.459 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collect2025-11-09 22:15:56.459 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collections.Generic.List`1[[NFLFantasyAPI.Logic.DTOs.EquipoF2025-11-09 22:15:56.461 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.Equipo2025-11-09 22:15:56.461 -06:00 [INF] Executed action NFLFantasyAPI.Presen2025-11-09 22:15:56.463 -06:00 [INF] Executed DbCommand (3ms) [Parameters=[@__usuarioId_0='?' (DbT2025-11-09 22:15:56.464 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.EquipoFantasyController.GetByUsuario (NFLFantasyAPI.Presentation)'
+2025-11-09 22:15:56.463 -06:00 [INF] Executed DbCommand (3ms) [Parameters=[@__usuarioId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FormatoPosiciones", l."IdTemporada", l."ImagenUrl", l."NombreLiga", l."PasswordHash", l."PermitirDecimales", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad", t."Id", t."Actual", t."FechaCierre", t."FechaCreacion", t."FechaInicio", t."Nombre"
+FROM ligas AS l
+INNER JOIN usuarios AS u ON l."ComisionadoId" = u."Id"
+INNER JOIN temporadas AS t ON l."IdTemporada" = t."Id"
+WHERE l."ComisionadoId" = @__usuarioId_0
+2025-11-09 22:15:56.467 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/EquipoFantasy/usuario/1 - 200 null application/json; charset=utf-8 41.8266ms
+2025-11-09 22:15:56.469 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collections.Generic.List`1[[NFLFantasyAPI.Persistence.2025-11-09 22:15:56.471 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.LigaCo2025-11-09 22:15:56.471 -06:00 [INF] Executed action NFLFantasyAPI.P2025-11-09 22:15:56.474 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.Lig2025-11-09 22:15:56.474 -06:00 [INF] Executed endpoint 'NFL2025-11-09 22:15:56.475 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/Liga/2025-11-09 22:15:56.475 -06:00 [INF] Request finished HTTP/1.1 GET 2025-11-09 22:16:01.540 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/Liga/2025-11-09 22:16:01.542025-11-09 22:16:01.544 -06:00 [INF] CORS policy execution successful.
+2025-11-09 22:16:01.545 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/Liga/2025-11-09 22:16:01.545 -06:00 [2025-11-09 22:16:01.545 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:16:01.545 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:16:42.592 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:16:42.592025-11-09 22:16:42.598 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:16:42.598 -06:00 [2025-11-09 22:16:42.600 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:16:42.600 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:17:25.740 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:17:25.742025-11-09 22:17:25.747 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:17:25.747 -06:00 2025-11-09 22:17:25.757 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:17:25.757 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:17:27.931 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:17:27.932025-11-09 22:17:27.933 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:17:27.933 -06:00 [2025-11-09 22:17:27.940 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:17:27.940 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:19:36.933 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000//swagger/2025-11-09 22:19:36.933 -06:2025-11-09 22:19:36.936 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000//swagger/2025-11-09 22:19:36.936 -06:00 [INF] R2025-11-09 22:19:36.945 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:19:36.945 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by application 2025-11-09 22:20:34.119 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:20:34.112025-11-09 22:20:34.124 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:20:34.124 -06:00 [2025-11-09 22:20:34.128 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:20:34.128 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:21:57.004 -06:00 [INF] Application is shutting down...
+l, Response status code: 404
+2025-11-09 22:21:57.004 -06:00 [INF] Application is shutting down...
+2025-11-09 22:22:32.131 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-11-09 22:22:32.275 -06:00 [INF] User profile is available. Using '/home/jaam/.aspnet/DataProt2025-11-09 22:22:32.275 -06:00 [INF] User profile is available. Usin2025-11-09 22:22:32.426 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-11-09 22:22:32.435 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-09 22:22:32.436 -06:00 [INF] Hosting environment: Development
+2025-11-09 22:22:32.437 -06:00 [INF] Content root path: /home/jaam/Documents/Angular/dise-o_NFL/ba2025-11-09 22:22:32.437 -06:00 [INF] 2025-11-09 22:22:45.052 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:45.052025-11-09 22:22:45.186 -06:00 [WRN] Failed to determine the https port for redirect.
+2025-11-09 22:22:45.244 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:45.244 -06:00 [IN2025-11-09 22:22:45.298 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:22:45.298 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:22:46.042 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:46.042025-11-09 22:22:46.072 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:46.072 -06:00 2025-11-09 22:22:46.080 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:22:46.080 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:22:46.537 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:46.532025-11-09 22:22:46.550 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:46.550 -06:00 [I2025-11-09 22:22:46.557 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:22:46.557 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:22:46.892 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:46.892025-11-09 22:22:46.898 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:46.898 -06:00 [2025-11-09 22:22:46.913 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:22:46.913 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:22:47.165 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:47.162025-11-09 22:22:47.167 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:47.167 -06:00 [2025-11-09 22:22:47.168 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:22:47.168 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:22:47.431 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:47.432025-11-09 22:22:47.438 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:47.438 -06:00 [2025-11-09 22:22:47.459 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:22:47.459 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:22:47.690 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:47.692025-11-09 22:22:47.691 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:47.691 -06:00 [2025-11-09 22:22:47.707 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:22:47.707 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:22:47.934 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:47.932025-11-09 22:22:47.945 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:22:47.945 -06:00 [2025-11-09 22:22:47.947 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:22:47.947 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:23:02.678 -06:00 [INF] Application is shutting down...
+l, Response status code: 404
+2025-11-09 22:23:02.678 -06:00 [INF] Application is shutting down...
+2025-11-09 22:25:00.254 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-11-09 22:25:00.366 -06:00 [INF] User profile is available. Using '/home/jaam/.aspnet/DataProt2025-11-09 22:25:00.366 -06:00 [INF] User profile is available. Usin2025-11-09 22:25:00.483 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-11-09 22:25:00.488 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-09 22:25:00.489 -06:00 [INF] Hosting environment: Development
+2025-11-09 22:25:00.490 -06:00 [INF] Content root path: /home/jaam/Documents/Angular/dise-o_NFL/ba2025-11-09 22:25:00.490 -06:00 [INF] 2025-11-09 22:25:09.968 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:25:09.962025-11-09 22:25:10.024 -06:00 [WRN] Failed to determine the https port for redirect.
+2025-11-09 22:25:10.146 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:25:10.146 -06:00 [IN2025-11-09 22:25:10.200 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:25:10.200 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:25:43.442 -06:00 [INF] Application is shutting down...
+l, Response status code: 404
+2025-11-09 22:25:43.442 -06:00 [INF] Application is shutting down...
+2025-11-09 22:26:39.475 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-11-09 22:26:39.698 -06:00 [INF] User profile is available. Using '/home/jaam/.aspnet/DataProt2025-11-09 22:26:39.698 -06:00 [INF] User profile is available. Usin2025-11-09 22:26:39.868 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-11-09 22:26:39.876 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-09 22:26:39.877 -06:00 [INF] Hosting environment: Development
+2025-11-09 22:26:39.877 -06:00 [INF] Content root path: /home/jaam/Documents/Angular/dise-o_NFL/ba2025-11-09 22:26:39.877 -06:00 [INF] 2025-11-09 22:26:41.827 -06:00 [INF] Application is shutting down...
+c/NFLFantasyAPI.Presentation
+2025-11-09 22:26:41.827 -06:00 [INF] Application is shutting down...
+2025-11-09 22:26:54.642 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-11-09 22:26:55.158 -06:00 [INF] User profile is available. Using '/home/jaam/.aspnet/DataProt2025-11-09 22:26:55.158 -06:00 [INF] User profile is available. Usin2025-11-09 22:26:55.370 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-11-09 22:26:55.381 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-09 22:26:55.386 -06:00 [INF] Hosting environment: Development
+2025-11-09 22:26:55.387 -06:00 [INF] Content root path: /home/jaam/Documents/Angular/dise-o_NFL/ba2025-11-09 22:26:55.387 -06:00 [INF] 2025-11-09 22:27:01.632 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:27:01.632025-11-09 22:27:01.751 -06:00 [WRN] Failed to determine the https port for redirect.
+2025-11-09 22:27:01.804 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/i2025-11-09 22:27:01.804 -06:00 [IN2025-11-09 22:27:01.860 -06:00 [INF] Request reached the end of the middleware pipeline without be2025-11-09 22:27:01.860 -06:00 [INF] Request reached the end of the middleware pipeline without being handled by applic2025-11-09 22:27:19.929 -06:00 [INF] Application is shutting down...
+l, Response status code: 404
+2025-11-09 22:27:19.929 -06:00 [INF] Application is shutting down...

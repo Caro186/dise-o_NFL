@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using NFLFantasyAPI.Services.Interfaces;
+using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.Logic.DTOs;
 
-namespace NFLFantasyAPI.Controllers
+namespace NFLFantasyAPI.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
