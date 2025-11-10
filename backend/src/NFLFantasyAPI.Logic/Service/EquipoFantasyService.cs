@@ -4,6 +4,7 @@ using NFLFantasyAPI.Logic.Interfaces;
 using NFLFantasyAPI.Persistence.Models;
 using NFLFantasyAPI.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace NFLFantasyAPI.Services
 {
