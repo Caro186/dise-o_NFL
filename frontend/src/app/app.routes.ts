@@ -13,6 +13,7 @@ import { EquiposNFLListComponent } from '../mainpage/equipos-nfl-list/equipos-nf
 import { EquiposNFLFormComponent } from '../mainpage/equipos-nfl-form/equipos-nfl-form.component';
 import { authGuard } from '../guards/auth.guard';
 import { adminGuard } from '../guards/admin.guard';
+import { JugadoresComponent } from '../mainpage/jugadores/jugadores.component';
 
 export const routes: Routes = [
     // ===== Rutas públicas =====
@@ -55,7 +56,14 @@ export const routes: Routes = [
                 path: 'temporada', 
                 component: TemporadaComponent,
                 canActivate: [adminGuard] 
+            },
+            {
+
+                path:'jugadores',
+                component: JugadoresComponent,
+                
             }
+
         ]
     },
     
