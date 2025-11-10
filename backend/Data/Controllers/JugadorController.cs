@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NFLFantasyAPI.Data;
 using NFLFantasyAPI.DTOs;
 using NFLFantasyAPI.Models;
+using NFLFantasyAPI.Services;
 
 namespace NFLFantasyAPI.Controllers
 {
@@ -11,10 +12,17 @@ namespace NFLFantasyAPI.Controllers
     public class JugadorController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly JugadorBatchService _batchService;
+        private readonly ILogger<JugadorController> _logger;
 
-        public JugadorController(ApplicationDbContext context)
+        public JugadorController(
+            ApplicationDbContext context,
+            JugadorBatchService batchService,
+            ILogger<JugadorController> logger)
         {
             _context = context;
+            _batchService = batchService;
+            _logger = logger;
         }
 
         // GET: api/Jugador
@@ -161,20 +169,99 @@ namespace NFLFantasyAPI.Controllers
             return CreatedAtAction(nameof(GetJugador), new { id = jugador.Id }, response);
         }
 
+        // ==========================================
+        // NUEVO ENDPOINT BATCH
+        // ==========================================
+        
+        /// <summary>
+        /// Endpoint para crear múltiples jugadores desde un archivo JSON
+        /// Implementa la lógica "todo-o-nada": si hay al menos un error, no se crea ningún jugador
+        /// </summary>
+        /// <param name="file">Archivo JSON con array de jugadores</param>
+        /// <returns>Reporte completo de éxitos y errores</returns>
+        [HttpPost("batch")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<JugadorBatchResultDto>> CrearJugadoresBatch(IFormFile file)
+        {
+            _logger.LogInformation("Iniciando procesamiento batch de jugadores");
+
+            // Validar que se envió un archivo
+            if (file == null)
+            {
+                return BadRequest(new JugadorBatchResultDto
+                {
+                    Exito = false,
+                    Mensaje = "No se proporcionó ningún archivo",
+                    Errores = new List<JugadorBatchErrorDto>
+                    {
+                        new JugadorBatchErrorDto { Error = "Archivo no encontrado en la solicitud" }
+                    }
+                });
+            }
+
+            // Validar extensión del archivo
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (extension != ".json")
+            {
+                return BadRequest(new JugadorBatchResultDto
+                {
+                    Exito = false,
+                    Mensaje = "El archivo debe ser de tipo JSON (.json)",
+                    Errores = new List<JugadorBatchErrorDto>
+                    {
+                        new JugadorBatchErrorDto { Error = $"Extensión de archivo inválida: {extension}" }
+                    }
+                });
+            }
+
+            try
+            {
+                // Procesar el archivo usando el servicio
+                var result = await _batchService.ProcessBatchFileAsync(file);
+
+                // Determinar código de estado HTTP según resultado
+                if (result.Exito)
+                {
+                    _logger.LogInformation($"Batch procesado exitosamente: {result.TotalExitosos} jugadores creados");
+                    return Ok(result);
+                }
+                else
+                {
+                    _logger.LogWarning($"Batch con errores: {result.TotalErrores} errores encontrados");
+                    return BadRequest(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error crítico al procesar batch de jugadores");
+                return StatusCode(500, new JugadorBatchResultDto
+                {
+                    Exito = false,
+                    Mensaje = "Error interno del servidor al procesar el archivo",
+                    Errores = new List<JugadorBatchErrorDto>
+                    {
+                        new JugadorBatchErrorDto { Error = $"Error del sistema: {ex.Message}" }
+                    }
+                });
+            }
+        }
+
+        // ==========================================
+        // FIN NUEVO ENDPOINT BATCH
+        // ==========================================
+
         // PUT: api/Jugador/5
         [HttpPut("{id}")]
         public async Task<ActionResult<JugadorResponseDto>> ActualizarJugador(int id, ActualizarJugadorDto dto)
         {
-            var jugador = await _context.Jugadores
-                .Include(j => j.EquipoNFL)
-                .FirstOrDefaultAsync(j => j.Id == id);
+            var jugador = await _context.Jugadores.FindAsync(id);
 
             if (jugador == null)
             {
                 return NotFound(new { mensaje = "Jugador no encontrado" });
             }
 
-            // Validar equipo NFL si se está actualizando
+            // Validar equipo NFL si se proporciona
             if (dto.EquipoNFLId.HasValue && dto.EquipoNFLId.Value > 0)
             {
                 var equipoExiste = await _context.EquiposNFL.AnyAsync(e => e.Id == dto.EquipoNFLId.Value);
@@ -184,13 +271,14 @@ namespace NFLFantasyAPI.Controllers
                 }
             }
 
-            // Validar nombre duplicado si se está actualizando
-            if (!string.IsNullOrWhiteSpace(dto.Nombre))
+            // Validar nombre duplicado si se está cambiando el nombre o equipo
+            if (!string.IsNullOrWhiteSpace(dto.Nombre) || dto.EquipoNFLId.HasValue)
             {
+                var nombreParaValidar = !string.IsNullOrWhiteSpace(dto.Nombre) ? dto.Nombre : jugador.Nombre;
                 var equipoIdParaValidar = dto.EquipoNFLId ?? jugador.EquipoNFLId;
                 var nombreDuplicado = await _context.Jugadores
                     .AnyAsync(j => j.Id != id && 
-                                  j.Nombre.ToLower() == dto.Nombre.ToLower() && 
+                                  j.Nombre.ToLower() == nombreParaValidar.ToLower() && 
                                   j.EquipoNFLId == equipoIdParaValidar);
 
                 if (nombreDuplicado)

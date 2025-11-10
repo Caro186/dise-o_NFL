@@ -6,148 +6,107 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Backend.Configuration;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Configurar JwtSettings
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
-// ✅ Configurar FileServer settings
-builder.Services.Configure<FileServerSettings>(builder.Configuration.GetSection("FileServer"));
-
-// Configurar Serilog para logging
+// Configurar Serilog
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.File("logs/nfl-fantasy-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.File("logs/nfl-fantasy-api-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 builder.Host.UseSerilog();
 
-// Add services to the container
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Registrar el servicio JWT
-builder.Services.AddScoped<IJwtService, JwtService>();
-
-// Configuración de autenticación JWT
-var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key no configurada");
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer no configurado");
-var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience no configurado");
-
-builder.Services.AddAuthentication(options =>
+// Configuración de Swagger con soporte para file uploads
+builder.Services.AddSwaggerGen(c =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-        ClockSkew = TimeSpan.Zero
-    };
-});
-
-// Configuración mejorada de Swagger
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "NFL Fantasy API",
+    c.SwaggerDoc("v1", new OpenApiInfo 
+    { 
+        Title = "NFL Fantasy API", 
         Version = "v1",
-        Description = "API para la gestión de usuarios y equipos de Fantasy NFL",
-        Contact = new Microsoft.OpenApi.Models.OpenApiContact
-        {
-            Name = "Equipo de Desarrollo NFL Fantasy",
-            Email = "support@nflfantasy.com"
-        }
+        Description = "API para gestión de jugadores y equipos NFL Fantasy"
     });
 
-    // Configurar Swagger para usar JWT
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header usando el esquema Bearer. Ejemplo: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
-
-    // Incluir comentarios XML
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        options.IncludeXmlComments(xmlPath);
-    }
+    // Configuración para soportar file uploads
+    c.OperationFilter<FileUploadOperationFilter>();
 });
 
-// Conexión a la base de datos
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new InvalidOperationException("La cadena de conexión 'DefaultConnection' no está configurada");
-}
-
+// Configurar DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Configuración de CORS
-var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+// Registrar el servicio de batch
+builder.Services.AddScoped<JugadorBatchService>();
 
+// Configurar FileServerSettings
+builder.Services.Configure<FileServerSettings>(
+    builder.Configuration.GetSection("FileServer"));
+
+// ==========================================
+// CONFIGURACIÓN JWT CORREGIDA
+// ==========================================
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["Secret"];  // ← CAMBIADO: Ahora usa "Secret" no "SecretKey"
+
+if (!string.IsNullOrEmpty(secretKey))
+{
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+    builder.Services.AddAuthorization();
+}
+// ==========================================
+
+// Configurar CORS
+const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins(
-                    builder.Configuration["Cors:AllowedOrigins"]?.Split(',') 
-                    ?? new[] { "http://localhost:4200" }
-                )
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
+            policy.WithOrigins("http://localhost:4200", "http://localhost:3000", "http://192.168.100.77:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    app.UseSwaggerUI(c =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "NFL Fantasy API v1");
-        options.RoutePrefix = string.Empty;
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "NFL Fantasy API v1");
+        c.RoutePrefix = "swagger";
     });
 }
 
-// Middleware de manejo global de excepciones
+// Configurar middleware de manejo de excepciones global
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -155,18 +114,18 @@ app.UseExceptionHandler(errorApp =>
         context.Response.StatusCode = 500;
         context.Response.ContentType = "application/json";
 
-        var error = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
-        if (error != null)
-        {
-            var exception = error.Error;
-            Log.Error(exception, "Error no manejado en la aplicación");
+        var exceptionHandlerPathFeature =
+            context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
 
-            await context.Response.WriteAsJsonAsync(new
-            {
-                mensaje = "Error interno del servidor",
-                detalles = app.Environment.IsDevelopment() ? exception.Message : null
-            });
-        }
+        var exception = exceptionHandlerPathFeature?.Error;
+
+        Log.Error(exception, "Error no controlado en la aplicación");
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            error = "Error interno del servidor",
+            message = app.Environment.IsDevelopment() ? exception?.Message : null
+        });
     });
 });
 
@@ -178,6 +137,13 @@ if (!Directory.Exists(uploadsPath))
     Log.Information("Carpeta de uploads creada: {UploadsPath}", uploadsPath);
 }
 
+var processedJugadoresPath = Path.Combine(app.Environment.WebRootPath, "processed", "jugadores");
+if (!Directory.Exists(processedJugadoresPath))
+{
+    Directory.CreateDirectory(processedJugadoresPath);
+    Log.Information("Carpeta de archivos procesados (jugadores) creada: {ProcessedPath}", processedJugadoresPath);
+}
+
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();
@@ -185,12 +151,16 @@ app.UseHttpsRedirection();
 app.UseCors(myAllowSpecificOrigins);
 
 // Agregar middleware de autenticación y autorización
-app.UseAuthentication();
-app.UseAuthorization();
+if (!string.IsNullOrEmpty(secretKey))
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
 
 app.MapControllers();
 
-Log.Information("Iniciando aplicación NFL Fantasy API con autenticación JWT");
+Log.Information("🚀 NFL Fantasy API iniciada correctamente");
+Log.Information("📖 Swagger disponible en: http://localhost:5000/swagger");
 
 try
 {
@@ -203,4 +173,47 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+// ==========================================
+// FILTRO PARA FILE UPLOADS EN SWAGGER
+// ==========================================
+public class FileUploadOperationFilter : Swashbuckle.AspNetCore.SwaggerGen.IOperationFilter
+{
+    public void Apply(Microsoft.OpenApi.Models.OpenApiOperation operation, Swashbuckle.AspNetCore.SwaggerGen.OperationFilterContext context)
+    {
+        var fileParams = context.MethodInfo.GetParameters()
+            .Where(p => p.ParameterType == typeof(IFormFile))
+            .ToList();
+
+        if (!fileParams.Any())
+            return;
+
+        // Limpiar parámetros existentes que causan conflicto
+        operation.Parameters?.Clear();
+
+        operation.RequestBody = new OpenApiRequestBody
+        {
+            Content = new Dictionary<string, OpenApiMediaType>
+            {
+                ["multipart/form-data"] = new OpenApiMediaType
+                {
+                    Schema = new OpenApiSchema
+                    {
+                        Type = "object",
+                        Properties = fileParams.ToDictionary(
+                            p => p.Name ?? "file",
+                            p => new OpenApiSchema
+                            {
+                                Type = "string",
+                                Format = "binary",
+                                Description = "Archivo JSON con array de jugadores"
+                            }
+                        ),
+                        Required = new HashSet<string>(fileParams.Select(p => p.Name ?? "file"))
+                    }
+                }
+            }
+        };
+    }
 }
