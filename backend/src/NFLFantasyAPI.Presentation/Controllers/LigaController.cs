@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.Logic.Services;
 using NFLFantasyAPI.Logic.DTOs;
 
 namespace NFLFantasyAPI.Controllers
@@ -15,31 +15,52 @@ namespace NFLFantasyAPI.Controllers
             _ligaService = ligaService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CrearLiga([FromBody] LigaCreateDto dto)
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _ligaService.CrearLigaAsync(dto);
-            return StatusCode(result.StatusCode, result.Data);
-        }
-
-        [HttpPost("unirse")]
-        public async Task<IActionResult> UnirseALiga([FromBody] UnirseALigaDto dto)
-        {
-            var result = await _ligaService.UnirseALigaAsync(dto);
+            var result = await _ligaService.GetAllAsync();
             return StatusCode(result.StatusCode, result.Data);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> ObtenerLiga(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var result = await _ligaService.ObtenerLigaAsync(id);
+            var result = await _ligaService.GetByIdAsync(id);
             return StatusCode(result.StatusCode, result.Data);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ObtenerTodas()
+        [HttpGet("comisionado/{usuarioId}")]
+        public async Task<IActionResult> GetByComisionado(int usuarioId)
         {
-            var result = await _ligaService.ObtenerTodasAsync();
+            var result = await _ligaService.GetByComisionadoAsync(usuarioId);
+            return StatusCode(result.StatusCode, result.Data);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] LigaCreateDto dto)
+        {
+            var result = await _ligaService.CreateAsync(dto);
+            return StatusCode(result.StatusCode, result.Data);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] LigaCreateDto dto)
+        {
+            var result = await _ligaService.UpdateAsync(id, dto);
+            return StatusCode(result.StatusCode, result.Data);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _ligaService.DeleteAsync(id);
+            return StatusCode(result.StatusCode, result.Data);
+        }
+
+        [HttpPost("{id}/imagen")]
+        public async Task<IActionResult> UploadImagen(int id, IFormFile imagen)
+        {
+            var result = await _ligaService.UploadImagenAsync(id, imagen);
             return StatusCode(result.StatusCode, result.Data);
         }
     }
