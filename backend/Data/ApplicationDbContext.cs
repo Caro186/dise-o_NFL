@@ -17,6 +17,7 @@ namespace NFLFantasyAPI.Data
         public DbSet<Liga> Ligas { get; set; }
         public DbSet<Temporada> Temporadas { get; set; }
         public DbSet<Semana> Semanas { get; set; }
+        public DbSet<Jugador> Jugadores { get; set; }  // NUEVO
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -78,7 +79,6 @@ namespace NFLFantasyAPI.Data
             });
 
             // Configurar tabla de ligas
-           // Configurar tabla de ligas
             modelBuilder.Entity<Liga>(entity =>
             {
                 entity.ToTable("ligas");
@@ -123,7 +123,6 @@ namespace NFLFantasyAPI.Data
             });
 
             // Configurar tabla de semanas
-            // Configurar tabla de semanas
             modelBuilder.Entity<Semana>(entity =>
             {
                 entity.ToTable("semanas");
@@ -133,11 +132,38 @@ namespace NFLFantasyAPI.Data
                 entity.Property(s => s.FechaFin).IsRequired();
 
                 entity.HasOne(s => s.Temporada)
-                    .WithMany(t => t.Semanas)  // Asume que Temporada tiene una colección de Semanas
+                    .WithMany(t => t.Semanas)
                     .HasForeignKey(s => s.TemporadaId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasIndex(s => s.TemporadaId);
+            });
+
+            // NUEVA CONFIGURACIÓN: Tabla de jugadores
+            modelBuilder.Entity<Jugador>(entity =>
+            {
+                entity.ToTable("jugadores");
+                entity.HasKey(j => j.Id);
+                entity.Property(j => j.Nombre).IsRequired().HasMaxLength(100);
+                entity.Property(j => j.Posicion).IsRequired().HasMaxLength(50);
+                entity.Property(j => j.EquipoNFLId).IsRequired();
+                entity.Property(j => j.ImagenUrl).HasMaxLength(500);
+                entity.Property(j => j.ThumbnailUrl).HasMaxLength(500);
+                entity.Property(j => j.Estado).IsRequired().HasMaxLength(20).HasDefaultValue("Activo");
+                entity.Property(j => j.FechaCreacion).IsRequired();
+                entity.Property(j => j.FechaActualizacion).IsRequired(false);
+
+                // Relación con EquipoNFL
+                entity.HasOne(j => j.EquipoNFL)
+                    .WithMany()
+                    .HasForeignKey(j => j.EquipoNFLId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Índices
+                entity.HasIndex(j => j.EquipoNFLId);
+                entity.HasIndex(j => new { j.Nombre, j.EquipoNFLId }).IsUnique();
+                entity.HasIndex(j => j.Posicion);
+                entity.HasIndex(j => j.Estado);
             });
         }
     }
