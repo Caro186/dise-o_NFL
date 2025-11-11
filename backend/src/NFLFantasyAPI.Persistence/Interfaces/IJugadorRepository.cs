@@ -1,4 +1,5 @@
 using NFLFantasyAPI.Persistence.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace NFLFantasyAPI.Persistence.Interfaces
 {
@@ -13,5 +14,8 @@ namespace NFLFantasyAPI.Persistence.Interfaces
         Task AddAsync(Jugador jugador);
         Task UpdateAsync(Jugador jugador);
         Task DeleteAsync(Jugador jugador);
+        Task<IDbContextTransaction> BeginTransactionAsync();
+        Task RollbackTransactionAsync();
+        Task SaveChangesAsync();
     }
 }

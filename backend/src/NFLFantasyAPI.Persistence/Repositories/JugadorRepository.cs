@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using NFLFantasyAPI.Persistence.Context;
 using NFLFantasyAPI.Persistence.Models;
 using NFLFantasyAPI.Persistence.Interfaces;
@@ -8,6 +9,7 @@ namespace NFLFantasyAPI.Persistence.Repositories
     public class JugadorRepository : IJugadorRepository
     {
         private readonly ApplicationDbContext _context;
+        private IDbContextTransaction? _currentTransaction;
 
         public JugadorRepository(ApplicationDbContext context)
         {
@@ -73,5 +75,24 @@ namespace NFLFantasyAPI.Persistence.Repositories
         {
             return await _context.EquiposNFL.AnyAsync(e => e.Id == equipoId);
         }
+
+         public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            _currentTransaction = await _context.Database.BeginTransactionAsync();
+            return _currentTransaction;
+        }
+
+        public async Task RollbackTransactionAsync()
+        {
+            if (_currentTransaction != null)
+            {
+                await _currentTransaction.RollbackAsync();
+                await _currentTransaction.DisposeAsync();
+                _currentTransaction = null;
+            }
+        }
+
+        public async Task SaveChangesAsync()
+            => await _context.SaveChangesAsync();
     }
 }

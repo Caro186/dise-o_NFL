@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NFLFantasyAPI.CrossCutting;
 using NFLFantasyAPI.Logic.DTOs;
 using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.Logic.Services;
 
 namespace NFLFantasyAPI.Presentation.Controllers
 {
@@ -10,10 +11,15 @@ namespace NFLFantasyAPI.Presentation.Controllers
     public class JugadorController : ControllerBase
     {
         private readonly IJugadorService _service;
+        private readonly ILogger<JugadorController> _logger;
 
-        public JugadorController(IJugadorService service)
+        public JugadorController(
+            IJugadorService service,
+            ILogger<JugadorController> logger
+        )
         {
             _service = service;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -52,5 +58,74 @@ namespace NFLFantasyAPI.Presentation.Controllers
         {
             return StatusCode(result.StatusCode, result.Data);
         }
+
+        [HttpPost("batch")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<JugadorBatchResultDto>> CrearJugadoresBatch(IFormFile file)
+        {
+            _logger.LogInformation("Iniciando procesamiento batch de jugadores");
+
+            // Validar que se envió un archivo
+            if (file == null)
+            {
+                return BadRequest(new JugadorBatchResultDto
+                {
+                    Exito = false,
+                    Mensaje = "No se proporcionó ningún archivo",
+                    Errores = new List<JugadorBatchErrorDto>
+                    {
+                        new JugadorBatchErrorDto { Error = "Archivo no encontrado en la solicitud" }
+                    }
+                });
+            }
+
+            // Validar extensión del archivo
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (extension != ".json")
+            {
+                return BadRequest(new JugadorBatchResultDto
+                {
+                    Exito = false,
+                    Mensaje = "El archivo debe ser de tipo JSON (.json)",
+                    Errores = new List<JugadorBatchErrorDto>
+                    {
+                        new JugadorBatchErrorDto { Error = $"Extensión de archivo inválida: {extension}" }
+                    }
+                });
+            }
+
+            try
+            {
+                // Procesar el archivo usando el servicio
+                var result = await _service.ProcessBatchFileAsync(file);
+
+                // Determinar código de estado HTTP según resultado
+                if (result.Exito)
+                {
+                    _logger.LogInformation($"Batch procesado exitosamente: {result.TotalExitosos} jugadores creados");
+                    return Ok(result);
+                }
+                else
+                {
+                    _logger.LogWarning($"Batch con errores: {result.TotalErrores} errores encontrados");
+                    return BadRequest(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error crítico al procesar batch de jugadores");
+                return StatusCode(500, new JugadorBatchResultDto
+                {
+                    Exito = false,
+                    Mensaje = "Error interno del servidor al procesar el archivo",
+                    Errores = new List<JugadorBatchErrorDto>
+                    {
+                        new JugadorBatchErrorDto { Error = $"Error del sistema: {ex.Message}" }
+                    }
+                });
+            }
+        }
+
+
     }
 }
