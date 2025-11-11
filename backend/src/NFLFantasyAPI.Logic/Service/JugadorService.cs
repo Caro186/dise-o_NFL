@@ -7,6 +7,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
+using NFLFantasyAPI.CrossCutting.Configuration;
+
 
 namespace NFLFantasyAPI.Logic.Services
 {
@@ -17,17 +20,21 @@ namespace NFLFantasyAPI.Logic.Services
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<JugadorService> _logger;
 
+        private readonly FileServerSettings _fileServerSettings;
+
+
         public JugadorService(
             IJugadorRepository jugadorRepository,
             IEquipoNFLRepository equipoNFLRepository,
             IWebHostEnvironment environment,
-            ILogger<JugadorService> logger
-        )
+            ILogger<JugadorService> logger,
+            IOptions<FileServerSettings> fileServerSettings)
         {
             _jugadorRepository = jugadorRepository;
             _equipoNFLRepository = equipoNFLRepository;
             _environment = environment;
             _logger = logger;
+            _fileServerSettings = fileServerSettings.Value;
         }
 
         public async Task<ServiceResult> GetAllAsync()
@@ -82,7 +89,7 @@ namespace NFLFantasyAPI.Logic.Services
         }
 
         // 5. Actualizar la URL en la base de datos
-        jugador.ImagenUrl = $"http://localhost:5000/uploads/jugadores/{fileName}";
+        jugador.ImagenUrl = $"{_fileServerSettings.BaseUrl}/uploads/jugadores/{fileName}";
         await _jugadorRepository.SaveChangesAsync();
 
         _logger.LogInformation("Imagen subida exitosamente para el jugador {Id}", id);
@@ -135,7 +142,7 @@ public async Task<ServiceResult> SubirThumbnailAsync(int id, IFormFile thumbnail
         }
 
         // 5. Actualizar la URL en la base de datos
-        jugador.ThumbnailUrl = $"http://localhost:5000/uploads/jugadores/thumbnails/{fileName}";
+        jugador.ThumbnailUrl = $"{_fileServerSettings.BaseUrl}/uploads/jugadores/thumbnails/{fileName}";
         await _jugadorRepository.SaveChangesAsync();
 
         _logger.LogInformation("Thumbnail subido exitosamente para el jugador {Id}", id);
