@@ -59,6 +59,29 @@ namespace NFLFantasyAPI.Presentation.Controllers
             return StatusCode(result.StatusCode, result.Data);
         }
 
+
+        [HttpPost("{id}/imagen")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> SubirImagen(int id, IFormFile imagen)
+        {
+            if (imagen == null)
+                return BadRequest(new { mensaje = "No se proporcionó ningún archivo" });
+
+            var result = await _service.SubirImagenAsync(id, imagen);
+            return StatusCode(result.StatusCode, result.Data);
+        }
+
+        [HttpPost("{id}/thumbnail")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> SubirThumbnail(int id, IFormFile thumbnail)
+        {
+            if (thumbnail == null)
+                return BadRequest(new { mensaje = "No se proporcionó ningún archivo" });
+
+            var result = await _service.SubirThumbnailAsync(id, thumbnail);
+            return StatusCode(result.StatusCode, result.Data);
+        }
+
         [HttpPost("batch")]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<JugadorBatchResultDto>> CrearJugadoresBatch(IFormFile file)

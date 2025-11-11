@@ -47,6 +47,112 @@ namespace NFLFantasyAPI.Logic.Services
             return ServiceResult.Ok(dto);
         }
 
+        public async Task<ServiceResult> SubirImagenAsync(int id, IFormFile imagen)
+{
+    try
+    {
+        // 1. Validar que el jugador existe
+        var jugador = await _jugadorRepository.GetByIdAsync(id);
+        if (jugador == null)
+            return ServiceResult.BadRequest("Jugador no encontrado");
+
+        // 2. Validar el archivo
+        if (imagen == null || imagen.Length == 0)
+            return ServiceResult.BadRequest("El archivo está vacío");
+
+        var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png" };
+        if (!allowedTypes.Contains(imagen.ContentType.ToLower()))
+            return ServiceResult.BadRequest("Solo se permiten imágenes JPEG o PNG");
+
+        if (imagen.Length > 5 * 1024 * 1024) // 5 MB
+            return ServiceResult.BadRequest("El tamaño máximo permitido es 5 MB");
+
+        // 3. Crear directorio si no existe
+        var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "jugadores");
+        Directory.CreateDirectory(uploadsFolder);
+
+        // 4. Generar nombre único y guardar archivo
+        var extension = Path.GetExtension(imagen.FileName);
+        var fileName = $"{id}_{Guid.NewGuid()}{extension}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await imagen.CopyToAsync(stream);
+        }
+
+        // 5. Actualizar la URL en la base de datos
+        jugador.ImagenUrl = $"http://localhost:5000/uploads/jugadores/{fileName}";
+        await _jugadorRepository.SaveChangesAsync();
+
+        _logger.LogInformation("Imagen subida exitosamente para el jugador {Id}", id);
+
+        return ServiceResult.Ok(new 
+        { 
+            mensaje = "Imagen subida exitosamente",
+            imagenUrl = jugador.ImagenUrl 
+        });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al subir imagen del jugador {Id}", id);
+        return ServiceResult.Error("Error interno del servidor al subir la imagen");
+    }
+}
+
+public async Task<ServiceResult> SubirThumbnailAsync(int id, IFormFile thumbnail)
+{
+    try
+    {
+        // 1. Validar que el jugador existe
+        var jugador = await _jugadorRepository.GetByIdAsync(id);
+        if (jugador == null)
+            return ServiceResult.BadRequest("Jugador no encontrado");
+
+        // 2. Validar el archivo
+        if (thumbnail == null || thumbnail.Length == 0)
+            return ServiceResult.BadRequest("El archivo está vacío");
+
+        var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png" };
+        if (!allowedTypes.Contains(thumbnail.ContentType.ToLower()))
+            return ServiceResult.BadRequest("Solo se permiten imágenes JPEG o PNG");
+
+        if (thumbnail.Length > 2 * 1024 * 1024) // 2 MB para thumbnails
+            return ServiceResult.BadRequest("El tamaño máximo permitido es 2 MB");
+
+        // 3. Crear directorio si no existe
+        var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "jugadores", "thumbnails");
+        Directory.CreateDirectory(uploadsFolder);
+
+        // 4. Generar nombre único y guardar archivo
+        var extension = Path.GetExtension(thumbnail.FileName);
+        var fileName = $"{id}_thumb_{Guid.NewGuid()}{extension}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await thumbnail.CopyToAsync(stream);
+        }
+
+        // 5. Actualizar la URL en la base de datos
+        jugador.ThumbnailUrl = $"http://localhost:5000/uploads/jugadores/thumbnails/{fileName}";
+        await _jugadorRepository.SaveChangesAsync();
+
+        _logger.LogInformation("Thumbnail subido exitosamente para el jugador {Id}", id);
+
+        return ServiceResult.Ok(new 
+        { 
+            mensaje = "Thumbnail subido exitosamente",
+            thumbnailUrl = jugador.ThumbnailUrl 
+        });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al subir thumbnail del jugador {Id}", id);
+        return ServiceResult.Error("Error interno del servidor al subir el thumbnail");
+    }
+}
+
         public async Task<ServiceResult> GetByIdAsync(int id)
         {
             var jugador = await _jugadorRepository.GetByIdAsync(id);

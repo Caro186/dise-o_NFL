@@ -22,6 +22,9 @@ namespace NFLFantasyAPI.Logic.Interfaces
         Task<ServiceResult> GetByPosicionAsync(string posicion);
 
         Task<JugadorBatchResultDto> ProcessBatchFileAsync(IFormFile file);
+
+        Task<ServiceResult> SubirImagenAsync(int id, IFormFile imagen);
+        Task<ServiceResult> SubirThumbnailAsync(int id, IFormFile thumbnail);
     }
 }
 
