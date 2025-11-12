@@ -9,6 +9,7 @@ import { Perfil } from '../perfil/perfil';
 import { authGuard } from '../guards/auth.guard';
 import { CrearLiga } from '../mainpage/crear-liga/crear-liga';
 import { BuscarUnirseLiga } from '../mainpage/buscar-unirse-liga/buscar-unirse-liga';
+import {FormJugadorComponent} from '../mainpage/creacion-manual-de-jugador/form-jugador';
 
 export const routes: Routes = [
   {
@@ -22,7 +23,7 @@ export const routes: Routes = [
   {
     path: 'mainpage',
     component: Sidenav,
-    canActivate: [authGuard],
+    //canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -52,7 +53,13 @@ export const routes: Routes = [
       {
         path: 'buscar-liga',
         component: BuscarUnirseLiga
+      },
+      {
+        path: 'form-jugador',
+        component: FormJugadorComponent
       }
+
+
     ]
   },
   {
