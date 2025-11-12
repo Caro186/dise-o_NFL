@@ -45,9 +45,9 @@ export class Register implements OnInit {
       nombreCompleto: ['', [Validators.required, Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
       password: ['', [
-        Validators.required,
-        Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]{8,12}$')
-      ]],
+      Validators.required,
+      Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]{8,12}$')
+    ]],
       confirmPassword: ['', Validators.required]
     }, {
       validators: this.passwordsMatchValidator

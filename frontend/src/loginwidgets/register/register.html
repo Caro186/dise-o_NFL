@@ -34,7 +34,8 @@
                   <input type="password" formControlName="password" id="password" class="form-control form-control-lg" />
                   <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="text-danger mt-1">
                     <div *ngIf="registerForm.get('password')?.errors?.['required']">Password is required.</div>
-                    <div *ngIf="registerForm.get('password')?.errors?.['pattern']">Password must be 8-12 characters, alphanumeric, with at least one uppercase and one lowercase letter.</div>
+                    <div *ngIf="registerForm.get('password')?.errors?.['pattern']">  Password must be 8-12 characters, with at least one uppercase letter, one lowercase letter, and one number.
+                    </div>
                   </div>
                 </div>
 

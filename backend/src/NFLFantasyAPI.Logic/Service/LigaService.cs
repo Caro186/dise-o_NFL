@@ -41,7 +41,30 @@ namespace NFLFantasyAPI.Logic.Services
         public async Task<ServiceResult> GetAllAsync()
         {
             var ligas = await _ligaRepository.GetAllAsync();
-            return ServiceResult.Ok(ligas);
+
+            var ligasResponse = ligas.Select(l => new LigaResponseDto
+            {
+                IdLiga = l.IdLiga,
+                ImagenUrl = l.ImagenUrl,
+                NombreLiga = l.NombreLiga,
+                Descripcion = l.Descripcion,
+                IdTemporada = l.IdTemporada,
+                NombreTemporada = l.Temporada?.Nombre,
+                Estado = l.Estado,
+                CuposTotales = l.CuposTotales,
+                CuposOcupados = l.CuposOcupados,
+                FechaCreacion = l.FechaCreacion,
+                FechaInicio = l.FechaInicio,
+                FechaFin = l.FechaFin,
+                ComisionadoId = l.ComisionadoId,
+                NombreComisionado = l.Comisionado?.NombreCompleto,
+                FormatoPosiciones = l.FormatoPosiciones,
+                EsquemaPuntos = l.EsquemaPuntos,
+                ConfigPlayoffs = l.ConfigPlayoffs,
+                PermitirDecimales = l.PermitirDecimales
+            }).ToList();
+
+            return ServiceResult.Ok(ligasResponse);
         }
 
         public async Task<ServiceResult> GetByIdAsync(int id)
