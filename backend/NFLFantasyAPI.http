@@ -1,6 +1,0 @@
-@NFLFantasyAPI_HostAddress = http://localhost:5225
-
-GET {{NFLFantasyAPI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
