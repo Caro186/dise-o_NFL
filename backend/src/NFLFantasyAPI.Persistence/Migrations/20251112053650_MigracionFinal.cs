@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NFLFantasyAPI.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AgregaRol : Migration
+    public partial class MigracionFinal : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

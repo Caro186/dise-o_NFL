@@ -6,7 +6,7 @@
                 <button type="button" class="btn btn-dark" (click)="cargarEquipos()">
                     Actualizar
                 </button>
-                <a routerLink="/admin/equipos-nfl/crear" class="btn btn-success">
+                <a routerLink="crear/" class="btn btn-success">
                     + Crear Equipo NFL
                 </a>
             </div>
@@ -29,7 +29,7 @@
         <div *ngIf="equipos.length === 0" class="col-12">
             <div class="alert alert-warning">
                 No hay equipos NFL registrados. 
-                <a routerLink="/admin/equipos-nfl/crear" class="alert-link">Crea el primer equipo aquí</a>.
+                <a routerLink="crear/" class="alert-link">Crea el primer equipo aquí</a>.
             </div>
         </div>
 
