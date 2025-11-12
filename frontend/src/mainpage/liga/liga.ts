@@ -1,9 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { EquipoService } from '../../services/equipo.service';
-import { Authservice } from '../../services/authservice';
-import { EquipoResponseDto } from '../../services/equipo.service'; //esto cambiarlo a liga
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { LigaService, LigaResponseDto } from '../../services/liga.service';
+import { Authservice } from '../../services/authservice';
+
+interface LigaConRol extends LigaResponseDto {
+  esComisionado: boolean;
+}
+
+/**
+ * Componente para mostrar las ligas del usuario
+ */
 @Component({
   selector: 'app-liga',
   imports: [CommonModule, RouterModule],
@@ -11,74 +18,85 @@ import { RouterModule } from '@angular/router';
   styleUrl: './liga.css'
 })
 export class Liga implements OnInit {
-  equipos: EquipoResponseDto[] = [];
+  ligas: LigaConRol[] = [];
   isLoading: boolean = true;
   errorMessage: string = '';
-  baseUrl: string = 'http://localhost:5000';
   
-  /**
-   * Constructor del componente de equipos
-   * @param equipoService Servicio para gestionar equipos
-   * @param authService Servicio de autenticación
-   */
   constructor(
-    private equipoService: EquipoService,
+    private ligaService: LigaService,
     private authService: Authservice
   ) { }
 
-  /**
-   * Inicialización del componente
-   * Carga los equipos del usuario actual
-   */
   ngOnInit(): void {
-    this.cargarEquipos();
+    this.cargarLigas();
   }
 
   /**
-   * Carga los equipos del usuario logueado desde el backend
+   * Carga todas las ligas del usuario (como comisionado y como participante)
    */
-  cargarEquipos(): void {
+  cargarLigas(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
     const currentUser = this.authService.currentUserValue;
     
     if (!currentUser) {
-      this.errorMessage = 'Debes iniciar sesión para ver tus equipos.';
+      this.errorMessage = 'Debes iniciar sesión para ver tus ligas.';
       this.isLoading = false;
       return;
     }
 
-    // Obtener equipos del usuario actual
-    this.equipoService.obtenerEquiposPorUsuario(currentUser.id).subscribe({
-      next: (equipos) => {
-        console.log('Equipos cargados:', equipos);
-        this.equipos = equipos;
+    // Usar el nuevo endpoint que obtiene todas las ligas del usuario
+    this.ligaService.obtenerPorUsuario(currentUser.id).subscribe({
+      next: (ligasDelUsuario) => {
+        // Mapear las ligas indicando si el usuario es comisionado
+        this.ligas = ligasDelUsuario.map(liga => ({
+          ...liga,
+          esComisionado: liga.comisionadoId === currentUser.id  // ✅ Ahora usa comisionadoId
+        }));
+        
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al cargar equipos:', error);
+        console.error('Error al cargar ligas:', error);
         this.isLoading = false;
         
         if (error.status === 0) {
           this.errorMessage = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
         } else {
-          this.errorMessage = 'Error al cargar los equipos. Inténtalo de nuevo.';
+          this.errorMessage = 'Error al cargar las ligas. Inténtalo de nuevo.';
         }
       }
     });
   }
 
   /**
-   * Obtiene la URL completa de la imagen del equipo
-   * @param imagenUrl URL relativa de la imagen
-   * @returns URL completa o imagen por defecto
+   * Obtiene la clase CSS del badge según el estado de la liga
    */
-  obtenerImagenUrl(imagenUrl: string | null): string {
-    if (imagenUrl) {
-      return `${this.baseUrl}${imagenUrl}`;
+  getBadgeClass(estado: string): string {
+    switch (estado) {
+      case 'Pre-Draft': return 'bg-info';
+      case 'En Draft': return 'bg-warning text-dark';
+      case 'Activa': return 'bg-success';
+      case 'Finalizada': return 'bg-secondary';
+      default: return 'bg-secondary';
     }
-    // Imagen por defecto si no hay imagen
-    return 'https://via.placeholder.com/150?text=Sin+Imagen';
+  }
+
+  /**
+   * Calcula los cupos disponibles
+   */
+  getCuposDisponibles(liga: LigaResponseDto): number {
+    return liga.cuposTotales - liga.cuposOcupados;
+  }
+
+  /**
+   * Obtiene la URL de la imagen o placeholder
+   */
+  obtenerImagenUrl(imagenUrl: string | null | undefined): string {
+    if (imagenUrl) {
+      return imagenUrl;
+    }
+    return 'https://via.placeholder.com/150?text=Liga';
   }
 }

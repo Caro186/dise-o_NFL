@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TemporadaService, TemporadaResponseDto, SemanaDto, TemporadaDto } from '../../services/temporada.service';
 
 interface Temporada {
-  nombre: number;
+  nombre: string;
   cantidadSemanas: number;
   fechaInicio: Date;
   fechaCierre: Date;
@@ -25,7 +25,7 @@ interface Semana {
 })
 export class TemporadaComponent implements OnInit {
   temporada: Temporada = {
-    nombre: 1,
+    nombre: "",
     cantidadSemanas: 1,
     fechaInicio: new Date(),
     fechaCierre: new Date(),
@@ -65,23 +65,22 @@ export class TemporadaComponent implements OnInit {
     const fechaCierreTemporada = new Date(this.temporada.fechaCierre);
 
     // 1️⃣ Validaciones básicas de temporada
-    if (nombre < 1 || nombre > 100) {
-      alert('El nombre de la temporada debe estar entre 1 y 100.');
-      return;
-    }
+if (nombre.length < 1 || nombre.length > 100) {
+  alert('El nombre de la temporada debe tener entre 1 y 100 caracteres.');
+  return;
+}
+
 
     if (fechaInicioTemporada > fechaCierreTemporada) {
       alert('La fecha de inicio de la temporada debe ser anterior a la fecha de fin.');
       return;
     }
 
-    // 6️⃣ Nombre único
     if (this.temporadasCreadas.some(t => t.nombre === nombre)) {
       alert('Ya existe una temporada con ese nombre.');
       return;
     }
 
-    // 2️⃣ No traslape con otras temporadas
     const traslapeTemporadas = this.temporadasCreadas.some(t => {
       const inicio = new Date(t.fechaInicio);
       const fin = new Date(t.fechaCierre);
@@ -147,7 +146,7 @@ export class TemporadaComponent implements OnInit {
       next: (resp) => {
         alert(`Temporada ${resp.nombre} creada correctamente.`);
         // Reinicia formulario
-        this.temporada = { nombre: 1, cantidadSemanas: 1, fechaInicio: new Date(), fechaCierre: new Date(), actual: false };
+        this.temporada = { nombre: "", cantidadSemanas: 1, fechaInicio: new Date(), fechaCierre: new Date(), actual: false };
         this.semanas = [];
         this.cargarTemporadas(); // recargar temporadas
       },

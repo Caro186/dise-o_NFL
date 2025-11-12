@@ -1,0 +1,89 @@
+<div class="gradient-custom-2 gradient-form d-flex align-items-center justify-content-center">
+  <div class="card p-4" style="width: 500px;">
+    <h3 class="mb-3 text-center">Crear Equipo NFL</h3>
+    <p class="text-muted text-center">Solo para administradores</p>
+
+    <form (ngSubmit)="onSubmit()">
+      <!-- Nombre del equipo -->
+      <div class="mb-3">
+        <label for="nombre">Nombre del Equipo NFL:</label>
+        <input 
+          id="nombre" 
+          type="text" 
+          placeholder="Ej: Dallas Cowboys" 
+          class="form-control"
+          [(ngModel)]="nombre"
+          name="nombre"
+          maxlength="100"
+          [disabled]="isLoading"
+        />
+        <small class="text-muted">Nombre oficial del equipo NFL (1-100 caracteres)</small>
+      </div>
+
+      <!-- Ciudad -->
+      <div class="mb-3">
+        <label for="ciudad">Ciudad:</label>
+        <input 
+          id="ciudad" 
+          type="text" 
+          placeholder="Ej: Dallas" 
+          class="form-control"
+          [(ngModel)]="ciudad"
+          name="ciudad"
+          maxlength="100"
+          [disabled]="isLoading"
+        />
+        <small class="text-muted">Ciudad del equipo (1-100 caracteres)</small>
+      </div>
+
+      <!-- Imagen del equipo -->
+      <div class="mb-3">
+        <label for="imagen">Logo del Equipo (opcional):</label>
+        <input 
+          id="imagen" 
+          type="file" 
+          accept="image/png, image/jpeg" 
+          class="form-control" 
+          (change)="onFileSelected($event)"
+          [disabled]="isLoading"
+        />
+        <small class="text-muted">
+          • Formatos: JPEG, PNG<br>
+          • Tamaño máximo: 5 MB
+        </small>
+
+        <!-- Preview de la imagen -->
+        <div *ngIf="imagenPreview" class="mt-2">
+          <p class="mb-2">Preview:</p>
+          <img 
+            [src]="imagenPreview" 
+            alt="Preview" 
+            class="img-fluid rounded border" 
+            style="max-height: 200px;" 
+          />
+        </div>
+      </div>
+
+      <!-- Mensaje de error -->
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Botones -->
+      <div class="d-flex gap-2">
+        <button 
+          type="submit" 
+          class="btn btn-primary flex-grow-1" 
+          [disabled]="!nombre.trim() || !ciudad.trim() || isLoading"
+        >
+          <span *ngIf="!isLoading">Crear Equipo NFL</span>
+          <span *ngIf="isLoading">Guardando...</span>
+        </button>
+        
+        <a routerLink="/admin/equipos-nfl" class="btn btn-secondary">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

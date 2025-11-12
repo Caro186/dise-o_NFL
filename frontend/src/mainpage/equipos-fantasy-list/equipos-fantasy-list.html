@@ -26,7 +26,7 @@
         <div *ngIf="equipos.length === 0" class="col-12">
             <div class="alert alert-warning">
                 No tienes equipos registrados. 
-                <a routerLink="/form" class="alert-link">Crea tu primer equipo aquí</a>.
+                <a routerLink="/equipos-fantasy/crear" class="alert-link">Crea tu primer equipo aquí</a>
             </div>
         </div>
 
@@ -47,7 +47,7 @@
                             <p class="card-title font-weight-bold mb-1">{{ equipo.nombre }}</p>
                             <h6 class="card-text mb-1">Manager: {{ equipo.nombrePropietario }}</h6>
                             <h6 class="card-text mb-1">Estado: {{ equipo.estado }}</h6>
-                            <h6 class="card-text">Liga: {{ equipo.liga || 'N/A' }}</h6>
+                            <h6 class="card-text">Liga: {{ equipo.nombreLiga || 'Sin liga' }}</h6>
                         </div>
                     </div>
                 </div>

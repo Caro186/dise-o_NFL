@@ -2,20 +2,20 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { EquipoService } from '../../services/equipo.service';
 import { Authservice } from '../../services/authservice';
+import { EquipoFantasyService,EquipoFantasyCreateDto } from '../../services/equipo-fantasy.service';
 
 /**
  * Componente para crear/editar equipos de fantasy
  */
 @Component({
-  selector: 'app-userform',
+  selector: 'app-equipos-fantasy-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './userform.html',
-  styleUrls: ['./userform.css']
+  templateUrl: './equipos-fantasy-form.html',
+  styleUrls: ['./equipos-fantasy-form.css']
 })
-export class Userform {
+export class EquiposFantasyForm {
   imagenPreview: string | null = null;
   selectedFile: File | null = null;
   nombreEquipo: string = '';
@@ -29,10 +29,13 @@ export class Userform {
    * @param router Router para navegación
    */
   constructor(
-    private equipoService: EquipoService,
+    private equipoFantasyService: EquipoFantasyService, 
     private authService: Authservice,
     private router: Router
-  ) { }
+  ) { 
+
+    
+  }
 
   /**
    * Maneja la selección de archivo de imagen
@@ -121,6 +124,9 @@ export class Userform {
    * Envía el formulario para crear un equipo
    * Crea el equipo primero y luego sube la imagen si existe
    */
+
+  
+
   onSubmit(): void {
     this.errorMessage = '';
 
@@ -148,28 +154,29 @@ export class Userform {
     this.isLoading = true;
 
     // Crear DTO para el equipo
-    const equipoDto = {
+    const equipoDto: EquipoFantasyCreateDto = {
       nombre: nombre,
       usuarioId: currentUser.id,
-      liga: 'NFL'
-    };
+      ligaId: undefined // Sin liga por ahora
+};
 
     console.log('Creando equipo:', equipoDto);
 
     // Primero crear el equipo
-    this.equipoService.crearEquipo(equipoDto).subscribe({
+    this.equipoFantasyService.crear(equipoDto).subscribe({
       next: (equipoCreado) => {
         console.log('Equipo creado exitosamente:', equipoCreado);
 
         // Si hay imagen, subirla
         if (this.selectedFile) {
-          this.equipoService.subirImagen(equipoCreado.id, this.selectedFile).subscribe({
+          this.equipoFantasyService.subirImagen(equipoCreado.id, this.selectedFile).subscribe({
             next: (imageResponse) => {
               console.log('Imagen subida exitosamente:', imageResponse);
               this.isLoading = false;
               alert('Equipo creado exitosamente con imagen');
               this.resetForm();
-              this.router.navigate(['/mainpage/teams']);
+              this.router.navigate(['/equipos-fantasy']);
+
             },
             error: (imageError) => {
               console.error('Error al subir imagen:', imageError);
@@ -177,7 +184,8 @@ export class Userform {
               // El equipo se creó pero la imagen falló
               alert('Equipo creado, pero hubo un error al subir la imagen. Puedes intentar subirla después.');
               this.resetForm();
-              this.router.navigate(['/mainpage/teams']);
+              this.router.navigate(['/equipos-fantasy']);
+
             }
           });
         } else {
@@ -185,7 +193,7 @@ export class Userform {
           this.isLoading = false;
           alert('Equipo creado exitosamente');
           this.resetForm();
-          this.router.navigate(['/mainpage/teams']);
+          this.router.navigate(['/equipos-fantasy']);
         }
       },
       error: (error) => {

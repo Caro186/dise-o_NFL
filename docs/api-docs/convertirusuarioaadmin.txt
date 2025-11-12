@@ -1,0 +1,13 @@
+-- Ver todos los usuarios actuales y sus roles
+SELECT "Id", "Email", "NombreCompleto", "Rol", "EstadoCuenta"
+FROM usuarios;
+
+-- Convertir un usuario específico en Admin (reemplaza con tu email)
+UPDATE usuarios 
+SET "Rol" = 'Admin' 
+WHERE "Email" = 'tu-email@ejemplo.com';
+
+-- Verificar el cambio
+SELECT "Id", "Email", "NombreCompleto", "Rol" 
+FROM usuarios 
+WHERE "Email" = 'tu-email@ejemplo.com';

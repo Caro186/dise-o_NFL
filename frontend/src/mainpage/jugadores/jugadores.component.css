@@ -1,0 +1,421 @@
+/* Reseteo de márgenes y altura completa */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Gradiente de fondo */
+.gradient-background {
+  background: linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593);
+  min-height: 100vh;
+  padding-bottom: 50px;
+}
+
+/* Ajuste para que la página no se "mueva" al hacer scroll */
+body {
+  overflow-x: hidden;
+}
+
+/* Navbar semitransparente con texto blanco */
+.navbar-custom {
+  background-color: rgba(26, 72, 91, 0.9);
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-custom .navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Formulario blanco con borde azul y sombra */
+.form-card {
+  background-color: white;
+  color: #1a485b;
+  border: 2px solid #4D7381;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Botón azul personalizado */
+.btn-custom {
+  background-color: #4D7381;
+  color: white;
+  border-radius: 5px;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-custom:hover {
+  background-color: #1a485b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-custom:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Cards de jugadores */
+.jugador-card {
+  border-radius: 10px;
+  border: 2px solid #4D7381;
+  transition: all 0.3s ease;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.jugador-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border-color: #1a485b;
+}
+
+/* Thumbnail de jugador */
+.jugador-thumbnail {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #4D7381;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Preview de imágenes en formulario */
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 2px dashed #4D7381;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.img-preview {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid #4D7381;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.img-preview-small {
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid #4D7381;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Imagen grande del jugador */
+.jugador-image-large {
+  max-width: 300px;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 3px solid #4D7381;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Información del jugador */
+.jugador-info {
+  font-size: 0.95rem;
+}
+
+.jugador-info p {
+  margin-bottom: 0.5rem;
+}
+
+.jugador-info i {
+  margin-right: 5px;
+}
+
+/* Ajustes de card */
+.card {
+  border-radius: 10px;
+}
+
+.card-title {
+  color: #1a485b;
+  font-weight: bold;
+}
+
+/* Badges personalizados */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 5px;
+}
+
+/* Botones de acción */
+.btn-sm {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.btn-sm:hover {
+  transform: scale(1.05);
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+/* Modal personalizado */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1040;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-dialog-custom {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1050;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Header del modal */
+.card-header {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  padding: 1rem;
+}
+
+/* Alertas */
+.alert {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alert i {
+  margin-right: 8px;
+}
+
+/* Formulario mejorado */
+.form-label {
+  font-weight: 600;
+  color: #1a485b;
+  margin-bottom: 0.5rem;
+}
+
+.form-label i {
+  margin-right: 5px;
+  color: #4D7381;
+}
+
+.form-control,
+.form-select {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.6rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #4D7381;
+  box-shadow: 0 0 0 0.2rem rgba(77, 115, 129, 0.25);
+}
+
+/* Texto requerido */
+.text-danger {
+  color: #dc3545;
+}
+
+/* Texto muted */
+.text-muted {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Spinner */
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15rem;
+}
+
+/* Grid responsivo */
+.row.g-3 {
+  margin: 0;
+}
+
+.row.g-3 > * {
+  padding: 0.5rem;
+}
+
+/* Sección de filtros */
+.form-card h5 {
+  color: #1a485b;
+  font-weight: bold;
+  border-bottom: 2px solid #4D7381;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* Botones outline */
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: white;
+}
+
+.btn-outline-secondary {
+  border: 2px solid #6c757d;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar-custom .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .jugador-card {
+    margin-bottom: 1rem;
+  }
+
+  .modal-dialog-custom {
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .jugador-thumbnail {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* Scrollbar personalizado */
+.modal-dialog-custom::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-dialog-custom::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.modal-dialog-custom::-webkit-scrollbar-thumb {
+  background: #4D7381;
+  border-radius: 10px;
+}
+
+.modal-dialog-custom::-webkit-scrollbar-thumb:hover {
+  background: #1a485b;
+}
+
+/* Estado vacio */
+.bi-inbox {
+  color: #b0b0b0;
+}
+
+/* Animación para cards */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jugador-card {
+  animation: cardAppear 0.5s ease;
+}
+
+/* Mejoras de accesibilidad */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+  outline: none;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Espaciado adicional */
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.flex-fill {
+  flex: 1 1 auto;
+}
+
+/* Texto blanco para títulos sobre el gradiente */
+.text-white {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
