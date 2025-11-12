@@ -1,0 +1,55 @@
+<div class="container mt-5 custom-background3 p-4 rounded shadow">
+  <h2 class="text-center mb-4 text-white">Crear Jugador</h2>
+
+  <form (ngSubmit)="crearJugador()" [formGroup]="jugadorForm" class="p-4 rounded custom-background2">
+    
+    <!-- Nombre -->
+    <div class="mb-3">
+      <label class="form-label fw-bold">Nombre del jugador</label>
+      <input type="text" class="form-control" formControlName="nombre" placeholder="Ej. Patrick Mahomes">
+    </div>
+
+    <!-- Posición -->
+    <div class="mb-3">
+      <label class="form-label fw-bold">Posición</label>
+      <select class="form-select" formControlName="posicion">
+        <option value="">Seleccionar posición</option>
+        <option>QB</option>
+        <option>RB</option>
+        <option>WR</option>
+        <option>TE</option>
+        <option>K</option>
+        <option>DEF</option>
+      </select>
+    </div>
+
+    <!-- Equipo NFL -->
+    <div class="mb-3">
+      <label class="form-label fw-bold">Equipo NFL</label>
+      <select class="form-select" formControlName="equipo">
+        <option value="">Seleccionar equipo</option>
+        <option *ngFor="let equipo of equiposNFL" [value]="equipo">{{ equipo }}</option>
+      </select>
+    </div>
+
+    <!-- Imagen -->
+    <div class="mb-3">
+      <label class="form-label fw-bold">Imagen del jugador</label>
+      <input type="file" class="form-control" (change)="onFileSelected($event)">
+    </div>
+
+    <!-- Thumbnail (autogenerado) -->
+    <div class="mb-3" *ngIf="thumbnailUrl">
+      <label class="form-label fw-bold">Vista previa (thumbnail generado)</label><br>
+      <img [src]="thumbnailUrl" alt="Thumbnail" class="rounded border" style="max-width: 150px;">
+    </div>
+
+    <button class="btn custom-background text-white mt-3 w-100" type="submit" [disabled]="jugadorForm.invalid">
+      Crear Jugador
+    </button>
+  </form>
+
+  <div *ngIf="mensajeExito" class="alert alert-success mt-3">
+    {{ mensajeExito }}
+  </div>
+</div>
