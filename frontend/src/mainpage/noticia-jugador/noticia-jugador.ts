@@ -63,11 +63,15 @@ export class NoticiaJugadorComponent implements OnInit {
   onJugadorSeleccionado(event: any): void {
     const jugadorId = parseInt(event.target.value);
     if (jugadorId) {
+      // Actualizar el campo jugadorId del formulario
+      this.noticiaForm.patchValue({ jugadorId: jugadorId });
       this.cargarJugadorConNoticias(jugadorId);
       this.mostrarFormulario = true;
     } else {
       this.jugadorSeleccionado = null;
       this.mostrarFormulario = false;
+      this.noticiaForm.patchValue({ jugadorId: '' });
+
     }
   }
 
