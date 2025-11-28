@@ -61,7 +61,7 @@ export interface CrearNoticiaResponse {
   providedIn: 'root'
 })
 export class NoticiaJugadorService {
-  private baseUrl = 'http://localhost:5220/api/NoticiaJugador';
+  private baseUrl = 'http://localhost:5000/api/NoticiaJugador';
 
   constructor(private http: HttpClient) { }
 

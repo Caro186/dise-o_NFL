@@ -1,0 +1,35 @@
+2025-11-26 16:03:34.807 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-11-26 16:03:34.876 -06:00 [INF] User profile is available. Using 'C:\Users\josev\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-26 16:03:34.957 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-11-26 16:03:34.963 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-26 16:03:34.965 -06:00 [INF] Hosting environment: Development
+2025-11-26 16:03:34.967 -06:00 [INF] Content root path: C:\Obsidian\OrganizaciónJoseAndresVargasTorres\02-Studies\Product Design and Quality\Proyect\ClaudeDisenoFinalTrabajo\backend\src\NFLFantasyAPI.Presentation
+2025-11-26 16:03:40.074 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/EquipoFantasy/usuario/1 - null null
+2025-11-26 16:03:40.074 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/Liga/comisionado/1 - null null
+2025-11-26 16:03:40.137 -06:00 [INF] CORS policy execution successful.
+2025-11-26 16:03:40.137 -06:00 [INF] CORS policy execution successful.
+2025-11-26 16:03:40.189 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.EquipoFantasyController.GetByUsuario (NFLFantasyAPI.Presentation)'
+2025-11-26 16:03:40.189 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.LigaController.GetByComisionado (NFLFantasyAPI.Presentation)'
+2025-11-26 16:03:40.211 -06:00 [INF] Route matched with {action = "GetByUsuario", controller = "EquipoFantasy"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetByUsuario(Int32) on controller NFLFantasyAPI.Presentation.Controllers.EquipoFantasyController (NFLFantasyAPI.Presentation).
+2025-11-26 16:03:40.211 -06:00 [INF] Route matched with {action = "GetByComisionado", controller = "Liga"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetByComisionado(Int32) on controller NFLFantasyAPI.Presentation.Controllers.LigaController (NFLFantasyAPI.Presentation).
+2025-11-26 16:03:41.959 -06:00 [INF] Executed DbCommand (54ms) [Parameters=[@__usuarioId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FormatoPosiciones", l."IdTemporada", l."ImagenUrl", l."NombreLiga", l."PasswordHash", l."PermitirDecimales", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad", t."Id", t."Actual", t."FechaCierre", t."FechaCreacion", t."FechaInicio", t."Nombre"
+FROM ligas AS l
+INNER JOIN usuarios AS u ON l."ComisionadoId" = u."Id"
+INNER JOIN temporadas AS t ON l."IdTemporada" = t."Id"
+WHERE l."ComisionadoId" = @__usuarioId_0
+2025-11-26 16:03:41.959 -06:00 [INF] Executed DbCommand (54ms) [Parameters=[@__usuarioId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT e."Id", e."Estado", e."FechaCreacion", e."ImagenUrl", e."LigaId", e."Nombre", e."UsuarioId", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad", l."IdLiga", l."ComisionadoId", l."ConfigPlayoffs", l."CuposOcupados", l."CuposTotales", l."Descripcion", l."EsquemaPuntos", l."Estado", l."FechaCreacion", l."FechaFin", l."FechaInicio", l."FormatoPosiciones", l."IdTemporada", l."ImagenUrl", l."NombreLiga", l."PasswordHash", l."PermitirDecimales"
+FROM equipos_fantasy AS e
+INNER JOIN usuarios AS u ON e."UsuarioId" = u."Id"
+LEFT JOIN ligas AS l ON e."LigaId" = l."IdLiga"
+WHERE e."UsuarioId" = @__usuarioId_0
+2025-11-26 16:03:41.992 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collections.Generic.List`1[[NFLFantasyAPI.Logic.DTOs.EquipoFantasyResponseDto, NFLFantasyAPI.Logic, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-11-26 16:03:41.992 -06:00 [INF] Executing ObjectResult, writing value of type 'System.Collections.Generic.List`1[[NFLFantasyAPI.Persistence.Models.Liga, NFLFantasyAPI.Persistence, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-11-26 16:03:42.051 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.EquipoFantasyController.GetByUsuario (NFLFantasyAPI.Presentation) in 1829.1667ms
+2025-11-26 16:03:42.051 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.LigaController.GetByComisionado (NFLFantasyAPI.Presentation) in 1826.7012ms
+2025-11-26 16:03:42.059 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.EquipoFantasyController.GetByUsuario (NFLFantasyAPI.Presentation)'
+2025-11-26 16:03:42.060 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.LigaController.GetByComisionado (NFLFantasyAPI.Presentation)'
+2025-11-26 16:03:42.074 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/EquipoFantasy/usuario/1 - 200 null application/json; charset=utf-8 2001.8477ms
+2025-11-26 16:03:42.074 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/Liga/comisionado/1 - 200 null application/json; charset=utf-8 2001.8137ms
+2025-11-26 16:04:45.870 -06:00 [INF] Application is shutting down...

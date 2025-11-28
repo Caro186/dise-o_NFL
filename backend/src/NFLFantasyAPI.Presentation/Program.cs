@@ -47,6 +47,13 @@ namespace NFLFantasyAPI.Presentation
             builder.Services.AddScoped<IJugadorService, JugadorService>();
             builder.Services.AddScoped<ILigaService, LigaService>();
             builder.Services.AddScoped<ITemporadaService, TemporadaService>();
+            builder.Services.AddScoped<INoticiaJugadorService, NoticiaJugadorService>();
+
+            // Registrar servicios de procesamiento de archivos batch
+            builder.Services.AddScoped<IBatchFileProcessingService, BatchFileProcessingService>();
+
+            // Registrar validadores
+            builder.Services.AddScoped<NFLFantasyAPI.Logic.Validators.JugadorValidator>();
 
             IDbContextProvider contextProvider = new DbContextProvider();
             contextProvider.registerRepositories(builder.Services);

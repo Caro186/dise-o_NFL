@@ -29,6 +29,9 @@ namespace NFLFantasyAPI.Persistence.Models
         [MaxLength(20)]
         public string Estado { get; set; } = "Activo";
 
+        [MaxLength(10)]
+        public string? DesignacionLesion { get; set; }
+
         [Required]
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
@@ -37,5 +40,8 @@ namespace NFLFantasyAPI.Persistence.Models
         // Navegación
         [ForeignKey("EquipoNFLId")]
         public virtual EquipoNFL EquipoNFL { get; set; }
+
+        // Colección de noticias
+        public virtual ICollection<NoticiaJugador> Noticias { get; set; } = new List<NoticiaJugador>();
     }
 }

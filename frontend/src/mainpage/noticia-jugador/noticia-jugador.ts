@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NoticiaJugadorService, CrearNoticiaJugadorDto, JugadorConNoticiasDto } from '../../services/noticia-jugador.service';
-import { JugadoresService, JugadorListDto } from '../../services/jugadores.service';
+import { JugadorService, JugadorListDto } from '../../services/jugadores.service';
 
 @Component({
   selector: 'app-noticia-jugador',
@@ -25,7 +25,7 @@ export class NoticiaJugadorComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private noticiaService: NoticiaJugadorService,
-    private jugadoresService: JugadoresService
+    private jugadoresService: JugadorService
   ) {
     this.noticiaForm = this.fb.group({
       jugadorId: ['', Validators.required],
@@ -48,9 +48,9 @@ export class NoticiaJugadorComponent implements OnInit {
 
   cargarJugadores(): void {
     this.cargando = true;
-    this.jugadoresService.getAll().subscribe({
+    this.jugadoresService.obtenerJugadores().subscribe({
       next: (response) => {
-        this.jugadores = response.jugadores || [];
+        this.jugadores = response || [];
         this.cargando = false;
       },
       error: (error) => {
@@ -71,7 +71,6 @@ export class NoticiaJugadorComponent implements OnInit {
       this.jugadorSeleccionado = null;
       this.mostrarFormulario = false;
       this.noticiaForm.patchValue({ jugadorId: '' });
-
     }
   }
 
