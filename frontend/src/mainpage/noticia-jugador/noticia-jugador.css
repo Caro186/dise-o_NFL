@@ -140,6 +140,29 @@
   margin-bottom: 20px;
 }
 
+/* Info box general */
+.info-box-general {
+  background-color: #e7f3ff;
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 4px solid #007bff;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-box-general i {
+  font-size: 20px;
+  color: #007bff;
+  flex-shrink: 0;
+}
+
+.info-box-general span {
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.5;
+}
 .form-group {
   margin-bottom: 20px;
 }
@@ -201,6 +224,15 @@
   height: 20px;
   margin-right: 10px;
   cursor: pointer;
+}
+
+.help-text {
+  display: block;
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-left: 30px;
+  font-style: italic;
 }
 
 /* Campos de lesión */
