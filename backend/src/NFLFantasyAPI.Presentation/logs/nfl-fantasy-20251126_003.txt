@@ -1,0 +1,29 @@
+2025-11-26 16:50:00.184 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-11-26 16:50:00.251 -06:00 [INF] User profile is available. Using 'C:\Users\josev\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-26 16:50:00.333 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-11-26 16:50:00.339 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-26 16:50:00.341 -06:00 [INF] Hosting environment: Development
+2025-11-26 16:50:00.343 -06:00 [INF] Content root path: C:\Obsidian\OrganizaciónJoseAndresVargasTorres\02-Studies\Product Design and Quality\Proyect\ClaudeDisenoFinalTrabajo\backend\src\NFLFantasyAPI.Presentation
+2025-11-26 17:05:27.702 -06:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/Jugador - null null
+2025-11-26 17:05:27.778 -06:00 [INF] CORS policy execution successful.
+2025-11-26 17:05:27.787 -06:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/Jugador - 204 null null 87.4012ms
+2025-11-26 17:05:35.232 -06:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/NoticiaJugador - null null
+2025-11-26 17:05:35.243 -06:00 [INF] CORS policy execution successful.
+2025-11-26 17:05:35.252 -06:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/NoticiaJugador - 204 null null 20.3708ms
+2025-11-26 17:05:35.263 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/NoticiaJugador - null null
+2025-11-26 17:05:35.278 -06:00 [INF] CORS policy execution successful.
+2025-11-26 17:05:35.418 -06:00 [INF] Executing endpoint 'NFLFantasyAPI.Presentation.Controllers.NoticiaJugadorController.ObtenerTodasNoticias (NFLFantasyAPI.Presentation)'
+2025-11-26 17:05:35.442 -06:00 [INF] Route matched with {action = "ObtenerTodasNoticias", controller = "NoticiaJugador"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] ObtenerTodasNoticias() on controller NFLFantasyAPI.Presentation.Controllers.NoticiaJugadorController (NFLFantasyAPI.Presentation).
+2025-11-26 17:05:36.145 -06:00 [INF] Obteniendo todas las noticias
+2025-11-26 17:05:37.741 -06:00 [INF] Executed DbCommand (32ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT n."Id", n."AutorId", n."DesignacionLesion", n."EsLesion", n."Estado", n."FechaCreacion", n."JugadorId", n."ResumenLesion", n."Texto", j."Id", j."DesignacionLesion", j."EquipoNFLId", j."Estado", j."FechaActualizacion", j."FechaCreacion", j."ImagenUrl", j."Nombre", j."Posicion", j."ThumbnailUrl", e."Id", e."Ciudad", e."Estado", e."FechaCreacion", e."ImagenUrl", e."Nombre", u."Id", u."Email", u."EstadoCuenta", u."FechaBloqueo", u."FechaRegistro", u."FechaUltimoIntentoFallido", u."IntentosFailidos", u."NombreCompleto", u."Password", u."Rol", u."UltimaActividad"
+FROM noticias_jugador AS n
+INNER JOIN jugadores AS j ON n."JugadorId" = j."Id"
+INNER JOIN equipos_nfl AS e ON j."EquipoNFLId" = e."Id"
+INNER JOIN usuarios AS u ON n."AutorId" = u."Id"
+ORDER BY n."FechaCreacion" DESC
+2025-11-26 17:05:37.975 -06:00 [INF] Executing OkObjectResult, writing value of type '<>f__AnonymousType4`2[[System.Collections.Generic.List`1[[NFLFantasyAPI.Logic.DTOs.NoticiaJugadorResponseDto, NFLFantasyAPI.Logic, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-11-26 17:05:38.060 -06:00 [INF] Executed action NFLFantasyAPI.Presentation.Controllers.NoticiaJugadorController.ObtenerTodasNoticias (NFLFantasyAPI.Presentation) in 2605.6856ms
+2025-11-26 17:05:38.065 -06:00 [INF] Executed endpoint 'NFLFantasyAPI.Presentation.Controllers.NoticiaJugadorController.ObtenerTodasNoticias (NFLFantasyAPI.Presentation)'
+2025-11-26 17:05:38.079 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/NoticiaJugador - 200 null application/json; charset=utf-8 2816.2547ms
+2025-11-26 17:05:59.401 -06:00 [INF] Application is shutting down...

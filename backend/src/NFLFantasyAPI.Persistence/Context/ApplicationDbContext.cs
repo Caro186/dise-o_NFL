@@ -17,7 +17,8 @@ namespace NFLFantasyAPI.Persistence.Context
         public DbSet<Liga> Ligas { get; set; }
         public DbSet<Temporada> Temporadas { get; set; }
         public DbSet<Semana> Semanas { get; set; }
-        public DbSet<Jugador> Jugadores { get; set; }  // NUEVO
+        public DbSet<Jugador> Jugadores { get; set; }
+        public DbSet<NoticiaJugador> NoticiasJugador { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -164,6 +165,36 @@ namespace NFLFantasyAPI.Persistence.Context
                 entity.HasIndex(j => new { j.Nombre, j.EquipoNFLId }).IsUnique();
                 entity.HasIndex(j => j.Posicion);
                 entity.HasIndex(j => j.Estado);
+            });
+
+            // Configurar tabla de noticias de jugador
+            modelBuilder.Entity<NoticiaJugador>(entity =>
+            {
+                entity.ToTable("noticias_jugador");
+                entity.HasKey(n => n.Id);
+                entity.Property(n => n.Texto).IsRequired().HasMaxLength(300);
+                entity.Property(n => n.EsLesion).IsRequired();
+                entity.Property(n => n.ResumenLesion).HasMaxLength(30);
+                entity.Property(n => n.DesignacionLesion).HasMaxLength(10);
+                entity.Property(n => n.FechaCreacion).IsRequired();
+                entity.Property(n => n.Estado).IsRequired().HasMaxLength(20).HasDefaultValue("Activa");
+
+                // Relación con Jugador
+                entity.HasOne(n => n.Jugador)
+                    .WithMany(j => j.Noticias)
+                    .HasForeignKey(n => n.JugadorId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Relación con Usuario (Autor)
+                entity.HasOne(n => n.Autor)
+                    .WithMany()
+                    .HasForeignKey(n => n.AutorId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Índices
+                entity.HasIndex(n => n.JugadorId);
+                entity.HasIndex(n => n.FechaCreacion);
+                entity.HasIndex(n => n.EsLesion);
             });
         }
     }

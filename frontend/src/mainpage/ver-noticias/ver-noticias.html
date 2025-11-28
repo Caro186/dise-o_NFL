@@ -1,0 +1,132 @@
+<div class="ver-noticias-container">
+  <div class="header">
+    <h2>📰 Todas las Noticias de Jugadores</h2>
+    <p class="subtitle">Historial completo de noticias y lesiones</p>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="mensajeError" class="alert alert-error">
+    <strong>✗ Error:</strong> {{ mensajeError }}
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="estadisticas" *ngIf="!cargando">
+    <div class="stat-card">
+      <i class="bi bi-newspaper"></i>
+      <div class="stat-info">
+        <h3>{{ noticias.length }}</h3>
+        <p>Total de Noticias</p>
+      </div>
+    </div>
+    <div class="stat-card lesiones">
+      <i class="bi bi-exclamation-triangle"></i>
+      <div class="stat-info">
+        <h3>{{ noticiasLesiones }}</h3>
+        <p>Noticias de Lesión</p>
+      </div>
+    </div>
+    <div class="stat-card generales">
+      <i class="bi bi-info-circle"></i>
+      <div class="stat-info">
+        <h3>{{ noticiasGenerales }}</h3>
+        <p>Noticias Generales</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-container" *ngIf="!cargando">
+    <div class="filtro-grupo">
+      <label for="filtroTipo">Tipo de noticia:</label>
+      <select id="filtroTipo" [value]="filtroTipo" (change)="onFiltroTipoChange($event)" class="form-select">
+        <option value="todas">Todas las noticias</option>
+        <option value="lesiones">Solo lesiones</option>
+        <option value="generales">Solo generales</option>
+      </select>
+    </div>
+
+    <div class="filtro-grupo">
+      <label for="busqueda">Buscar:</label>
+      <input
+        type="text"
+        id="busqueda"
+        [value]="filtroBusqueda"
+        (input)="onBusquedaChange($event)"
+        placeholder="Buscar por jugador, equipo o texto..."
+        class="form-control">
+    </div>
+
+    <button class="btn btn-secondary" (click)="limpiarFiltros()">
+      <i class="bi bi-x-circle"></i> Limpiar Filtros
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando noticias...</p>
+  </div>
+
+  <!-- Lista de noticias -->
+  <div *ngIf="!cargando && noticiasFiltradas.length > 0" class="noticias-grid">
+    <div *ngFor="let noticia of noticiasFiltradas" class="noticia-card" [class.noticia-lesion]="noticia.esLesion">
+      <!-- Header de la tarjeta -->
+      <div class="noticia-header">
+        <div class="jugador-info">
+          <h3>{{ noticia.nombreJugador }}</h3>
+          <span class="equipo">{{ noticia.equipoNFL }}</span>
+        </div>
+        <span *ngIf="noticia.esLesion" class="badge badge-danger">
+          <i class="bi bi-bandaid"></i> LESIÓN
+        </span>
+        <span *ngIf="!noticia.esLesion" class="badge badge-info">
+          <i class="bi bi-info-circle"></i> GENERAL
+        </span>
+      </div>
+
+      <!-- Contenido de la noticia -->
+      <div class="noticia-body">
+        <p class="noticia-texto">{{ noticia.texto }}</p>
+
+        <!-- Información de lesión -->
+        <div *ngIf="noticia.esLesion" class="lesion-info">
+          <div class="lesion-detalle">
+            <strong>Resumen:</strong> {{ noticia.resumenLesion }}
+          </div>
+          <div class="lesion-detalle">
+            <strong>Designación:</strong>
+            <span class="badge badge-warning">{{ noticia.designacionLesion }}</span>
+            <span class="designacion-desc">{{ noticia.designacionDescripcion }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer de la tarjeta -->
+      <div class="noticia-footer">
+        <div class="autor-info">
+          <i class="bi bi-person"></i>
+          <span>{{ noticia.nombreAutor }}</span>
+        </div>
+        <div class="fecha-info">
+          <i class="bi bi-clock"></i>
+          <span>{{ noticia.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sin resultados -->
+  <div *ngIf="!cargando && noticiasFiltradas.length === 0 && noticias.length > 0" class="no-resultados">
+    <i class="bi bi-search"></i>
+    <h3>No se encontraron noticias</h3>
+    <p>No hay noticias que coincidan con los filtros aplicados.</p>
+    <button class="btn btn-primary" (click)="limpiarFiltros()">Limpiar Filtros</button>
+  </div>
+
+  <!-- Sin noticias -->
+  <div *ngIf="!cargando && noticias.length === 0" class="sin-noticias">
+    <i class="bi bi-inbox"></i>
+    <h3>No hay noticias registradas</h3>
+    <p>Aún no se han creado noticias en el sistema.</p>
+  </div>
+</div>

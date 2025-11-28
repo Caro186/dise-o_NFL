@@ -15,6 +15,8 @@ import { authGuard } from '../guards/auth.guard';
 import { adminGuard } from '../guards/admin.guard';
 import { JugadoresComponent } from '../mainpage/jugadores/jugadores.component';
 import { JugadorBatchUpload } from '../mainpage/jugador-batch-upload/jugador-batch-upload';
+import { NoticiaJugadorComponent } from '../mainpage/noticia-jugador/noticia-jugador';
+import { VerNoticiasComponent } from '../mainpage/ver-noticias/ver-noticias';
 
 export const routes: Routes = [
     // ===== Rutas públicas =====
@@ -70,6 +72,16 @@ export const routes: Routes = [
 
                 path:'jugadores/batch-upload',
                 component: JugadorBatchUpload,
+                canActivate: [adminGuard]
+            },
+            {
+                path: 'noticias-jugador/crear',
+                component: NoticiaJugadorComponent,
+                canActivate: [adminGuard]
+            },
+            {
+                path: 'noticias-jugador/ver',
+                component: VerNoticiasComponent,
                 canActivate: [adminGuard]
             }
 
