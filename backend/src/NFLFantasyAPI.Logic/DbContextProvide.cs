@@ -23,6 +23,7 @@ namespace NFLFantasyAPI.Logic.DbContextProvider
             services.AddScoped<IJugadorRepository, JugadorRepository>();
             services.AddScoped<ILigaRepository, LigaRepository>();
             services.AddScoped<ITemporadaRepository, TemporadaRepository>();
+            services.AddScoped<INoticiaJugadorRepository, NoticiaJugadorRepository>();
         }
     }
 }

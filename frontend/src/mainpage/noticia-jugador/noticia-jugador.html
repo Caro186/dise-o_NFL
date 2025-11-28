@@ -1,0 +1,190 @@
+<div class="noticia-jugador-container">
+  <div class="header">
+    <h2>Agregar Noticia de Jugador</h2>
+    <p class="subtitle">Mantenga informados a los usuarios sobre novedades y lesiones</p>
+  </div>
+
+  <!-- Mensajes de estado -->
+  <div *ngIf="mensajeExito" class="alert alert-success">
+    <strong>✓ Éxito:</strong> {{ mensajeExito }}
+  </div>
+
+  <div *ngIf="mensajeError" class="alert alert-error">
+    <strong>✗ Error:</strong> {{ mensajeError }}
+  </div>
+
+  <!-- Selector de jugador -->
+  <div class="selector-jugador">
+    <label for="jugadorSelector">
+      <strong>1. Seleccione un jugador:</strong>
+    </label>
+    <select
+      id="jugadorSelector"
+      (change)="onJugadorSeleccionado($event)"
+      [disabled]="cargando"
+      class="form-select">
+      <option value="">-- Seleccione un jugador --</option>
+      <option *ngFor="let jugador of jugadores" [value]="jugador.id">
+        {{ jugador.nombre }} - {{ jugador.posicion }} ({{ jugador.nombreEquipoNFL }})
+      </option>
+    </select>
+  </div>
+
+  <!-- Información del jugador seleccionado -->
+  <div *ngIf="jugadorSeleccionado" class="jugador-info">
+    <div class="info-card">
+      <img
+        *ngIf="jugadorSeleccionado.imagenUrl"
+        [src]="jugadorSeleccionado.imagenUrl"
+        alt="{{ jugadorSeleccionado.nombre }}"
+        class="jugador-imagen">
+      <div class="info-details">
+        <h3>{{ jugadorSeleccionado.nombre }}</h3>
+        <p><strong>Posición:</strong> {{ jugadorSeleccionado.posicion }}</p>
+        <p><strong>Equipo:</strong> {{ jugadorSeleccionado.equipoNFL }}</p>
+        <p *ngIf="jugadorSeleccionado.designacionLesion" class="designacion-actual">
+          <strong>Designación actual:</strong>
+          <span class="badge badge-warning">{{ jugadorSeleccionado.designacionLesion }}</span>
+          {{ jugadorSeleccionado.designacionDescripcion }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de noticia -->
+  <form *ngIf="mostrarFormulario" [formGroup]="noticiaForm" (ngSubmit)="crearNoticia()" class="noticia-form">
+    <h3>2. Agregar noticia:</h3>
+
+    <!-- Campo oculto para jugadorId -->
+    <input type="hidden" formControlName="jugadorId">
+
+    <!-- Texto de la noticia -->
+    <div class="form-group">
+      <label for="texto">
+        <strong>Texto de la noticia *</strong>
+        <span class="char-counter">
+          {{ caracteresRestantes }} caracteres restantes
+        </span>
+      </label>
+      <textarea
+        id="texto"
+        formControlName="texto"
+        rows="4"
+        maxlength="300"
+        placeholder="Escriba la noticia aquí (mínimo 10 caracteres, máximo 300)"
+        class="form-control"
+        [class.invalid]="noticiaForm.get('texto')?.invalid && noticiaForm.get('texto')?.touched">
+      </textarea>
+      <small *ngIf="noticiaForm.get('texto')?.invalid && noticiaForm.get('texto')?.touched" class="error-text">
+        El texto debe tener entre 10 y 300 caracteres
+      </small>
+    </div>
+
+    <!-- Checkbox de lesión -->
+    <div class="form-group checkbox-group">
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          formControlName="esLesion"
+          class="form-checkbox">
+        <strong>Esta noticia es sobre una lesión</strong>
+      </label>
+    </div>
+
+    <!-- Campos específicos para lesiones -->
+    <div *ngIf="noticiaForm.get('esLesion')?.value" class="lesion-fields">
+      <div class="form-group">
+        <label for="resumenLesion">
+          <strong>Resumen de la lesión *</strong>
+          <span class="char-counter">
+            {{ caracteresResumenRestantes }} caracteres restantes
+          </span>
+        </label>
+        <input
+          type="text"
+          id="resumenLesion"
+          formControlName="resumenLesion"
+          maxlength="30"
+          placeholder="Ej: Lesión de rodilla"
+          class="form-control"
+          [class.invalid]="noticiaForm.get('resumenLesion')?.invalid && noticiaForm.get('resumenLesion')?.touched">
+        <small *ngIf="noticiaForm.get('resumenLesion')?.invalid && noticiaForm.get('resumenLesion')?.touched" class="error-text">
+          El resumen es obligatorio y no puede superar los 30 caracteres
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="designacionLesion">
+          <strong>Designación de lesión *</strong>
+        </label>
+        <select
+          id="designacionLesion"
+          formControlName="designacionLesion"
+          class="form-select"
+          [class.invalid]="noticiaForm.get('designacionLesion')?.invalid && noticiaForm.get('designacionLesion')?.touched">
+          <option value="">-- Seleccione una designación --</option>
+          <option *ngFor="let designacion of designacionesDisponibles" [value]="designacion.valor">
+            {{ designacion.valor }} - {{ designacion.descripcion }}
+          </option>
+        </select>
+        <small *ngIf="noticiaForm.get('designacionLesion')?.invalid && noticiaForm.get('designacionLesion')?.touched" class="error-text">
+          La designación de lesión es obligatoria
+        </small>
+      </div>
+
+      <div class="info-box">
+        <strong>ℹ️ Información sobre designaciones:</strong>
+        <ul>
+          <li><strong>O (Out):</strong> No jugará</li>
+          <li><strong>D (Doubtful):</strong> ~25% probabilidad de jugar</li>
+          <li><strong>Q (Questionable):</strong> ~50% probabilidad de jugar</li>
+          <li><strong>P (Probable):</strong> Muy probable que juegue</li>
+          <li><strong>FP (Full Practice):</strong> Casi seguro que juega</li>
+          <li><strong>IR (Injured Reserve):</strong> Fuera por período extendido</li>
+          <li><strong>PUP:</strong> Incapaz físicamente de jugar</li>
+          <li><strong>SUS (Suspended):</strong> Suspendido por sanción</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="!esFormularioValido || cargando">
+        <span *ngIf="!cargando">Crear Noticia</span>
+        <span *ngIf="cargando">Creando...</span>
+      </button>
+    </div>
+  </form>
+
+  <!-- Lista de noticias del jugador -->
+  <div *ngIf="jugadorSeleccionado && jugadorSeleccionado.noticias.length > 0" class="noticias-lista">
+    <h3>Historial de noticias</h3>
+    <div class="noticias-scroll">
+      <div *ngFor="let noticia of jugadorSeleccionado.noticias" class="noticia-card" [class.noticia-lesion]="noticia.esLesion">
+        <div class="noticia-header">
+          <span *ngIf="noticia.esLesion" class="badge badge-danger">LESIÓN</span>
+          <span class="noticia-fecha">{{ noticia.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <p class="noticia-texto">{{ noticia.texto }}</p>
+        <div *ngIf="noticia.esLesion" class="noticia-lesion-info">
+          <p><strong>Resumen:</strong> {{ noticia.resumenLesion }}</p>
+          <p>
+            <strong>Designación:</strong>
+            <span class="badge badge-warning">{{ noticia.designacionLesion }}</span>
+            {{ noticia.designacionDescripcion }}
+          </p>
+        </div>
+        <div class="noticia-footer">
+          <small>Autor: {{ noticia.nombreAutor }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="jugadorSeleccionado && jugadorSeleccionado.noticias.length === 0" class="no-noticias">
+    <p>Este jugador aún no tiene noticias registradas.</p>
+  </div>
+</div>
