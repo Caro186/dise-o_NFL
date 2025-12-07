@@ -4,10 +4,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace NFLFantasyAPI.Migrations
+namespace NFLFantasyAPI.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class cambiarTemporada : Migration
+    public partial class MigracionFinal : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -66,6 +66,33 @@ namespace NFLFantasyAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_usuarios", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "jugadores",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nombre = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Posicion = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    EquipoNFLId = table.Column<int>(type: "integer", nullable: false),
+                    ImagenUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ThumbnailUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Activo"),
+                    DesignacionLesion = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaActualizacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_jugadores", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_jugadores_equipos_nfl_EquipoNFLId",
+                        column: x => x.EquipoNFLId,
+                        principalTable: "equipos_nfl",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -130,6 +157,38 @@ namespace NFLFantasyAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "noticias_jugador",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    JugadorId = table.Column<int>(type: "integer", nullable: false),
+                    Texto = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    EsLesion = table.Column<bool>(type: "boolean", nullable: false),
+                    ResumenLesion = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: true),
+                    DesignacionLesion = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    AutorId = table.Column<int>(type: "integer", nullable: false),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Activa")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_noticias_jugador", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_noticias_jugador_jugadores_JugadorId",
+                        column: x => x.JugadorId,
+                        principalTable: "jugadores",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_noticias_jugador_usuarios_AutorId",
+                        column: x => x.AutorId,
+                        principalTable: "usuarios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "equipos_fantasy",
                 columns: table => new
                 {
@@ -176,6 +235,27 @@ namespace NFLFantasyAPI.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_jugadores_EquipoNFLId",
+                table: "jugadores",
+                column: "EquipoNFLId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_jugadores_Estado",
+                table: "jugadores",
+                column: "Estado");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_jugadores_Nombre_EquipoNFLId",
+                table: "jugadores",
+                columns: new[] { "Nombre", "EquipoNFLId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_jugadores_Posicion",
+                table: "jugadores",
+                column: "Posicion");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ligas_ComisionadoId",
                 table: "ligas",
                 column: "ComisionadoId");
@@ -189,6 +269,26 @@ namespace NFLFantasyAPI.Migrations
                 name: "IX_ligas_NombreLiga",
                 table: "ligas",
                 column: "NombreLiga");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_noticias_jugador_AutorId",
+                table: "noticias_jugador",
+                column: "AutorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_noticias_jugador_EsLesion",
+                table: "noticias_jugador",
+                column: "EsLesion");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_noticias_jugador_FechaCreacion",
+                table: "noticias_jugador",
+                column: "FechaCreacion");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_noticias_jugador_JugadorId",
+                table: "noticias_jugador",
+                column: "JugadorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_semanas_TemporadaId",
@@ -209,7 +309,7 @@ namespace NFLFantasyAPI.Migrations
                 name: "equipos_fantasy");
 
             migrationBuilder.DropTable(
-                name: "equipos_nfl");
+                name: "noticias_jugador");
 
             migrationBuilder.DropTable(
                 name: "semanas");
@@ -218,10 +318,16 @@ namespace NFLFantasyAPI.Migrations
                 name: "ligas");
 
             migrationBuilder.DropTable(
+                name: "jugadores");
+
+            migrationBuilder.DropTable(
                 name: "temporadas");
 
             migrationBuilder.DropTable(
                 name: "usuarios");
+
+            migrationBuilder.DropTable(
+                name: "equipos_nfl");
         }
     }
 }

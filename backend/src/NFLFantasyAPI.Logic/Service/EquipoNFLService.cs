@@ -6,6 +6,8 @@ using NFLFantasyAPI.CrossCutting;
 using NFLFantasyAPI.CrossCutting.Configuration;
 using NFLFantasyAPI.Logic.DTOs;
 using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.Logic.Validators;
+using NFLFantasyAPI.Logic.Exceptions;
 using NFLFantasyAPI.Persistence.Models;
 using NFLFantasyAPI.Persistence.Interfaces;
 using System;
@@ -21,17 +23,20 @@ namespace NFLFantasyAPI.Logic.Services
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<EquipoNFLService> _logger;
         private readonly FileServerSettings _fileServerSettings;
+        private readonly EquipoNFLValidator _validator;
 
         public EquipoNFLService(
             IEquipoNFLRepository repository,
             IWebHostEnvironment environment,
             ILogger<EquipoNFLService> logger,
-            IOptions<FileServerSettings> fileServerSettings)
+            IOptions<FileServerSettings> fileServerSettings,
+            EquipoNFLValidator validator)
         {
             _repository = repository;
             _environment = environment;
             _logger = logger;
             _fileServerSettings = fileServerSettings.Value;
+            _validator = validator;
         }
 
         public async Task<ServiceResult> GetAllAsync()
@@ -62,9 +67,8 @@ namespace NFLFantasyAPI.Logic.Services
         {
             try
             {
+                await _validator.ValidarEquipoExisteAsync(id);
                 var equipo = await _repository.GetByIdAsync(id);
-                if (equipo == null)
-                    return ServiceResult.BadRequest("Equipo NFL no encontrado");
 
                 var response = new EquipoNFLResponseDto
                 {
@@ -78,6 +82,11 @@ namespace NFLFantasyAPI.Logic.Services
 
                 return ServiceResult.Ok(response);
             }
+            catch (EquipoNFLNotFoundException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return ServiceResult.BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener equipo NFL {Id}", id);
@@ -89,8 +98,8 @@ namespace NFLFantasyAPI.Logic.Services
         {
             try
             {
-                if (await _repository.ExistsByNameAsync(equipoDto.Nombre))
-                    return ServiceResult.BadRequest("Ya existe un equipo NFL con ese nombre");
+                // Validaciones usando el validador centralizado (método consolidado)
+                await _validator.ValidarParaCrearAsync(equipoDto);
 
                 var equipo = new EquipoNFL
                 {
@@ -112,6 +121,16 @@ namespace NFLFantasyAPI.Logic.Services
                     Estado = equipo.Estado
                 });
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación al crear equipo NFL: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (EquipoNFLNotFoundException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return ServiceResult.BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear equipo NFL");
@@ -123,19 +142,17 @@ namespace NFLFantasyAPI.Logic.Services
         {
             try
             {
+                // Validar que el equipo existe
+                await _validator.ValidarEquipoExisteAsync(id);
+
+                // Validar que se proporcionó un archivo
+                if (imagen == null)
+                    throw new InvalidFileException("No se proporcionó ninguna imagen");
+
+                // Validar el archivo usando el validador compartido
+                FileValidator.ValidarArchivoImagen(imagen.ContentType, imagen.Length, maxSizeMB: 5);
+
                 var equipo = await _repository.GetByIdAsync(id);
-                if (equipo == null)
-                    return ServiceResult.BadRequest("Equipo NFL no encontrado");
-
-                if (imagen == null || imagen.Length == 0)
-                    return ServiceResult.BadRequest("No se proporcionó ninguna imagen");
-
-                var allowedTypes = new[] { "image/jpeg", "image/png" };
-                if (!allowedTypes.Contains(imagen.ContentType.ToLower()))
-                    return ServiceResult.BadRequest("Solo se permiten imágenes JPEG o PNG");
-
-                if (imagen.Length > 5 * 1024 * 1024)
-                    return ServiceResult.BadRequest("El tamaño máximo permitido es 5 MB");
 
                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "equipos-nfl");
                 if (!Directory.Exists(uploadsFolder))
@@ -157,6 +174,16 @@ namespace NFLFantasyAPI.Logic.Services
                     imagenUrl = equipo.ImagenUrl
                 });
             }
+            catch (EquipoNFLNotFoundException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (InvalidFileException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return ServiceResult.BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al subir imagen del equipo NFL {Id}", id);
@@ -168,14 +195,18 @@ namespace NFLFantasyAPI.Logic.Services
         {
             try
             {
+                await _validator.ValidarEquipoExisteAsync(id);
                 var equipo = await _repository.GetByIdAsync(id);
-                if (equipo == null)
-                    return ServiceResult.BadRequest("Equipo NFL no encontrado");
 
                 await _repository.DeleteAsync(equipo);
                 await _repository.SaveChangesAsync();
 
                 return ServiceResult.Ok(new { mensaje = "Equipo NFL eliminado exitosamente" });
+            }
+            catch (EquipoNFLNotFoundException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return ServiceResult.BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

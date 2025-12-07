@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using NFLFantasyAPI.Logic.DTOs;
 using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.Logic.Validators;
 using NFLFantasyAPI.Persistence.Interfaces;
 using NFLFantasyAPI.Persistence.Models;
 
@@ -10,49 +11,28 @@ namespace NFLFantasyAPI.Logic.Service
     {
         private readonly INoticiaJugadorRepository _noticiaRepository;
         private readonly ILogger<NoticiaJugadorService> _logger;
+        private readonly NoticiaJugadorValidator _validator;
 
         public NoticiaJugadorService(
             INoticiaJugadorRepository noticiaRepository,
-            ILogger<NoticiaJugadorService> logger)
+            ILogger<NoticiaJugadorService> logger,
+            NoticiaJugadorValidator validator)
         {
             _noticiaRepository = noticiaRepository;
             _logger = logger;
+            _validator = validator;
         }
 
         public async Task<NoticiaJugadorResponseDto> CrearNoticiaAsync(CrearNoticiaJugadorDto dto, int autorId)
         {
             _logger.LogInformation("Creando noticia para jugador {JugadorId}", dto.JugadorId);
 
-            // Validar que el jugador existe y está activo
-            var jugadorExiste = await _noticiaRepository.ExisteJugadorAsync(dto.JugadorId);
-            if (!jugadorExiste)
-            {
-                throw new InvalidOperationException("El jugador no existe o está inactivo");
-            }
+            // Validaciones usando el validador centralizado (método consolidado)
+            await _validator.ValidarParaCrearAsync(dto);
 
-            // Validaciones específicas para noticias de lesión
-            if (dto.EsLesion)
+            // Si no es lesión, limpiar campos de lesión
+            if (!dto.EsLesion)
             {
-                if (string.IsNullOrWhiteSpace(dto.ResumenLesion))
-                {
-                    throw new ArgumentException("El resumen de la lesión es obligatorio para noticias de lesión");
-                }
-
-                if (string.IsNullOrWhiteSpace(dto.DesignacionLesion))
-                {
-                    throw new ArgumentException("La designación de lesión es obligatoria para noticias de lesión");
-                }
-
-                // Validar que la designación sea válida
-                var designacionesValidas = new[] { "O", "D", "Q", "P", "FP", "IR", "PUP", "SUS" };
-                if (!designacionesValidas.Contains(dto.DesignacionLesion))
-                {
-                    throw new ArgumentException("Designación de lesión inválida. Valores permitidos: O, D, Q, P, FP, IR, PUP, SUS");
-                }
-            }
-            else
-            {
-                // Si no es lesión, no debe tener campos de lesión
                 dto.ResumenLesion = null;
                 dto.DesignacionLesion = null;
             }
@@ -121,7 +101,7 @@ namespace NFLFantasyAPI.Logic.Service
                 Posicion = jugador.Posicion,
                 EquipoNFL = jugador.EquipoNFL?.Nombre ?? "Sin equipo",
                 DesignacionLesion = jugador.DesignacionLesion,
-                DesignacionDescripcion = ObtenerDescripcionDesignacion(jugador.DesignacionLesion),
+                DesignacionDescripcion = NoticiaJugadorValidator.ObtenerDescripcionDesignacion(jugador.DesignacionLesion),
                 ImagenUrl = jugador.ImagenUrl,
                 Noticias = jugador.Noticias.Select(MapearAResponseDto).ToList()
             };
@@ -162,7 +142,7 @@ namespace NFLFantasyAPI.Logic.Service
                 EsLesion = noticia.EsLesion,
                 ResumenLesion = noticia.ResumenLesion,
                 DesignacionLesion = noticia.DesignacionLesion,
-                DesignacionDescripcion = ObtenerDescripcionDesignacion(noticia.DesignacionLesion),
+                DesignacionDescripcion = NoticiaJugadorValidator.ObtenerDescripcionDesignacion(noticia.DesignacionLesion),
                 AutorId = noticia.AutorId,
                 NombreAutor = noticia.Autor?.NombreCompleto ?? "Desconocido",
                 FechaCreacion = noticia.FechaCreacion,
@@ -170,26 +150,5 @@ namespace NFLFantasyAPI.Logic.Service
             };
         }
 
-        // Método privado para obtener la descripción de una designación
-        private string? ObtenerDescripcionDesignacion(string? designacion)
-        {
-            if (string.IsNullOrWhiteSpace(designacion))
-            {
-                return null;
-            }
-
-            return designacion switch
-            {
-                "O" => "Fuera (Out) - No jugará",
-                "D" => "Dudoso (Doubtful) - ~25% probabilidad de jugar",
-                "Q" => "Cuestionable (Questionable) - ~50% probabilidad de jugar",
-                "P" => "Probable (Probable) - Muy probable que juegue",
-                "FP" => "Participación Plena (Full Practice) - Casi seguro que juega",
-                "IR" => "Reserva de Lesionados (Injured Reserve) - Fuera por período extendido",
-                "PUP" => "Incapaz Físicamente de Jugar (Physically Unable to Perform)",
-                "SUS" => "Suspendido (Suspended) - No elegible por sanción",
-                _ => designacion
-            };
-        }
     }
 }

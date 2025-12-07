@@ -1,6 +1,8 @@
 using NFLFantasyAPI.CrossCutting;
 using NFLFantasyAPI.Logic.DTOs;
 using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.Logic.Validators;
+using NFLFantasyAPI.Logic.Exceptions;
 using NFLFantasyAPI.Persistence.Models;
 using NFLFantasyAPI.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -12,11 +14,13 @@ namespace NFLFantasyAPI.Logic.Services
     {
         private readonly IEquipoFantasyRepository _repository;
         private readonly ILogger<EquipoFantasyService> _logger;
+        private readonly EquipoFantasyValidator _validator;
 
-        public EquipoFantasyService(IEquipoFantasyRepository repository, ILogger<EquipoFantasyService> logger)
+        public EquipoFantasyService(IEquipoFantasyRepository repository, ILogger<EquipoFantasyService> logger, EquipoFantasyValidator validator)
         {
             _repository = repository;
             _logger = logger;
+            _validator = validator;
         }
 
         public async Task<ServiceResult> GetAllEquiposFantasyAsync()
@@ -49,9 +53,10 @@ namespace NFLFantasyAPI.Logic.Services
 
         public async Task<ServiceResult> GetEquipoFantasyByIdAsync(int id)
         {
-            var equipo = await _repository.GetByIdAsync(id);
-            if (equipo == null)
-                return ServiceResult.BadRequest("Equipo fantasy no encontrado");
+            try
+            {
+                await _validator.ValidarEquipoExisteAsync(id);
+                var equipo = await _repository.GetByIdAsync(id);
 
             var dto = new EquipoFantasyResponseDto
             {
@@ -67,6 +72,12 @@ namespace NFLFantasyAPI.Logic.Services
             };
 
             return ServiceResult.Ok(dto);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
         }
 
         public async Task<ServiceResult> GetEquiposByUsuarioAsync(int usuarioId)
@@ -93,11 +104,8 @@ namespace NFLFantasyAPI.Logic.Services
         {
             try
             {
-                if (!await _repository.UsuarioExisteAsync(dto.UsuarioId))
-                    return ServiceResult.BadRequest("Usuario no encontrado");
-
-                if (await _repository.NombreExisteAsync(dto.Nombre, dto.UsuarioId))
-                    return ServiceResult.BadRequest("Ya tienes un equipo con ese nombre");
+                // Validaciones usando el validador centralizado (método consolidado)
+                await _validator.ValidarParaCrearAsync(dto);
 
                 var equipo = new EquipoFantasy
                 {
@@ -115,6 +123,11 @@ namespace NFLFantasyAPI.Logic.Services
 
                 return ServiceResult.Ok(new { mensaje = "Equipo creado exitosamente", equipo.Id });
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación al crear equipo fantasy: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear equipo fantasy");
@@ -126,19 +139,17 @@ namespace NFLFantasyAPI.Logic.Services
         {
             try
             {
+                // Validar que el equipo existe
+                await _validator.ValidarEquipoExisteAsync(id);
+
+                // Validar que se proporcionó un archivo
+                if (imagen == null)
+                    throw new InvalidFileException("No se proporcionó ninguna imagen");
+
+                // Validar el archivo usando el validador compartido
+                FileValidator.ValidarArchivoImagen(imagen.ContentType, imagen.Length, maxSizeMB: 5);
+
                 var equipo = await _repository.GetByIdAsync(id);
-                if (equipo == null)
-                    return ServiceResult.BadRequest("Equipo no encontrado");
-
-                if (imagen == null || imagen.Length == 0)
-                    return ServiceResult.BadRequest("No se proporcionó ninguna imagen");
-
-                var allowedTypes = new[] { "image/jpeg", "image/png" };
-                if (!allowedTypes.Contains(imagen.ContentType.ToLower()))
-                    return ServiceResult.BadRequest("Solo se permiten imágenes JPEG o PNG");
-
-                if (imagen.Length > 5 * 1024 * 1024)
-                    return ServiceResult.BadRequest("El tamaño máximo permitido es 5 MB");
 
                 var folder = Path.Combine(uploadsRoot, "uploads", "equipos-fantasy");
                 Directory.CreateDirectory(folder);
@@ -155,6 +166,16 @@ namespace NFLFantasyAPI.Logic.Services
 
                 return ServiceResult.Ok(new { mensaje = "Imagen actualizada", imagenUrl = equipo.ImagenUrl });
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (InvalidFileException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return ServiceResult.BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al subir imagen del equipo {Id}", id);
@@ -164,14 +185,21 @@ namespace NFLFantasyAPI.Logic.Services
 
         public async Task<ServiceResult> DeleteEquipoFantasyAsync(int id)
         {
-            var equipo = await _repository.GetByIdAsync(id);
-            if (equipo == null)
-                return ServiceResult.BadRequest("Equipo no encontrado");
+            try
+            {
+                await _validator.ValidarEquipoExisteAsync(id);
+                var equipo = await _repository.GetByIdAsync(id);
 
             await _repository.DeleteAsync(equipo);
             await _repository.SaveChangesAsync();
 
             return ServiceResult.Ok(new { mensaje = "Equipo eliminado exitosamente" });
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
         }
     }
 }
