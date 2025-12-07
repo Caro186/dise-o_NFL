@@ -6,9 +6,12 @@ using Microsoft.Extensions.Options;
 using NFLFantasyAPI.CrossCutting;
 using NFLFantasyAPI.CrossCutting.Configuration;
 using NFLFantasyAPI.Logic.DTOs;
+using NFLFantasyAPI.Logic.Validators;
+using NFLFantasyAPI.Logic.Exceptions;
 using NFLFantasyAPI.Persistence.Models;
 using NFLFantasyAPI.Persistence.Interfaces;
 using BCrypt.Net;
+using static NFLFantasyAPI.Logic.Validators.FileValidator;
 
 namespace NFLFantasyAPI.Logic.Services
 {
@@ -20,6 +23,9 @@ namespace NFLFantasyAPI.Logic.Services
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<LigaService> _logger;
         private readonly FileServerSettings _fileServerSettings;
+        private readonly LigaValidator _ligaValidator;
+        private readonly EquipoFantasyValidator _equipoFantasyValidator;
+        private readonly ITemporadaRepository _temporadaRepository;
 
 
         public LigaService(
@@ -28,7 +34,10 @@ namespace NFLFantasyAPI.Logic.Services
             IEquipoFantasyRepository equipoFantasyRepository,
             IWebHostEnvironment environment,
             ILogger<LigaService> logger,
-            IOptions<FileServerSettings> fileServerSettings)
+            IOptions<FileServerSettings> fileServerSettings,
+            LigaValidator ligaValidator,
+            EquipoFantasyValidator equipoFantasyValidator,
+            ITemporadaRepository temporadaRepository)
         {
             _ligaRepository = ligaRepository;
             _environment = environment;
@@ -36,6 +45,9 @@ namespace NFLFantasyAPI.Logic.Services
             _fileServerSettings = fileServerSettings.Value;
             _usuarioRespository = usuarioRespository;
             _equipoFantasyRepository = equipoFantasyRepository;
+            _ligaValidator = ligaValidator;
+            _equipoFantasyValidator = equipoFantasyValidator;
+            _temporadaRepository = temporadaRepository;
         }
 
         public async Task<ServiceResult> GetAllAsync()
@@ -69,11 +81,16 @@ namespace NFLFantasyAPI.Logic.Services
 
         public async Task<ServiceResult> GetByIdAsync(int id)
         {
-            var liga = await _ligaRepository.GetByIdAsync(id);
-            if (liga == null)
-                return ServiceResult.BadRequest("Liga no encontrada");
-
-            return ServiceResult.Ok(liga);
+            try
+            {
+                var liga = await _ligaValidator.ValidarLigaExisteAsync(id);
+                return ServiceResult.Ok(liga);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
         }
 
         public async Task<ServiceResult> GetByComisionadoAsync(int usuarioId)
@@ -113,142 +130,187 @@ namespace NFLFantasyAPI.Logic.Services
 
         public async Task<ServiceResult> CreateAsync(LigaCreateDto dto)
         {
-            // Ejemplo simplificado: deberías incluir validaciones como en tu controller original
-            var liga = new Liga
+            try
             {
-                NombreLiga = dto.NombreLiga,
-                Descripcion = dto.Descripcion,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.PasswordHash),
-                IdTemporada = dto.IdTemporada,
-                Estado = "Pre-Draft",
-                CuposTotales = dto.CuposTotales,
-                CuposOcupados = 1,
-                FechaCreacion = DateTime.UtcNow,
-                ComisionadoId = dto.ComisionadoId
-            };
+                // Validaciones usando el validador centralizado (método consolidado)
+                await _ligaValidator.ValidarParaCrearAsync(dto);
 
-            await _ligaRepository.AddAsync(liga);
-            await _ligaRepository.SaveChangesAsync();
+                var liga = new Liga
+                {
+                    NombreLiga = dto.NombreLiga,
+                    Descripcion = dto.Descripcion,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.PasswordHash),
+                    IdTemporada = dto.IdTemporada,
+                    Estado = "Pre-Draft",
+                    CuposTotales = dto.CuposTotales,
+                    CuposOcupados = 1,
+                    FechaCreacion = DateTime.UtcNow,
+                    ComisionadoId = dto.ComisionadoId
+                };
 
-            _logger.LogInformation("Liga creada {Nombre}", liga.NombreLiga);
-            return ServiceResult.Ok(liga);
+                await _ligaRepository.AddAsync(liga);
+                await _ligaRepository.SaveChangesAsync();
+
+                _logger.LogInformation("Liga creada {Nombre}", liga.NombreLiga);
+                return ServiceResult.Ok(liga);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación al crear liga: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear liga");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
         public async Task<ServiceResult> UpdateAsync(int id, LigaCreateDto dto)
         {
-            var liga = await _ligaRepository.GetByIdAsync(id);
-            if (liga == null)
-                return ServiceResult.BadRequest("Liga no encontrada");
+            try
+            {
+                var liga = await _ligaValidator.ValidarLigaExisteAsync(id);
 
-            liga.NombreLiga = dto.NombreLiga;
-            liga.Descripcion = dto.Descripcion;
+                liga.NombreLiga = dto.NombreLiga;
+                liga.Descripcion = dto.Descripcion;
 
-            await _ligaRepository.UpdateAsync(liga);
-            await _ligaRepository.SaveChangesAsync();
+                await _ligaRepository.UpdateAsync(liga);
+                await _ligaRepository.SaveChangesAsync();
 
-            return ServiceResult.Ok(liga);
+                return ServiceResult.Ok(liga);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar liga");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
         public async Task<ServiceResult> DeleteAsync(int id)
         {
-            var liga = await _ligaRepository.GetByIdAsync(id);
-            if (liga == null)
-                return ServiceResult.BadRequest("Liga no encontrada");
+            try
+            {
+                var liga = await _ligaValidator.ValidarLigaExisteAsync(id);
 
-            await _ligaRepository.DeleteAsync(liga);
-            await _ligaRepository.SaveChangesAsync();
+                await _ligaRepository.DeleteAsync(liga);
+                await _ligaRepository.SaveChangesAsync();
 
-            return ServiceResult.Ok(new { mensaje = "Liga eliminada exitosamente" });
+                return ServiceResult.Ok(new { mensaje = "Liga eliminada exitosamente" });
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al eliminar liga");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
         public async Task<ServiceResult> UploadImagenAsync(int id, IFormFile imagen)
         {
-            var liga = await _ligaRepository.GetByIdAsync(id);
-            if (liga == null)
-                return ServiceResult.BadRequest("Liga no encontrada");
-
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "ligas");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var extension = Path.GetExtension(imagen.FileName);
-            var fileName = $"{id}_{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(uploadsFolder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await imagen.CopyToAsync(stream);
+                var liga = await _ligaValidator.ValidarLigaExisteAsync(id);
+
+                if (imagen == null)
+                    throw new InvalidFileException("No se proporcionó ninguna imagen");
+
+                FileValidator.ValidarArchivoImagen(imagen.ContentType, imagen.Length, maxSizeMB: 5);
+
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "ligas");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var extension = Path.GetExtension(imagen.FileName);
+                var fileName = $"{id}_{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imagen.CopyToAsync(stream);
+                }
+
+                liga.ImagenUrl = $"{_fileServerSettings.BaseUrl}/uploads/ligas/{fileName}";
+                await _ligaRepository.SaveChangesAsync();
+
+                return ServiceResult.Ok(new { imagenUrl = liga.ImagenUrl });
             }
-
-            liga.ImagenUrl = $"{_fileServerSettings.BaseUrl}/uploads/ligas/{fileName}";
-            await _ligaRepository.SaveChangesAsync();
-
-            return ServiceResult.Ok(new { imagenUrl = liga.ImagenUrl });
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (InvalidFileException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al subir imagen de liga");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
         public async Task<ServiceResult> UnirseLigaAsync(UnirseLigaDto dto)
         {
-            // 1. Validar existencia de liga
-            var liga = await _ligaRepository.GetByIdAsync(dto.LigaId);
-            if (liga == null)
-                return ServiceResult.BadRequest("Liga no encontrada");
-
-            // 2. Verificar contraseña
-            if (!BCrypt.Net.BCrypt.Verify(dto.Password, liga.PasswordHash))
-                return ServiceResult.BadRequest("Contraseña incorrecta");
-
-            // 3. Cupos disponibles
-            if (liga.CuposOcupados >= liga.CuposTotales)
-                return ServiceResult.BadRequest("La liga está llena");
-
-            // 4. Validar usuario
-            var usuario = await _usuarioRespository.GetByIdAsync(dto.UsuarioId);
-            if (usuario == null)
-                return ServiceResult.BadRequest("Usuario no encontrado");
-
-            // 5. Validar equipo
-            var equipoFantasy = await _equipoFantasyRepository.GetByIdAsync(dto.EquipoId);
-            if (equipoFantasy == null)
-                return ServiceResult.BadRequest("Equipo fantasy no encontrado");
-
-            if (equipoFantasy.UsuarioId != dto.UsuarioId)
-                return ServiceResult.BadRequest("El equipo no pertenece al usuario");
-
-            if (equipoFantasy.LigaId.HasValue)
-                return ServiceResult.BadRequest("El equipo ya está en otra liga");
-
-            // 6. Verificar si ya está en liga
-            var equipos = await _equipoFantasyRepository.GetByUsuarioIdAsync(dto.UsuarioId);
-            if (equipos != null)
+            try
             {
-                foreach (var equipo in equipos)
+                // 1-3. Validaciones de liga usando el validador consolidado
+                var liga = await _ligaValidator.ValidarParaUnirseAsync(dto);
+
+                // 4. Validar usuario
+                var usuario = await _usuarioRespository.GetByIdAsync(dto.UsuarioId);
+                if (usuario == null)
+                    throw new ValidationException("UsuarioId", "Usuario no encontrado");
+
+                // 5-6. Validaciones de equipo usando el validador consolidado
+                await _equipoFantasyValidator.ValidarParaUnirseALigaAsync(dto.EquipoId, dto.UsuarioId);
+                await _equipoFantasyValidator.ValidarUsuarioNoTieneEquipoEnLigaAsync(dto.UsuarioId, dto.LigaId);
+
+                // 7. Obtener el equipo y actualizar entidades
+                var equipoFantasy = await _equipoFantasyRepository.GetByIdAsync(dto.EquipoId);
+                if (equipoFantasy == null)
+                    throw new ValidationException("EquipoId", "Equipo fantasy no encontrado");
+
+                equipoFantasy.LigaId = liga.IdLiga;
+                liga.CuposOcupados++;
+
+                await _equipoFantasyRepository.UpdateAsync(equipoFantasy);
+                await _ligaRepository.UpdateAsync(liga);
+                await _ligaRepository.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    "Usuario {UsuarioId} se unió a liga {LigaId} con equipo {EquipoId}",
+                    dto.UsuarioId, dto.LigaId, dto.EquipoId);
+
+                return ServiceResult.Ok(new
                 {
-                    if (equipo.LigaId == dto.LigaId)
-                    {
-                        return ServiceResult.BadRequest("Ya tienes un equipo en esta liga");
-                    }
-                }
+                    mensaje = $"Te has unido exitosamente a la liga '{liga.NombreLiga}'",
+                    ligaId = liga.IdLiga,
+                    nombreLiga = liga.NombreLiga,
+                    equipoId = equipoFantasy.Id,
+                    alias = dto.Alias
+                });
             }
-
-            // 7. Actualizar entidades
-            equipoFantasy.LigaId = liga.IdLiga;
-            liga.CuposOcupados++;
-
-            await _equipoFantasyRepository.UpdateAsync(equipoFantasy);
-            await _ligaRepository.UpdateAsync(liga);
-            await _ligaRepository.SaveChangesAsync();
-
-            _logger.LogInformation(
-                "Usuario {UsuarioId} se unió a liga {LigaId} con equipo {EquipoId}",
-                dto.UsuarioId, dto.LigaId, dto.EquipoId);
-
-            return ServiceResult.Ok(new
+            catch (ValidationException ex)
             {
-                mensaje = $"Te has unido exitosamente a la liga '{liga.NombreLiga}'",
-                ligaId = liga.IdLiga,
-                nombreLiga = liga.NombreLiga,
-                equipoId = equipoFantasy.Id,
-                alias = dto.Alias
-            });
+                _logger.LogWarning($"Error de validación al unirse a liga: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al unirse a liga");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
     }

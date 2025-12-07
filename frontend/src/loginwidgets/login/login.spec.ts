@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { Login } from './login';
 import { Authservice } from '../../services/authservice';
@@ -9,19 +9,21 @@ describe('Login Component', () => {
   let component: Login;
   let fixture: ComponentFixture<Login>;
   let mockAuthService: jasmine.SpyObj<Authservice>;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let router: Router;
 
   beforeEach(async () => {
     mockAuthService = jasmine.createSpyObj('Authservice', ['login', 'isLoggedIn']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
       imports: [Login, ReactiveFormsModule],
       providers: [
         { provide: Authservice, useValue: mockAuthService },
-        { provide: Router, useValue: mockRouter }
+        provideRouter([{ path: 'register', component: Login }])
       ]
     }).compileComponents();
+    
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
 
     fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;
@@ -107,7 +109,7 @@ describe('Login Component', () => {
     component.loginForm.get('password')?.setValue('Password123');
     component.onSubmit();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/mainpage']);
+    expect(router.navigate).toHaveBeenCalledWith(['/mainpage']);
   });
 
   it('debe mostrar mensaje de error con credenciales incorrectas (401)', () => {

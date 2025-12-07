@@ -1,0 +1,29 @@
+2025-12-06 22:37:32.459 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-12-06 22:37:32.552 -06:00 [INF] User profile is available. Using 'C:\Users\josev\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-12-06 22:37:32.688 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-12-06 22:37:32.693 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-12-06 22:37:32.695 -06:00 [INF] Hosting environment: Development
+2025-12-06 22:37:32.697 -06:00 [INF] Content root path: C:\Obsidian\OrganizaciónJoseAndresVargasTorres\02-Studies\Product Design and Quality\Proyect\dise-o_NFL\backend\src\NFLFantasyAPI.Presentation
+2025-12-06 22:43:34.970 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-12-06 22:43:35.084 -06:00 [INF] User profile is available. Using 'C:\Users\josev\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-12-06 22:43:35.242 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-12-06 22:43:35.248 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-12-06 22:43:35.250 -06:00 [INF] Hosting environment: Development
+2025-12-06 22:43:35.252 -06:00 [INF] Content root path: C:\Obsidian\OrganizaciónJoseAndresVargasTorres\02-Studies\Product Design and Quality\Proyect\dise-o_NFL\backend\src\NFLFantasyAPI.Presentation
+2025-12-06 22:43:44.943 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/index.html - null null
+2025-12-06 22:43:45.138 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/index.html - 200 null text/html;charset=utf-8 196.0978ms
+2025-12-06 22:43:45.202 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger-ui.css - null null
+2025-12-06 22:43:45.202 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/index.css - null null
+2025-12-06 22:43:45.242 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger-ui.css - 200 23647 text/css 40.5125ms
+2025-12-06 22:43:45.242 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/index.css - 200 152 text/css 40.4025ms
+2025-12-06 22:43:45.265 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger-ui-standalone-preset.js - null null
+2025-12-06 22:43:45.269 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger-ui-bundle.js - null null
+2025-12-06 22:43:45.289 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger-ui-standalone-preset.js - 200 77352 text/javascript 24.073ms
+2025-12-06 22:43:45.309 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/index.js - null null
+2025-12-06 22:43:45.321 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/index.js - 200 null application/javascript;charset=utf-8 11.4555ms
+2025-12-06 22:43:45.321 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger-ui-bundle.js - 200 424767 text/javascript 52.2726ms
+2025-12-06 22:43:45.630 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/favicon-32x32.png - null null
+2025-12-06 22:43:45.630 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/v1/swagger.json - null null
+2025-12-06 22:43:45.640 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/favicon-32x32.png - 200 628 image/png 10.5279ms
+2025-12-06 22:43:45.861 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 231.3845ms
+2025-12-06 22:45:40.581 -06:00 [INF] Application is shutting down...

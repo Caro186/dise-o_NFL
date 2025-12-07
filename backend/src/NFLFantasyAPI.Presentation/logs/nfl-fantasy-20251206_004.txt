@@ -1,0 +1,13 @@
+2025-12-06 23:08:39.011 -06:00 [ERR] Failed executing DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2025-12-06 23:08:39.561 -06:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2025-12-06 23:08:39.581 -06:00 [INF] Applying migration '20251207050705_MigracionFinal'.
+2025-12-06 23:12:28.987 -06:00 [INF] Iniciando aplicación NFL Fantasy API con autenticación JWT
+2025-12-06 23:12:29.238 -06:00 [INF] User profile is available. Using 'C:\Users\josev\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-12-06 23:12:29.525 -06:00 [INF] Now listening on: http://0.0.0.0:5000
+2025-12-06 23:12:29.534 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-12-06 23:12:29.539 -06:00 [INF] Hosting environment: Development
+2025-12-06 23:12:29.542 -06:00 [INF] Content root path: C:\Obsidian\OrganizaciónJoseAndresVargasTorres\02-Studies\Product Design and Quality\Proyect\dise-o_NFL\backend\src\NFLFantasyAPI.Presentation
+2025-12-06 23:49:54.047 -06:00 [INF] Application is shutting down...

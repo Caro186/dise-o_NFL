@@ -54,6 +54,11 @@ namespace NFLFantasyAPI.Presentation
 
             // Registrar validadores
             builder.Services.AddScoped<NFLFantasyAPI.Logic.Validators.JugadorValidator>();
+            builder.Services.AddScoped<NFLFantasyAPI.Logic.Validators.NoticiaJugadorValidator>();
+            builder.Services.AddScoped<NFLFantasyAPI.Logic.Validators.EquipoNFLValidator>();
+            builder.Services.AddScoped<NFLFantasyAPI.Logic.Validators.EquipoFantasyValidator>();
+            builder.Services.AddScoped<NFLFantasyAPI.Logic.Validators.LigaValidator>();
+            builder.Services.AddScoped<NFLFantasyAPI.Logic.Validators.TemporadaValidator>();
 
             IDbContextProvider contextProvider = new DbContextProvider();
             contextProvider.registerRepositories(builder.Services);

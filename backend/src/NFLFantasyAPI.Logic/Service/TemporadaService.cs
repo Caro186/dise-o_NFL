@@ -1,6 +1,8 @@
 using NFLFantasyAPI.CrossCutting;
 using NFLFantasyAPI.Logic.DTOs;
 using NFLFantasyAPI.Logic.Interfaces;
+using NFLFantasyAPI.Logic.Validators;
+using NFLFantasyAPI.Logic.Exceptions;
 using NFLFantasyAPI.Persistence.Models;
 using NFLFantasyAPI.Persistence.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -11,74 +13,80 @@ namespace NFLFantasyAPI.Logic.Service
     {
         private readonly ITemporadaRepository _temporadaRepo;
         private readonly ILogger<TemporadaService> _logger;
+        private readonly TemporadaValidator _validator;
 
-        public TemporadaService(ITemporadaRepository temporadaRepo, ILogger<TemporadaService> logger)
+        public TemporadaService(ITemporadaRepository temporadaRepo, ILogger<TemporadaService> logger, TemporadaValidator validator)
         {
             _temporadaRepo = temporadaRepo;
             _logger = logger;
+            _validator = validator;
         }
 
         public async Task<ServiceResult> CrearTemporadaAsync(CrearTemporadaDto dto)
         {
-            if (await _temporadaRepo.ExistsByNameAsync(dto.Nombre))
-                return ServiceResult.BadRequest("Ya existe una temporada con ese nombre");
-
-            if (dto.FechaInicio >= dto.FechaCierre)
-                return ServiceResult.BadRequest("La fecha de inicio debe ser anterior a la de cierre");
-
-            if (await _temporadaRepo.HasOverlapAsync(dto.FechaInicio, dto.FechaCierre))
-                return ServiceResult.BadRequest("Las fechas se traslapan con otra temporada existente");
-
-            if (dto.Actual)
+            try
             {
-                var actual = await _temporadaRepo.GetActualesAsync();
-                if (actual != null) actual.Actual = false;
-            }
+                // Validaciones usando el validador centralizado (método consolidado)
+                await _validator.ValidarParaCrearAsync(dto);
 
-            var temporada = new Temporada
-            {
-                Nombre = dto.Nombre,
-                FechaInicio = dto.FechaInicio,
-                FechaCierre = dto.FechaCierre,
-                FechaCreacion = DateTime.UtcNow,
-                Actual = dto.Actual
-            };
-
-            await _temporadaRepo.AddAsync(temporada);
-            await _temporadaRepo.SaveChangesAsync();
-
-            // Crear semanas
-            if (dto.Semanas != null)
-            {
-                foreach (var s in dto.Semanas)
+                if (dto.Actual)
                 {
-                    if (s.FechaInicio < temporada.FechaInicio || s.FechaFin > temporada.FechaCierre)
-                        return ServiceResult.BadRequest("Las semanas deben estar dentro del rango de la temporada");
-
-                    temporada.Semanas.Add(new Semana
-                    {
-                        FechaInicio = s.FechaInicio,
-                        FechaFin = s.FechaFin,
-                        Temporada = temporada
-                    });
+                    var actual = await _temporadaRepo.GetActualesAsync();
+                    if (actual != null) actual.Actual = false;
                 }
 
+                var temporada = new Temporada
+                {
+                    Nombre = dto.Nombre,
+                    FechaInicio = dto.FechaInicio,
+                    FechaCierre = dto.FechaCierre,
+                    FechaCreacion = DateTime.UtcNow,
+                    Actual = dto.Actual
+                };
+
+                await _temporadaRepo.AddAsync(temporada);
                 await _temporadaRepo.SaveChangesAsync();
+
+                // Crear semanas (las validaciones de semanas ya están en el validador)
+                if (dto.Semanas != null && dto.Semanas.Any())
+                {
+                    foreach (var s in dto.Semanas)
+                    {
+                        temporada.Semanas.Add(new Semana
+                        {
+                            FechaInicio = s.FechaInicio,
+                            FechaFin = s.FechaFin,
+                            Temporada = temporada
+                        });
+                    }
+
+                    await _temporadaRepo.SaveChangesAsync();
+                }
+
+                _logger.LogInformation("Temporada creada: {Nombre}", temporada.Nombre);
+
+                var response = new TemporadaResponseDto
+                {
+                    Id = temporada.Id,
+                    Nombre = temporada.Nombre,
+                    FechaInicio = temporada.FechaInicio,
+                    FechaCierre = temporada.FechaCierre,
+                    FechaCreacion = temporada.FechaCreacion,
+                    Actual = temporada.Actual
+                };
+
+                return ServiceResult.Ok(response);
             }
-
-            _logger.LogInformation("Temporada creada: {Nombre}", temporada.Nombre);
-
-            var response = new TemporadaResponseDto
+            catch (ValidationException ex)
             {
-                Id = temporada.Id,
-                Nombre = temporada.Nombre,
-                FechaInicio = temporada.FechaInicio,
-                FechaCierre = temporada.FechaCierre,
-                FechaCreacion = temporada.FechaCreacion,
-                Actual = temporada.Actual
-            };
-
-            return ServiceResult.Ok(response);
+                _logger.LogWarning($"Error de validación al crear temporada: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear temporada");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
 
         public async Task<ServiceResult> ObtenerTemporadasAsync()
@@ -99,37 +107,54 @@ namespace NFLFantasyAPI.Logic.Service
 
         public async Task<ServiceResult> ObtenerTemporadaAsync(int id)
         {
-            var temporada = await _temporadaRepo.GetByIdAsync(id);
-            if (temporada == null)
-                return ServiceResult.BadRequest("Temporada no encontrada");
-
-            var dto = new TemporadaResponseDto
+            try
             {
-                Id = temporada.Id,
-                Nombre = temporada.Nombre,
-                FechaInicio = temporada.FechaInicio,
-                FechaCierre = temporada.FechaCierre,
-                FechaCreacion = temporada.FechaCreacion,
-                Actual = temporada.Actual
-            };
+                var temporada = await _validator.ValidarTemporadaExisteAsync(id);
 
-            return ServiceResult.Ok(dto);
+                var dto = new TemporadaResponseDto
+                {
+                    Id = temporada.Id,
+                    Nombre = temporada.Nombre,
+                    FechaInicio = temporada.FechaInicio,
+                    FechaCierre = temporada.FechaCierre,
+                    FechaCreacion = temporada.FechaCreacion,
+                    Actual = temporada.Actual
+                };
+
+                return ServiceResult.Ok(dto);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
         }
 
         public async Task<ServiceResult> MarcarComoActualAsync(int id)
         {
-            var temporada = await _temporadaRepo.GetByIdAsync(id);
-            if (temporada == null)
-                return ServiceResult.BadRequest("Temporada no encontrada");
+            try
+            {
+                var temporada = await _validator.ValidarTemporadaExisteAsync(id);
 
-            var actual = await _temporadaRepo.GetActualesAsync();
-            if (actual != null) actual.Actual = false;
+                var actual = await _temporadaRepo.GetActualesAsync();
+                if (actual != null) actual.Actual = false;
 
-            temporada.Actual = true;
-            await _temporadaRepo.SaveChangesAsync();
+                temporada.Actual = true;
+                await _temporadaRepo.SaveChangesAsync();
 
-            _logger.LogInformation("Temporada {Id} marcada como actual", id);
-            return ServiceResult.Ok(new { mensaje = "Temporada marcada como actual" });
+                _logger.LogInformation("Temporada {Id} marcada como actual", id);
+                return ServiceResult.Ok(new { mensaje = "Temporada marcada como actual" });
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning($"Error de validación: {ex.Message}");
+                return ServiceResult.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al marcar temporada como actual");
+                return ServiceResult.Error("Error interno del servidor");
+            }
         }
     }
 }

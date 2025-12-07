@@ -29,6 +29,12 @@ namespace NFLFantasyAPI.Persistence.Models
         [MaxLength(20)]
         public string Estado { get; set; } = "Activo";
 
+        /// <summary>
+        /// Designación de lesión del jugador (O, D, Q, P, FP, IR, PUP, SUS)
+        /// NOTA: Este campo NO debe editarse directamente desde los DTOs de jugador.
+        /// Se actualiza automáticamente desde NoticiaJugadorService cuando se crea una noticia de lesión.
+        /// Las lesiones deben manejarse a través del sistema de noticias, no como campos informativos sueltos.
+        /// </summary>
         [MaxLength(10)]
         public string? DesignacionLesion { get; set; }
 
