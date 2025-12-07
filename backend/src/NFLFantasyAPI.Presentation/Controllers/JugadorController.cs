@@ -88,38 +88,10 @@ namespace NFLFantasyAPI.Presentation.Controllers
         {
             _logger.LogInformation("Iniciando procesamiento batch de jugadores");
 
-            // Validar que se envió un archivo
-            if (file == null)
-            {
-                return BadRequest(new JugadorBatchResultDto
-                {
-                    Exito = false,
-                    Mensaje = "No se proporcionó ningún archivo",
-                    Errores = new List<JugadorBatchErrorDto>
-                    {
-                        new JugadorBatchErrorDto { Error = "Archivo no encontrado en la solicitud" }
-                    }
-                });
-            }
-
-            // Validar extensión del archivo
-            var extension = Path.GetExtension(file.FileName).ToLower();
-            if (extension != ".json")
-            {
-                return BadRequest(new JugadorBatchResultDto
-                {
-                    Exito = false,
-                    Mensaje = "El archivo debe ser de tipo JSON (.json)",
-                    Errores = new List<JugadorBatchErrorDto>
-                    {
-                        new JugadorBatchErrorDto { Error = $"Extensión de archivo inválida: {extension}" }
-                    }
-                });
-            }
-
             try
             {
-                // Procesar el archivo usando el servicio
+                // Las validaciones de archivo ahora se hacen en el servicio/validador
+                // El servicio lanzará excepciones apropiadas que se manejan en el catch
                 var result = await _service.ProcessBatchFileAsync(file);
 
                 // Determinar código de estado HTTP según resultado
@@ -133,6 +105,29 @@ namespace NFLFantasyAPI.Presentation.Controllers
                     _logger.LogWarning($"Batch con errores: {result.TotalErrores} errores encontrados");
                     return BadRequest(result);
                 }
+            }
+            catch (NFLFantasyAPI.Logic.Exceptions.InvalidFileException ex)
+            {
+                _logger.LogWarning($"Archivo inválido: {ex.Message}");
+                return BadRequest(new JugadorBatchResultDto
+                {
+                    Exito = false,
+                    Mensaje = ex.Message,
+                    Errores = new List<JugadorBatchErrorDto>
+                    {
+                        new JugadorBatchErrorDto { Error = ex.Message }
+                    }
+                });
+            }
+            catch (NFLFantasyAPI.Logic.Exceptions.BatchProcessingException ex)
+            {
+                _logger.LogError(ex, "Error al procesar batch de jugadores");
+                return BadRequest(new JugadorBatchResultDto
+                {
+                    Exito = false,
+                    Mensaje = ex.Message,
+                    Errores = ex.Errores.Select(e => new JugadorBatchErrorDto { Error = e }).ToList()
+                });
             }
             catch (Exception ex)
             {

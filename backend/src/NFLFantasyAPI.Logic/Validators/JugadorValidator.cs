@@ -7,17 +7,30 @@ namespace NFLFantasyAPI.Logic.Validators
 {
     /// <summary>
     /// Validador centralizado para todas las validaciones relacionadas con jugadores
+    /// REFACTORIZADO SPRINT 3: Modularizado con métodos pequeños y claros, agrupados por responsabilidad
     /// </summary>
     public class JugadorValidator
     {
         private readonly IJugadorRepository _jugadorRepository;
         private readonly IEquipoNFLRepository _equipoNFLRepository;
 
+        #region Constantes y Constantes Estáticas
+
         // Posiciones válidas de la NFL
         private static readonly HashSet<string> PosicionesValidas = new(StringComparer.OrdinalIgnoreCase)
         {
             "QB", "RB", "WR", "TE", "K", "DEF", "OL", "DL", "LB", "DB", "FB", "P", "LS"
         };
+
+        // Estados válidos para un jugador
+        private static readonly HashSet<string> EstadosValidos = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Activo", "Inactivo"
+        };
+
+        #endregion
+
+        #region Constructor
 
         public JugadorValidator(
             IJugadorRepository jugadorRepository,
@@ -27,17 +40,44 @@ namespace NFLFantasyAPI.Logic.Validators
             _equipoNFLRepository = equipoNFLRepository;
         }
 
+        #endregion
+
+        #region Validaciones de Datos Básicos
+
         /// <summary>
         /// Valida los campos requeridos para crear un jugador
+        /// MÓDULO: Validaciones de datos básicos
         /// </summary>
         public void ValidarCamposRequeridos(string nombre, string posicion, int equipoNFLId)
         {
+            ValidarNombreRequerido(nombre);
+            ValidarPosicionRequerida(posicion);
+            ValidarEquipoNFLIdRequerido(equipoNFLId);
+        }
+
+        /// <summary>
+        /// Valida que el nombre no esté vacío
+        /// </summary>
+        public void ValidarNombreRequerido(string nombre)
+        {
             if (string.IsNullOrWhiteSpace(nombre))
                 throw new ValidationException("Nombre", "El nombre es requerido");
+        }
 
+        /// <summary>
+        /// Valida que la posición no esté vacía
+        /// </summary>
+        public void ValidarPosicionRequerida(string posicion)
+        {
             if (string.IsNullOrWhiteSpace(posicion))
                 throw new ValidationException("Posicion", "La posición es requerida");
+        }
 
+        /// <summary>
+        /// Valida que el ID del equipo NFL sea válido
+        /// </summary>
+        public void ValidarEquipoNFLIdRequerido(int equipoNFLId)
+        {
             if (equipoNFLId <= 0)
                 throw new ValidationException("EquipoNFLId", "El ID del equipo NFL debe ser mayor a 0");
         }
@@ -56,6 +96,45 @@ namespace NFLFantasyAPI.Logic.Validators
                     $"La posición '{posicion}' no es válida. Posiciones válidas: {string.Join(", ", PosicionesValidas)}");
             }
         }
+
+        #endregion
+
+        #region Validaciones de Estado del Jugador
+
+        /// <summary>
+        /// Valida que el estado del jugador sea válido
+        /// MÓDULO: Validaciones de estado
+        /// </summary>
+        public void ValidarEstadoValido(string? estado)
+        {
+            if (string.IsNullOrWhiteSpace(estado))
+                return; // Estado es opcional en actualización
+
+            if (!EstadosValidos.Contains(estado.Trim()))
+            {
+                throw new ValidationException("Estado",
+                    $"El estado '{estado}' no es válido. Estados válidos: {string.Join(", ", EstadosValidos)}");
+            }
+        }
+
+        /// <summary>
+        /// Valida que el jugador esté activo para ciertas operaciones
+        /// </summary>
+        public void ValidarJugadorActivo(Jugador jugador)
+        {
+            if (jugador == null)
+                throw new JugadorNotFoundException(0);
+
+            if (!string.Equals(jugador.Estado, "Activo", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ValidationException("Estado",
+                    $"El jugador '{jugador.Nombre}' no está activo. Estado actual: {jugador.Estado}");
+            }
+        }
+
+        #endregion
+
+        #region Validaciones de Relaciones (Equipo NFL, Duplicados)
 
         /// <summary>
         /// Valida que el equipo NFL existe
@@ -89,29 +168,33 @@ namespace NFLFantasyAPI.Logic.Validators
             }
         }
 
+        #endregion
+
+        #region Validaciones de URLs y Archivos
+
         /// <summary>
         /// Valida que las URLs de imágenes tengan formato válido
+        /// MÓDULO: Validaciones de URLs y archivos
         /// </summary>
         public void ValidarUrlsValidas(string? imagenUrl, string? thumbnailUrl = null)
         {
-            if (!string.IsNullOrWhiteSpace(imagenUrl))
-            {
-                if (!Uri.TryCreate(imagenUrl, UriKind.Absolute, out var uriResult) ||
-                    (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
-                {
-                    throw new ValidationException("ImagenUrl",
-                        $"La URL de imagen '{imagenUrl}' no tiene un formato válido");
-                }
-            }
+            ValidarUrlValida(imagenUrl, "ImagenUrl");
+            ValidarUrlValida(thumbnailUrl, "ThumbnailUrl");
+        }
 
-            if (!string.IsNullOrWhiteSpace(thumbnailUrl))
+        /// <summary>
+        /// Valida que una URL tenga formato válido (HTTP o HTTPS)
+        /// </summary>
+        private void ValidarUrlValida(string? url, string campoNombre)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return;
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uriResult) ||
+                (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
             {
-                if (!Uri.TryCreate(thumbnailUrl, UriKind.Absolute, out var uriResult) ||
-                    (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
-                {
-                    throw new ValidationException("ThumbnailUrl",
-                        $"La URL de thumbnail '{thumbnailUrl}' no tiene un formato válido");
-                }
+                throw new ValidationException(campoNombre,
+                    $"La URL de {campoNombre} '{url}' no tiene un formato válido");
             }
         }
 
@@ -120,11 +203,36 @@ namespace NFLFantasyAPI.Logic.Validators
         /// </summary>
         public void ValidarArchivoJson(string? fileName, long fileLength)
         {
+            ValidarNombreArchivoRequerido(fileName);
+            ValidarArchivoNoVacio(fileLength);
+            ValidarExtensionJson(fileName);
+        }
+
+        /// <summary>
+        /// Valida que el nombre del archivo no esté vacío
+        /// </summary>
+        private void ValidarNombreArchivoRequerido(string? fileName)
+        {
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new InvalidFileException("El nombre del archivo es requerido");
+        }
 
+        /// <summary>
+        /// Valida que el archivo no esté vacío
+        /// </summary>
+        private void ValidarArchivoNoVacio(long fileLength)
+        {
             if (fileLength == 0)
                 throw new InvalidFileException("El archivo está vacío");
+        }
+
+        /// <summary>
+        /// Valida que el archivo tenga extensión JSON
+        /// </summary>
+        private void ValidarExtensionJson(string? fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return;
 
             var extension = Path.GetExtension(fileName).ToLower();
             if (extension != ".json")
@@ -136,20 +244,89 @@ namespace NFLFantasyAPI.Logic.Validators
         /// </summary>
         public void ValidarArchivoImagen(string? contentType, long fileLength, long maxSizeMB = 5)
         {
-            if (fileLength == 0)
-                throw new InvalidFileException("El archivo está vacío");
+            ValidarArchivoNoVacio(fileLength);
+            ValidarTipoImagen(contentType);
+            ValidarTamañoArchivo(fileLength, maxSizeMB);
+        }
 
+        /// <summary>
+        /// Valida que el archivo sea de un tipo de imagen permitido
+        /// </summary>
+        private void ValidarTipoImagen(string? contentType)
+        {
             var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png" };
             if (string.IsNullOrWhiteSpace(contentType) || !allowedTypes.Contains(contentType.ToLower()))
                 throw new InvalidFileException("Solo se permiten imágenes JPEG o PNG");
+        }
 
+        /// <summary>
+        /// Valida que el tamaño del archivo no exceda el límite
+        /// </summary>
+        private void ValidarTamañoArchivo(long fileLength, long maxSizeMB)
+        {
             var maxSizeBytes = maxSizeMB * 1024 * 1024;
             if (fileLength > maxSizeBytes)
                 throw new InvalidFileException($"El tamaño máximo permitido es {maxSizeMB} MB");
         }
 
+        #endregion
+
+        #region Métodos Consolidados de Validación
+
+        /// <summary>
+        /// Valida todos los datos básicos para crear un jugador (método consolidado)
+        /// MÓDULO: Método consolidado que agrupa validaciones básicas
+        /// </summary>
+        public async Task ValidarParaCrearAsync(CrearJugadorDto dto)
+        {
+            // Validaciones de datos básicos
+            ValidarCamposRequeridos(dto.Nombre, dto.Posicion, dto.EquipoNFLId);
+            ValidarPosicionValida(dto.Posicion);
+            
+            // Validaciones de relaciones
+            await ValidarEquipoExisteAsync(dto.EquipoNFLId);
+            await ValidarNoDuplicadoAsync(dto.Nombre, dto.EquipoNFLId);
+            
+            // Validaciones de URLs
+            ValidarUrlsValidas(dto.ImagenUrl, dto.ThumbnailUrl);
+        }
+
+        /// <summary>
+        /// Valida todos los datos para actualizar un jugador (método consolidado)
+        /// MÓDULO: Método consolidado que agrupa validaciones de actualización
+        /// </summary>
+        public async Task ValidarParaActualizarAsync(ActualizarJugadorDto dto, Jugador jugadorExistente)
+        {
+            // Validar equipo si se proporciona
+            if (dto.EquipoNFLId.HasValue)
+                await ValidarEquipoExisteAsync(dto.EquipoNFLId.Value);
+
+            // Validar posición si se proporciona
+            if (!string.IsNullOrWhiteSpace(dto.Posicion))
+                ValidarPosicionValida(dto.Posicion);
+
+            // Validar estado si se proporciona
+            if (!string.IsNullOrWhiteSpace(dto.Estado))
+                ValidarEstadoValido(dto.Estado);
+
+            // Validar duplicados si se cambia el nombre
+            if (!string.IsNullOrWhiteSpace(dto.Nombre))
+            {
+                var equipoId = dto.EquipoNFLId ?? jugadorExistente.EquipoNFLId;
+                await ValidarNoDuplicadoAsync(dto.Nombre, equipoId, jugadorExistente.Id);
+            }
+
+            // Validar URLs si se proporcionan
+            ValidarUrlsValidas(dto.ImagenUrl, dto.ThumbnailUrl);
+        }
+
+        #endregion
+
+        #region Validaciones de Batch
+
         /// <summary>
         /// Valida TODOS los jugadores de un batch antes de crear cualquiera
+        /// REUTILIZA los métodos de validación individuales para evitar duplicación
         /// </summary>
         public async Task<List<BatchValidationError>> ValidarBatchAsync(List<JugadorBatchItemDto> jugadores)
         {
@@ -166,7 +343,7 @@ namespace NFLFantasyAPI.Logic.Validators
                 .Select(e => e.Id)
                 .ToHashSet();
 
-            // Obtener jugadores existentes en los equipos relevantes
+            // Obtener jugadores existentes en los equipos relevantes (para validar duplicados)
             var jugadoresExistentes = new List<Jugador>();
             foreach (var equipoId in equipoIds)
             {
@@ -174,125 +351,114 @@ namespace NFLFantasyAPI.Logic.Validators
                 jugadoresExistentes.AddRange(jugadoresEquipo);
             }
 
-            // Validar cada jugador del batch
+            // Validar cada jugador del batch REUTILIZANDO los métodos de validación individuales
             for (int i = 0; i < jugadores.Count; i++)
             {
                 var jugador = jugadores[i];
+                var playerName = jugador.Nombre ?? "Sin nombre";
 
-                // Validar ID positivo
+                // Validar ID positivo (validación específica de batch)
                 if (jugador.Id <= 0)
                 {
                     errors.Add(new BatchValidationError
                     {
                         PlayerId = jugador.Id,
-                        PlayerName = jugador.Nombre ?? "Sin nombre",
+                        PlayerName = playerName,
                         ErrorMessage = $"El ID debe ser un número positivo mayor a 0 (valor actual: {jugador.Id})",
                         ErrorType = "validation"
                     });
                     continue;
                 }
 
-                // Validar campos requeridos
-                if (string.IsNullOrWhiteSpace(jugador.Nombre))
+                // REUTILIZAR: Validar campos requeridos usando el método existente
+                try
                 {
-                    errors.Add(new BatchValidationError
-                    {
-                        PlayerId = jugador.Id,
-                        PlayerName = "Sin nombre",
-                        ErrorMessage = "El nombre es requerido",
-                        ErrorType = "validation"
-                    });
-                    continue;
+                    ValidarCamposRequeridos(jugador.Nombre ?? "", jugador.Posicion ?? "", jugador.EquipoNFLId);
                 }
-
-                if (string.IsNullOrWhiteSpace(jugador.Posicion))
+                catch (ValidationException ex)
                 {
-                    errors.Add(new BatchValidationError
-                    {
-                        PlayerId = jugador.Id,
-                        PlayerName = jugador.Nombre,
-                        ErrorMessage = "La posición es requerida",
-                        ErrorType = "validation"
-                    });
-                    continue;
-                }
-
-                // Validar posición válida
-                if (!PosicionesValidas.Contains(jugador.Posicion.Trim()))
-                {
-                    errors.Add(new BatchValidationError
-                    {
-                        PlayerId = jugador.Id,
-                        PlayerName = jugador.Nombre,
-                        ErrorMessage = $"La posición '{jugador.Posicion}' no es válida. Posiciones válidas: {string.Join(", ", PosicionesValidas)}",
-                        ErrorType = "validation"
-                    });
-                    continue;
-                }
-
-                if (jugador.EquipoNFLId <= 0)
-                {
-                    errors.Add(new BatchValidationError
-                    {
-                        PlayerId = jugador.Id,
-                        PlayerName = jugador.Nombre,
-                        ErrorMessage = "El ID del equipo NFL debe ser mayor a 0",
-                        ErrorType = "validation"
-                    });
-                    continue;
-                }
-
-                // Validar URL de imagen si está presente
-                if (!string.IsNullOrWhiteSpace(jugador.ImagenUrl))
-                {
-                    if (!Uri.TryCreate(jugador.ImagenUrl, UriKind.Absolute, out var uriResult) ||
-                        (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
+                    // Capturar errores de validación y agregarlos a la lista
+                    foreach (var error in ex.Errores)
                     {
                         errors.Add(new BatchValidationError
                         {
                             PlayerId = jugador.Id,
-                            PlayerName = jugador.Nombre,
-                            ErrorMessage = $"La URL de imagen '{jugador.ImagenUrl}' no tiene un formato válido",
+                            PlayerName = playerName,
+                            ErrorMessage = error.Value,
                             ErrorType = "validation"
                         });
-                        continue;
                     }
+                    continue; // Si hay errores en campos requeridos, continuar con el siguiente
                 }
 
-                // Validar que el equipo NFL existe
+                // REUTILIZAR: Validar posición válida usando el método existente
+                try
+                {
+                    ValidarPosicionValida(jugador.Posicion);
+                }
+                catch (ValidationException ex)
+                {
+                    errors.Add(new BatchValidationError
+                    {
+                        PlayerId = jugador.Id,
+                        PlayerName = playerName,
+                        ErrorMessage = ex.Message,
+                        ErrorType = "validation"
+                    });
+                    continue;
+                }
+
+                // REUTILIZAR: Validar URLs usando el método existente
+                try
+                {
+                    ValidarUrlsValidas(jugador.ImagenUrl);
+                }
+                catch (ValidationException ex)
+                {
+                    errors.Add(new BatchValidationError
+                    {
+                        PlayerId = jugador.Id,
+                        PlayerName = playerName,
+                        ErrorMessage = ex.Message,
+                        ErrorType = "validation"
+                    });
+                    continue;
+                }
+
+                // REUTILIZAR: Validar que el equipo NFL existe usando el método existente
                 if (!equiposExistentesIds.Contains(jugador.EquipoNFLId))
                 {
                     errors.Add(new BatchValidationError
                     {
                         PlayerId = jugador.Id,
-                        PlayerName = jugador.Nombre,
+                        PlayerName = playerName,
                         ErrorMessage = $"El equipo NFL con ID {jugador.EquipoNFLId} no existe",
                         ErrorType = "not_found"
                     });
                     continue;
                 }
 
-                // Validar duplicados en la base de datos
-                var existeDuplicado = jugadoresExistentes.Any(j =>
+                // Validar duplicados en la base de datos (optimizado para batch - ya tenemos los jugadores existentes cargados)
+                var existeDuplicadoEnBD = jugadoresExistentes.Any(j =>
                     string.Equals(j.Nombre.Trim(), jugador.Nombre.Trim(), StringComparison.OrdinalIgnoreCase) &&
                     j.EquipoNFLId == jugador.EquipoNFLId);
 
-                if (existeDuplicado)
+                if (existeDuplicadoEnBD)
                 {
                     errors.Add(new BatchValidationError
                     {
                         PlayerId = jugador.Id,
-                        PlayerName = jugador.Nombre,
+                        PlayerName = playerName,
                         ErrorMessage = $"Ya existe un jugador con el nombre '{jugador.Nombre}' en el equipo NFL especificado",
                         ErrorType = "duplicate"
                     });
                     continue;
                 }
 
-                // Validar duplicados dentro del mismo batch (nombre + equipo)
+                // Validar duplicados dentro del mismo batch (nombre + equipo) - validación específica de batch
                 var duplicadoEnBatch = jugadores
                     .Where((j, idx) => idx != i) // Excluir el jugador actual
-                    .Any(j => string.Equals(j.Nombre.Trim(), jugador.Nombre.Trim(), StringComparison.OrdinalIgnoreCase)
+                    .Any(j => string.Equals(j.Nombre?.Trim(), jugador.Nombre?.Trim(), StringComparison.OrdinalIgnoreCase)
                                 && j.EquipoNFLId == jugador.EquipoNFLId);
 
                 if (duplicadoEnBatch)
@@ -300,7 +466,7 @@ namespace NFLFantasyAPI.Logic.Validators
                     errors.Add(new BatchValidationError
                     {
                         PlayerId = jugador.Id,
-                        PlayerName = jugador.Nombre,
+                        PlayerName = playerName,
                         ErrorMessage = $"El jugador '{jugador.Nombre}' aparece duplicado en el archivo para el mismo equipo",
                         ErrorType = "duplicate"
                     });
@@ -348,5 +514,7 @@ namespace NFLFantasyAPI.Logic.Validators
 
             return errors;
         }
+
+        #endregion
     }
 }

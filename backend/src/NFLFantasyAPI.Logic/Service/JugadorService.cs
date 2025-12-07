@@ -95,12 +95,8 @@ namespace NFLFantasyAPI.Logic.Services
         {
             try
             {
-                // Validaciones usando el validador centralizado
-                _validator.ValidarCamposRequeridos(dto.Nombre, dto.Posicion, dto.EquipoNFLId);
-                _validator.ValidarPosicionValida(dto.Posicion);
-                await _validator.ValidarEquipoExisteAsync(dto.EquipoNFLId);
-                await _validator.ValidarNoDuplicadoAsync(dto.Nombre, dto.EquipoNFLId);
-                _validator.ValidarUrlsValidas(dto.ImagenUrl, dto.ThumbnailUrl);
+                // Validaciones usando el validador centralizado (método consolidado)
+                await _validator.ValidarParaCrearAsync(dto);
 
                 // Crear el jugador usando el método interno (reutilizable)
                 var jugador = await CrearJugadorInternoAsync(
@@ -142,23 +138,8 @@ namespace NFLFantasyAPI.Logic.Services
                 if (jugador == null)
                     throw new JugadorNotFoundException(id);
 
-                // Validar equipo si se proporciona
-                if (dto.EquipoNFLId.HasValue)
-                    await _validator.ValidarEquipoExisteAsync(dto.EquipoNFLId.Value);
-
-                // Validar posición si se proporciona
-                if (!string.IsNullOrWhiteSpace(dto.Posicion))
-                    _validator.ValidarPosicionValida(dto.Posicion);
-
-                // Validar duplicados si se cambia el nombre
-                if (!string.IsNullOrWhiteSpace(dto.Nombre))
-                {
-                    var equipoId = dto.EquipoNFLId ?? jugador.EquipoNFLId;
-                    await _validator.ValidarNoDuplicadoAsync(dto.Nombre, equipoId, id);
-                }
-
-                // Validar URLs si se proporcionan
-                _validator.ValidarUrlsValidas(dto.ImagenUrl, dto.ThumbnailUrl);
+                // Validaciones usando el validador centralizado (método consolidado)
+                await _validator.ValidarParaActualizarAsync(dto, jugador);
 
                 // Actualizar campos
                 jugador.Nombre = dto.Nombre ?? jugador.Nombre;
@@ -386,7 +367,7 @@ namespace NFLFantasyAPI.Logic.Services
 
         /// <summary>
         /// Procesa un archivo batch de jugadores (operación todo-o-nada)
-        /// AHORA REUTILIZA LA CREACIÓN MANUAL
+        /// REUTILIZA LA CREACIÓN MANUAL - Validaciones movidas del controller al servicio
         /// </summary>
         public async Task<JugadorBatchResultDto> ProcessBatchFileAsync(IFormFile file)
         {
@@ -402,13 +383,19 @@ namespace NFLFantasyAPI.Logic.Services
 
             try
             {
-                // 1. Validar archivo usando el validador
-                _validator.ValidarArchivoJson(file?.FileName, file?.Length ?? 0);
+                // 1. Validar que se proporcionó un archivo (validación movida del controller)
+                if (file == null)
+                {
+                    throw new InvalidFileException("No se proporcionó ningún archivo");
+                }
 
-                // 2. Leer contenido del archivo usando el servicio de archivos
-                fileContent = await _batchFileService.ReadFileContentAsync(file!);
+                // 2. Validar archivo usando el validador (ahora incluye validación de extensión)
+                _validator.ValidarArchivoJson(file.FileName, file.Length);
 
-                // 3. Parsear JSON
+                // 3. Leer contenido del archivo usando el servicio de archivos
+                fileContent = await _batchFileService.ReadFileContentAsync(file);
+
+                // 4. Parsear JSON
                 JugadorBatchRequestDto? batchRequest;
                 try
                 {
@@ -420,31 +407,24 @@ namespace NFLFantasyAPI.Logic.Services
                 }
                 catch (JsonException ex)
                 {
-                    result.Mensaje = "Error al parsear el archivo JSON: formato inválido";
-                    result.Errores.Add(new JugadorBatchErrorDto
-                    {
-                        Error = $"Formato JSON inválido: {ex.Message}"
-                    });
+                    _logger.LogWarning($"Error al parsear JSON: {ex.Message}");
                     var failedPath = await _batchFileService.SaveProcessedFileAsync(file.FileName, fileContent, false, "jugadores");
-                    result.ArchivoMovidoA = failedPath;
-                    return result;
+                    throw new BatchProcessingException(
+                        "Error al parsear el archivo JSON: formato inválido",
+                        new List<string> { $"Formato JSON inválido: {ex.Message}" });
                 }
 
                 if (batchRequest == null || batchRequest.Jugadores == null || !batchRequest.Jugadores.Any())
                 {
-                    result.Mensaje = "El archivo JSON no contiene jugadores válidos";
-                    result.Errores.Add(new JugadorBatchErrorDto
-                    {
-                        Error = "No se encontraron jugadores en el archivo"
-                    });
                     var failedPath = await _batchFileService.SaveProcessedFileAsync(file.FileName, fileContent, false, "jugadores");
-                    result.ArchivoMovidoA = failedPath;
-                    return result;
+                    throw new BatchProcessingException(
+                        "El archivo JSON no contiene jugadores válidos",
+                        new List<string> { "No se encontraron jugadores en el archivo" });
                 }
 
                 result.TotalProcesados = batchRequest.Jugadores.Count;
 
-                // 4. Validar TODOS los jugadores usando el validador
+                // 5. Validar TODOS los jugadores usando el validador REUTILIZANDO métodos individuales
                 var validationErrors = await _validator.ValidarBatchAsync(batchRequest.Jugadores);
 
                 if (validationErrors.Any())
@@ -463,7 +443,7 @@ namespace NFLFantasyAPI.Logic.Services
                     return result;
                 }
 
-                // 5. Crear TODOS los jugadores en transacción REUTILIZANDO el método de creación manual
+                // 6. Crear TODOS los jugadores en transacción REUTILIZANDO el método de creación manual
                 var createdPlayers = await CrearJugadoresEnTransaccionAsync(batchRequest.Jugadores);
 
                 if (createdPlayers.Any())
@@ -497,26 +477,26 @@ namespace NFLFantasyAPI.Logic.Services
             }
             catch (InvalidFileException ex)
             {
+                // Re-lanzar la excepción para que el controller la maneje
                 _logger.LogWarning($"Archivo inválido: {ex.Message}");
-                result.Mensaje = ex.Message;
-                result.Errores.Add(new JugadorBatchErrorDto { Error = ex.Message });
-                return result;
+                throw;
+            }
+            catch (BatchProcessingException ex)
+            {
+                // Re-lanzar para que el controller maneje la excepción con su estructura
+                _logger.LogWarning($"Error en procesamiento batch: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error inesperado al procesar el archivo batch de jugadores");
-                result.Mensaje = $"Error inesperado: {ex.Message}";
-                result.Errores.Add(new JugadorBatchErrorDto
-                {
-                    Error = $"Error del sistema: {ex.Message}"
-                });
-
+                
+                // Guardar archivo si existe contenido
                 if (file != null && fileContent != null)
                 {
                     try
                     {
-                        var failedPath = await _batchFileService.SaveProcessedFileAsync(file.FileName, fileContent, false, "jugadores");
-                        result.ArchivoMovidoA = failedPath;
+                        await _batchFileService.SaveProcessedFileAsync(file.FileName, fileContent, false, "jugadores");
                     }
                     catch (Exception moveEx)
                     {
@@ -524,7 +504,10 @@ namespace NFLFantasyAPI.Logic.Services
                     }
                 }
 
-                return result;
+                // Lanzar excepción en lugar de retornar DTO
+                throw new BatchProcessingException(
+                    "Error interno del servidor al procesar el archivo batch",
+                    ex);
             }
         }
 
