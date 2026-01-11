@@ -1,0 +1,62 @@
+##########################
+# FRONTEND (Angular)
+##########################
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# IDEs
+frontend/.vscode/
+frontend/.idea/
+
+##########################
+# BACKEND (.NET)
+##########################
+
+# Build results
+backend/bin/
+backend/obj/
+backend/out/
+
+# User-specific files
+backend/*.user
+backend/*.userosscache
+backend/*.suo
+
+# Logs
+backend/logs/
+backend/*.log
+
+# Database
+backend/*.db
+backend/*.db-shm
+backend/*.db-wal
+
+# Uploads
+# Ignorar archivos subidos pero mantener la estructura
+wwwroot/uploads/**/*
+!wwwroot/uploads/**/.gitkeep
+
+# Configuration (sensible)
+backend/appsettings.*.json
+!backend/appsettings.Development.json
+
+##########################
+# GENERAL
+##########################
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs globales
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

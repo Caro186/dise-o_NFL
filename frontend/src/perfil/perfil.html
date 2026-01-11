@@ -1,0 +1,182 @@
+<div class="perfil-container">
+  <!-- Header del perfil -->
+  <div class="perfil-header">
+    <div class="perfil-info">
+      <div class="avatar">
+        <span class="avatar-inicial">{{ usuario?.nombreCompleto?.charAt(0) || 'U' }}</span>
+      </div>
+      <div class="usuario-datos">
+        <h1>{{ usuario?.nombreCompleto || 'Usuario' }}</h1>
+        <p class="email">{{ usuario?.email || 'email@ejemplo.com' }}</p>
+        <!-- ✅ ELIMINADA la línea de fechaCreacion porque UsuarioDto no tiene esa propiedad -->
+      </div>
+    </div>
+    <!-- ✅ CORREGIDO: Ahora llama al método logout() del componente -->
+    <button class="btn-logout" (click)="logout()">
+      <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+    </button>
+  </div>
+
+  <!-- Grid de 3 cuadros -->
+  <div class="row">
+    <!-- Cuadro 1: Información Personal -->
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-person-circle"></i> Información Personal
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="info-item mb-3">
+            <label class="text-muted small mb-1">ID de Usuario</label>
+            <p class="mb-0 fw-bold">{{ usuario?.id }}</p>
+          </div>
+          <div class="info-item mb-3">
+            <label class="text-muted small mb-1">Nombre Completo</label>
+            <p class="mb-0">{{ usuario?.nombreCompleto }}</p>
+          </div>
+          <div class="info-item mb-3">
+            <label class="text-muted small mb-1">Email</label>
+            <p class="mb-0">{{ usuario?.email }}</p>
+          </div>
+          
+          <div class="info-item mb-3">
+            <label class="text-muted small mb-1">Rol</label>
+            <p class="mb-0">
+              <span class="badge bg-info">{{ usuario?.rol || 'Usuario' }}</span>
+            </p>
+          </div>
+          <div class="info-item">
+            <label class="text-muted small mb-1">Estado de Cuenta</label>
+            <p class="mb-0">
+              <span class="badge bg-success">Activa</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cuadro 2: Equipos Fantasy -->
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-trophy"></i> Mis Equipos Fantasy
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- Loading equipos -->
+          <div *ngIf="isLoadingEquipos" class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-success" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+
+          <!-- Error equipos -->
+          <div *ngIf="errorEquipos" class="alert alert-danger small">
+            {{ errorEquipos }}
+          </div>
+
+          <!-- Contenido equipos -->
+          <div *ngIf="!isLoadingEquipos && !errorEquipos">
+            <p class="text-muted small mb-3">
+              Total de equipos: <strong>{{ equiposFantasy.length }}</strong>
+            </p>
+
+            <div *ngIf="equiposFantasy.length === 0" class="alert alert-info">
+              <i class="bi bi-info-circle"></i> No tienes equipos fantasy aún.
+              <a routerLink="/mainpage/equipos-fantasy/crear" class="alert-link">Crear uno</a>
+            </div>
+
+            <div class="list-group" *ngIf="equiposFantasy.length > 0" style="max-height: 300px; overflow-y: auto;">
+              <div class="list-group-item" *ngFor="let equipo of equiposFantasy">
+                <div class="d-flex align-items-center">
+                  <img 
+                    [src]="equipo.imagenUrl || 'https://via.placeholder.com/40?text=Equipo'" 
+                    alt="{{ equipo.nombre }}"
+                    class="rounded me-2"
+                    style="width: 40px; height: 40px; object-fit: contain;"
+                  />
+                  <div class="flex-grow-1">
+                    <h6 class="mb-0">{{ equipo.nombre }}</h6>
+                    <small class="text-muted">{{ equipo.nombreLiga || 'Sin liga' }}</small>
+                  </div>
+                  <span class="badge bg-success">{{ equipo.estado }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cuadro 3: Ligas como Comisionado -->
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header bg-warning text-dark">
+          <h5 class="mb-0">
+            <i class="bi bi-flag"></i> Ligas como Comisionado
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- Loading ligas -->
+          <div *ngIf="isLoadingLigas" class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-warning" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+
+          <!-- Error ligas -->
+          <div *ngIf="errorLigas" class="alert alert-danger small">
+            {{ errorLigas }}
+          </div>
+
+          <!-- Contenido ligas -->
+          <div *ngIf="!isLoadingLigas && !errorLigas">
+            <p class="text-muted small mb-3">
+              Total de ligas: <strong>{{ ligasComisionadas.length }}</strong>
+            </p>
+
+            <div *ngIf="ligasComisionadas.length === 0" class="alert alert-info">
+              <i class="bi bi-info-circle"></i> No eres comisionado de ninguna liga aún.
+              <a routerLink="/mainpage/ligas/crear" class="alert-link">Crear una liga</a>
+            </div>
+
+            <div *ngIf="ligasComisionadas.length > 0">
+              <!-- Botón de Crear Liga -->
+              <div class="d-grid gap-2 mb-3">
+                <a routerLink="/mainpage/ligas/crear" class="btn btn-warning btn-sm">
+                  <i class="bi bi-plus-circle"></i> Crear Nueva Liga
+                </a>
+              </div>
+
+              <!-- Lista de ligas -->
+              <div class="list-group" style="max-height: 240px; overflow-y: auto;">
+                <div class="list-group-item" *ngFor="let liga of ligasComisionadas">
+                  <div class="d-flex align-items-center">
+                    <img 
+                      [src]="liga.imagenUrl || 'https://via.placeholder.com/40?text=Liga'" 
+                      alt="{{ liga.nombreLiga }}"
+                      class="rounded me-2"
+                      style="width: 40px; height: 40px; object-fit: contain;"
+                    />
+                    <div class="flex-grow-1">
+                      <h6 class="mb-0">{{ liga.nombreLiga }}</h6>
+                      <small class="text-muted">
+                        {{ liga.cuposOcupados }}/{{ liga.cuposTotales }} equipos
+                      </small>
+                    </div>
+                    <span class="badge" [ngClass]="getBadgeClass(liga.estado)">
+                      {{ liga.estado }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

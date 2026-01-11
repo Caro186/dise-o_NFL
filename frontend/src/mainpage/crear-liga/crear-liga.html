@@ -1,0 +1,278 @@
+<div class="crear-liga-container">
+  <div class="crear-liga-card">
+    <h2><i class="bi bi-trophy-fill"></i> Crear Nueva Liga</h2>
+    <p class="subtitle">Configura tu liga y comienza a competir</p>
+
+    <!-- Mensajes -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
+    </div>
+
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" *ngIf="!successMessage">
+      <!-- SECCIÓN 1: Información de la Liga -->
+      <div class="form-section">
+        <h4 class="section-title">
+          <i class="bi bi-info-circle-fill"></i> Información de la Liga
+        </h4>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="nombreLiga" class="form-label">Nombre de la Liga *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="nombreLiga"
+              [(ngModel)]="nombreLiga"
+              name="nombreLiga"
+              maxlength="100"
+              placeholder="Ej: Liga de Campeones 2025"
+              required
+            />
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="temporada" class="form-label">Temporada *</label>
+            <select
+              class="form-select"
+              id="temporada"
+              [(ngModel)]="idTemporada"
+              name="temporada"
+              required
+            >
+              <option [value]="0">Selecciona una temporada</option>
+              <option *ngFor="let temp of temporadas" [value]="temp.id">
+                {{ temp.nombre }} {{ temp.actual ? '(Actual)' : '' }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="descripcion" class="form-label">Descripción (Opcional)</label>
+          <textarea
+            class="form-control"
+            id="descripcion"
+            [(ngModel)]="descripcion"
+            name="descripcion"
+            rows="3"
+            placeholder="Describe tu liga..."
+          ></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="password" class="form-label">Contraseña *</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              [(ngModel)]="password"
+              name="password"
+              minlength="8"
+              maxlength="12"
+              placeholder="Mínimo 8 caracteres"
+              required
+            />
+            <small class="text-muted">8-12 caracteres, al menos 1 mayúscula y 1 minúscula</small>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="confirmPassword" class="form-label">Confirmar Contraseña *</label>
+            <input
+              type="password"
+              class="form-control"
+              id="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              placeholder="Repite la contraseña"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: Configuración -->
+      <div class="form-section">
+        <h4 class="section-title">
+          <i class="bi bi-gear-fill"></i> Configuración
+        </h4>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="cuposTotales" class="form-label">Número de Equipos *</label>
+            <select
+              class="form-select"
+              id="cuposTotales"
+              [(ngModel)]="cuposTotales"
+              name="cuposTotales"
+              required
+            >
+              <option *ngFor="let cantidad of cantidadesEquipos" [value]="cantidad">
+                {{ cantidad }} equipos
+              </option>
+            </select>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="configPlayoffs" class="form-label">Configuración de Playoffs *</label>
+            <select
+              class="form-select"
+              id="configPlayoffs"
+              [(ngModel)]="configPlayoffs"
+              name="configPlayoffs"
+              required
+            >
+              <option *ngFor="let opcion of opcionesPlayoffs" [value]="opcion.valor">
+                {{ opcion.texto }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-check mb-3">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="permitirDecimales"
+            [(ngModel)]="permitirDecimales"
+            name="permitirDecimales"
+          />
+          <label class="form-check-label" for="permitirDecimales">
+            Permitir puntos decimales
+          </label>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: Tu Equipo -->
+      <div class="form-section">
+        <h4 class="section-title">
+          <i class="bi bi-person-badge-fill"></i> Tu Equipo (Comisionado)
+        </h4>
+
+        <!-- Selector de opción -->
+        <div class="opcion-equipo-selector mb-4">
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="opcionEquipo"
+              id="opcionExistente"
+              value="existente"
+              [(ngModel)]="opcionEquipo"
+            />
+            <label class="form-check-label" for="opcionExistente">
+              <i class="bi bi-folder-symlink"></i> Usar equipo existente
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="opcionEquipo"
+              id="opcionNuevo"
+              value="nuevo"
+              [(ngModel)]="opcionEquipo"
+            />
+            <label class="form-check-label" for="opcionNuevo">
+              <i class="bi bi-plus-circle"></i> Crear equipo nuevo
+            </label>
+          </div>
+        </div>
+
+        <!-- Opción: Equipo Existente -->
+        <div *ngIf="opcionEquipo === 'existente'" class="equipo-existente-section">
+          <div *ngIf="equiposDisponibles.length === 0" class="alert alert-warning">
+            <i class="bi bi-exclamation-circle"></i>
+            No tienes equipos disponibles (sin liga asignada).
+            <button
+              type="button"
+              class="btn btn-sm btn-primary ms-2"
+              (click)="opcionEquipo = 'nuevo'"
+            >
+              Crear uno ahora
+            </button>
+          </div>
+
+          <div *ngIf="equiposDisponibles.length > 0">
+            <label class="form-label">Selecciona tu equipo *</label>
+            <div class="equipos-grid">
+              <div
+                *ngFor="let equipo of equiposDisponibles"
+                class="equipo-card"
+                [class.selected]="equipoSeleccionadoId === equipo.id"
+                (click)="equipoSeleccionadoId = equipo.id"
+              >
+                <img
+                  [src]="equipo.imagenUrl || 'https://via.placeholder.com/80?text=Equipo'"
+                  [alt]="equipo.nombre"
+                  class="equipo-img"
+                />
+                <div class="equipo-name">{{ equipo.nombre }}</div>
+                <div class="selected-check" *ngIf="equipoSeleccionadoId === equipo.id">
+                  <i class="bi bi-check-circle-fill"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opción: Equipo Nuevo -->
+        <div *ngIf="opcionEquipo === 'nuevo'" class="equipo-nuevo-section">
+          <div class="mb-3">
+            <label for="nombreEquipoNuevo" class="form-label">Nombre del Equipo *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="nombreEquipoNuevo"
+              [(ngModel)]="nombreEquipoNuevo"
+              name="nombreEquipoNuevo"
+              maxlength="100"
+              placeholder="Ej: Los Invencibles"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="imagenEquipo" class="form-label">Imagen del Equipo (Opcional)</label>
+            <input
+              type="file"
+              class="form-control"
+              id="imagenEquipo"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+            />
+            <small class="text-muted">Formatos aceptados: JPG, PNG. Máximo 5MB.</small>
+          </div>
+
+          <div *ngIf="imagenPreview" class="imagen-preview">
+            <img [src]="imagenPreview" alt="Vista previa" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          routerLink="/mainpage/ligas"
+          [disabled]="isLoading"
+        >
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <button type="submit" class="btn btn-success" [disabled]="isLoading">
+          <span *ngIf="!isLoading">
+            <i class="bi bi-check-circle-fill"></i> Crear Liga
+          </span>
+          <span *ngIf="isLoading">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Creando...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

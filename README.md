@@ -1,2 +1,2 @@
-# jarroyo_nvargas_crodriguez_computer_architecture_2_II_2025
-# Proyecto_Comunicaci-n_Procesos_SO
+Trabajo de NFL-Fantasy Football
+

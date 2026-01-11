@@ -1,0 +1,263 @@
+<div class="buscar-container">
+  <!-- Sección de búsqueda -->
+  <div class="buscar-card" *ngIf="!mostrarFormularioUnirse">
+    <h2><i class="bi bi-search"></i> Buscar Liga</h2>
+    <p class="subtitle">Encuentra una liga para unirte y comienza a competir</p>
+
+    <form (ngSubmit)="buscarLigas()" class="search-form">
+      <div class="search-group">
+        <input
+          type="text"
+          [(ngModel)]="busqueda"
+          name="busqueda"
+          placeholder="Buscar por nombre de liga..."
+          class="search-input"
+        />
+        <button type="submit" class="btn-search">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+    </form>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p>Buscando ligas...</p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}
+    </div>
+
+    <!-- Resultados -->
+    <div class="resultados" *ngIf="!isLoading">
+      <h3><i class="bi bi-list-ul"></i> Ligas Disponibles ({{ ligasEncontradas.length }})</h3>
+
+      <div *ngIf="ligasEncontradas.length === 0" class="no-results">
+        <i class="bi bi-inbox"></i>
+        <p>No se encontraron ligas disponibles</p>
+        <small>Intenta con otro nombre o crea tu propia liga</small>
+      </div>
+
+      <div class="ligas-grid">
+        <div class="liga-card" *ngFor="let liga of ligasEncontradas">
+          <div class="liga-header">
+            <img
+              [src]="liga.imagenUrl || 'https://via.placeholder.com/80?text=Liga'"
+              [alt]="liga.nombreLiga"
+              class="liga-logo"
+            />
+            <div class="liga-info">
+              <h4>{{ liga.nombreLiga }}</h4>
+              <p class="liga-descripcion">{{ liga.descripcion || 'Sin descripción' }}</p>
+            </div>
+          </div>
+
+          <div class="liga-details">
+            <div class="detail-item">
+              <span class="label"><i class="bi bi-person-badge"></i> Comisionado:</span>
+              <span class="value">{{ liga.nombreComisionado }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label"><i class="bi bi-flag"></i> Estado:</span>
+              <span class="badge" [ngClass]="getBadgeClass(liga.estado)">
+                {{ liga.estado }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="label"><i class="bi bi-people"></i> Cupos:</span>
+              <span class="value cupos">
+                <strong>{{ getCuposDisponibles(liga) }}</strong> de {{ liga.cuposTotales }} disponibles
+              </span>
+            </div>
+          </div>
+
+          <button
+            class="btn-unirse"
+            (click)="seleccionarLiga(liga)"
+            [disabled]="getCuposDisponibles(liga) === 0"
+          >
+            <i class="bi bi-box-arrow-in-right"></i>
+            {{ getCuposDisponibles(liga) === 0 ? 'Liga Llena' : 'Unirse a Liga' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de Unirse -->
+  <div class="unirse-card" *ngIf="mostrarFormularioUnirse && ligaSeleccionada">
+    <h2><i class="bi bi-box-arrow-in-right"></i> Unirse a {{ ligaSeleccionada.nombreLiga }}</h2>
+    <p class="subtitle">Completa la información para unirte</p>
+
+    <!-- Mensajes -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
+    </div>
+
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="onUnirse()" *ngIf="!successMessage">
+      <!-- Contraseña y Alias -->
+      <div class="form-section">
+        <h4 class="section-title"><i class="bi bi-key-fill"></i> Credenciales</h4>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Contraseña de la Liga *</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Ingresa la contraseña de la liga"
+            minlength="8"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="alias" class="form-label">Tu Alias en la Liga *</label>
+          <input
+            type="text"
+            class="form-control"
+            id="alias"
+            [(ngModel)]="alias"
+            name="alias"
+            placeholder="Ej: ElCampeón"
+            maxlength="50"
+            required
+          />
+          <small class="text-muted">Este será tu nombre visible en la liga</small>
+        </div>
+      </div>
+
+      <!-- Sección de Equipo -->
+      <div class="form-section">
+        <h4 class="section-title"><i class="bi bi-trophy"></i> Tu Equipo</h4>
+
+        <!-- Selector de opción -->
+        <div class="opcion-equipo-selector mb-4">
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="opcionEquipo"
+              id="opcionExistente"
+              value="existente"
+              [(ngModel)]="opcionEquipo"
+            />
+            <label class="form-check-label" for="opcionExistente">
+              <i class="bi bi-folder-symlink"></i> Usar equipo existente
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="opcionEquipo"
+              id="opcionNuevo"
+              value="nuevo"
+              [(ngModel)]="opcionEquipo"
+            />
+            <label class="form-check-label" for="opcionNuevo">
+              <i class="bi bi-plus-circle"></i> Crear equipo nuevo
+            </label>
+          </div>
+        </div>
+
+        <!-- Opción: Equipo Existente -->
+        <div *ngIf="opcionEquipo === 'existente'" class="equipo-existente-section">
+          <div *ngIf="equiposDisponibles.length === 0" class="alert alert-warning">
+            <i class="bi bi-exclamation-circle"></i>
+            No tienes equipos disponibles (sin liga asignada).
+            <button
+              type="button"
+              class="btn btn-sm btn-primary ms-2"
+              (click)="opcionEquipo = 'nuevo'"
+            >
+              Crear uno ahora
+            </button>
+          </div>
+
+          <div *ngIf="equiposDisponibles.length > 0">
+            <label class="form-label">Selecciona tu equipo *</label>
+            <div class="equipos-grid">
+              <div
+                *ngFor="let equipo of equiposDisponibles"
+                class="equipo-card"
+                [class.selected]="equipoSeleccionadoId === equipo.id"
+                (click)="equipoSeleccionadoId = equipo.id"
+              >
+                <img
+                  [src]="equipo.imagenUrl || 'https://via.placeholder.com/80?text=Equipo'"
+                  [alt]="equipo.nombre"
+                  class="equipo-img"
+                />
+                <div class="equipo-name">{{ equipo.nombre }}</div>
+                <div class="selected-check" *ngIf="equipoSeleccionadoId === equipo.id">
+                  <i class="bi bi-check-circle-fill"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opción: Equipo Nuevo -->
+        <div *ngIf="opcionEquipo === 'nuevo'" class="equipo-nuevo-section">
+          <div class="mb-3">
+            <label for="nombreEquipoNuevo" class="form-label">Nombre del Equipo *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="nombreEquipoNuevo"
+              [(ngModel)]="nombreEquipoNuevo"
+              name="nombreEquipoNuevo"
+              maxlength="100"
+              placeholder="Ej: Los Invencibles"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="imagenEquipo" class="form-label">Imagen del Equipo (Opcional)</label>
+            <input
+              type="file"
+              class="form-control"
+              id="imagenEquipo"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+            />
+          </div>
+
+          <div *ngIf="imagenPreview" class="imagen-preview">
+            <img [src]="imagenPreview" alt="Vista previa" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarUnion()"
+          [disabled]="isLoading"
+        >
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <button type="submit" class="btn btn-success" [disabled]="isLoading">
+          <span *ngIf="!isLoading">
+            <i class="bi bi-check-circle-fill"></i> Unirse a Liga
+          </span>
+          <span *ngIf="isLoading">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Uniéndose...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

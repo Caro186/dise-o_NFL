@@ -1,0 +1,76 @@
+<div class="container mt-5">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand me-auto">Equipos NFL (Administrador)</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-dark" (click)="cargarEquipos()">
+                    Actualizar
+                </button>
+                <a routerLink="crear/" class="btn btn-success">
+                    + Crear Equipo NFL
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mensaje de carga -->
+    <div *ngIf="isLoading" class="alert alert-info mt-4">
+        Cargando equipos NFL...
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="errorMessage" class="alert alert-danger mt-4">
+        {{ errorMessage }}
+    </div>
+
+    <!-- Lista de equipos -->
+    <div class="row mt-4" *ngIf="!isLoading && !errorMessage">
+        <!-- Mensaje si no hay equipos -->
+        <div *ngIf="equipos.length === 0" class="col-12">
+            <div class="alert alert-warning">
+                No hay equipos NFL registrados. 
+                <a routerLink="crear/" class="alert-link">Crea el primer equipo aquí</a>.
+            </div>
+        </div>
+
+        <!-- Tabla de equipos NFL -->
+        <div class="col-12" *ngIf="equipos.length > 0">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Logo</th>
+                        <th>Nombre</th>
+                        <th>Ciudad</th>
+                        <th>Estado</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let equipo of equipos">
+                        <td>
+                            <img 
+                                [src]="equipo.imagenUrl || 'https://via.placeholder.com/50?text=NFL'" 
+                                [alt]="equipo.nombre" 
+                                style="width: 50px; height: 50px; object-fit: contain;"
+                            >
+                        </td>
+                        <td>{{ equipo.nombre }}</td>
+                        <td>{{ equipo.ciudad }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="equipo.estado === 'Activo' ? 'bg-success' : 'bg-secondary'">
+                                {{ equipo.estado }}
+                            </span>
+                        </td>
+                        <td>{{ equipo.fechaCreacion | date:'short' }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" (click)="eliminarEquipo(equipo.id, equipo.nombre)">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

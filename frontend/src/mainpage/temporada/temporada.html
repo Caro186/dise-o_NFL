@@ -1,0 +1,118 @@
+<div class="gradient-background">
+<div class="container py-5">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <div class="container-fluid">
+      <span class="navbar-brand me-auto">Crear Temporada</span>
+    </div>
+  </nav>
+
+  <!-- Formulario -->
+  <div class="card mt-4 p-4 form-card">
+    <form (ngSubmit)="crearTemporada()">
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre (1 - 100 caracteres)</label>
+        <input
+          type="text"
+          class="form-control"
+          id="nombre"
+          name="nombre"
+          [(ngModel)]="temporada.nombre"
+          min="1"
+          max="100"
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="fechaInicio" class="form-label">Fecha de inicio</label>
+        <input
+          type="date"
+          class="form-control"
+          id="fechaInicio"
+          name="fechaInicio"
+          [(ngModel)]="temporada.fechaInicio"
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="fechaCierre" class="form-label">Fecha de cierre</label>
+        <input
+          type="date"
+          class="form-control"
+          id="fechaCierre"
+          name="fechaCierre"
+          [(ngModel)]="temporada.fechaCierre"
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="cantidadSemanas" class="form-label">Cantidad de semanas</label>
+        <input
+          type="number"
+          class="form-control"
+          id="cantidadSemanas"
+          name="cantidadSemanas"
+          [(ngModel)]="temporada.cantidadSemanas"
+          (change)="actualizarSemanas()"
+          required
+        />
+      </div>
+
+      <!-- Checkbox para marcar como actual -->
+      <div class="mb-3 form-check">
+        <input
+          type="checkbox"
+          class="form-check-input"
+          id="actual"
+          name="actual"
+          [(ngModel)]="temporada.actual"
+        />
+        <label class="form-check-label" for="actual">
+          Marcar como temporada actual
+        </label>
+      </div>
+
+      <!-- Campos de fechas por semana -->
+      <div *ngFor="let semana of semanas; let i = index" class="mb-3 p-2 border rounded">
+        <h5>Semana {{ i + 1 }}</h5>
+        <div class="row g-2">
+          <div class="col">
+            <label class="form-label">Fecha inicio</label>
+            <input type="date" class="form-control" [(ngModel)]="semana.inicio" name="inicio{{i}}" required />
+          </div>
+          <div class="col">
+            <label class="form-label">Fecha fin</label>
+            <input type="date" class="form-control" [(ngModel)]="semana.fin" name="fin{{i}}" required />
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-custom">Crear Temporada</button>
+    </form>
+  </div>
+
+  <!-- Lista de temporadas creadas -->
+  <div *ngIf="temporadasCreadas.length > 0" class="mt-4">
+    <h4>Temporadas creadas</h4>
+    <div *ngFor="let t of temporadasCreadas" class="card mb-3 p-3">
+      <strong>Nombre:</strong> {{ t.nombre }} <br />
+      <strong>Inicio:</strong> {{ t.fechaInicio | date }} |
+      <strong>Cierre:</strong> {{ t.fechaCierre | date }} |
+      <strong>Actual:</strong> {{ t.actual ? 'Sí' : 'No' }} |
+      <strong>Semanas:</strong> {{ t.semanas?.length || 0 }}
+
+      <div *ngIf="t.semanas && t.semanas.length > 0" class="mt-2">
+        <h6>Detalle de semanas:</h6>
+        <ul class="list-group">
+          <li *ngFor="let s of t.semanas; let i = index" class="list-group-item">
+            Semana {{ i + 1 }}: {{ s.fechaInicio | date }} - {{ s.fechaFin | date }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

@@ -1,0 +1,291 @@
+<div class="container mt-5">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand me-auto">
+                <i class="bi bi-cloud-upload"></i>
+                Carga Masiva de Jugadores NFL
+            </span>
+            <div class="btn-group" role="group" aria-label="Botones de acciones">
+                <button type="button" class="btn btn-light" (click)="descargarEjemplo()">
+                    <i class="bi bi-download"></i>
+                    Descargar Ejemplo
+                </button>
+                <button type="button" class="btn btn-dark" routerLink="/mainpage/jugadores">
+                    <i class="bi bi-list-ul"></i>
+                    Ver Jugadores
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sección de información -->
+    <div class="row mt-4">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Formato del Archivo</h5>
+                </div>
+                <div class="card-body">
+                    <p>El archivo JSON debe contener un array de jugadores con los siguientes campos:</p>
+                    <ul class="list-unstyled">
+                        <li><strong>id:</strong> ID temporal del jugador (número)</li>
+                        <li><strong>nombre:</strong> Nombre completo del jugador</li>
+                        <li><strong>posicion:</strong> Posición (QB, RB, WR, TE, etc.)</li>
+                        <li><strong>equipoNFLId:</strong> ID del equipo NFL existente</li>
+                        <li><strong>imagenUrl:</strong> URL de la imagen (opcional)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-warning">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Importante</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li>✓ La operación es <strong>todo-o-nada</strong>: si hay un error, no se crea ningún jugador</li>
+                        <li>✓ No pueden existir jugadores duplicados (mismo nombre en el mismo equipo)</li>
+                        <li>✓ Todos los equipos NFL deben existir previamente</li>
+                        <li>✓ El archivo debe ser menor a 10 MB</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de carga -->
+    <div class="card mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"> Subir Archivo JSON</h5>
+        </div>
+        <div class="card-body text-center">
+            <div class="mb-3">
+                <label for="fileInput" class="form-label">
+                    <strong>Selecciona un archivo JSON:</strong>
+                </label>
+                <input 
+                    type="file" 
+                    class="form-control" 
+                    id="fileInput"
+                    accept=".json"
+                    (change)="onFileSelected($event)"
+                    [disabled]="isProcessing"
+                >
+                <small class="form-text text-muted">
+                    Archivo seleccionado: <strong>{{ nombreArchivo }}</strong>
+                </small>
+            </div>
+
+            <div class="btn-group" role="group">
+                <button 
+                    type="button"
+                    class="btn btn-success btn-lg"
+                    (click)="procesarArchivo()"
+                    [disabled]="!archivoSeleccionado || isProcessing"
+                >
+                    <span *ngIf="!isProcessing">
+                        <i class="bi bi-upload"></i>
+                        Procesar Archivo
+                    </span>
+                    <span *ngIf="isProcessing">
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        Procesando...
+                    </span>
+                </button>
+
+                <button 
+                    type="button"
+                    class="btn btn-secondary btn-lg"
+                    (click)="limpiarFormulario()"
+                    [disabled]="isProcessing || !archivoSeleccionado"
+                >
+                    <i class="bi bi-x-circle"></i>
+                    Limpiar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div class="alert alert-danger mt-4" *ngIf="errorMessage">
+        <i class="bi bi-exclamation-triangle"></i>
+        {{ errorMessage }}
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isProcessing" class="alert alert-info mt-4">
+        <div class="d-flex align-items-center">
+            <span class="spinner-border spinner-border-sm me-3" role="status"></span>
+            <strong>Procesando archivo, por favor espera...</strong>
+        </div>
+    </div>
+
+    <!-- Resultados del procesamiento -->
+    <div *ngIf="resultado" class="mt-4">
+        <!-- Resultado exitoso -->
+        <div *ngIf="resultado.exito" class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-check-circle"></i>
+                    ✅ Procesamiento Exitoso
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ resultado.mensaje }}</p>
+                
+                <!-- Estadísticas -->
+                <div class="row text-center mt-3">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h2 class="text-primary">{{ resultado.totalProcesados }}</h2>
+                                <p class="mb-0">Total Procesados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h2>{{ resultado.totalExitosos }}</h2>
+                                <p class="mb-0">Creados Exitosamente</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h2 class="text-secondary">{{ resultado.totalErrores }}</h2>
+                                <p class="mb-0">Errores</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de jugadores creados -->
+                <div *ngIf="resultado.jugadoresCreados.length > 0" class="mt-4">
+                    <h5>Jugadores Creados:</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nombre</th>
+                                    <th>Posición</th>
+                                    <th>Equipo NFL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let jugador of resultado.jugadoresCreados; let i = index">
+                                    <td>{{ i + 1 }}</td>
+                                    <td><strong>{{ jugador.nombre }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ jugador.posicion }}</span>
+                                    </td>
+                                    <td>{{ jugador.nombreEquipoNFL }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="mt-4 text-center">
+                    <button type="button" class="btn btn-primary me-2" (click)="verJugadores()">
+                        <i class="bi bi-list-ul"></i>
+                        Ver Todos los Jugadores
+                    </button>
+                    <button type="button" class="btn btn-secondary" (click)="limpiarFormulario(); resultado = null">
+                        <i class="bi bi-plus-circle"></i>
+                        Cargar Más Jugadores
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultado con errores -->
+        <div *ngIf="!resultado.exito" class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-x-circle"></i>
+                     Error en el Procesamiento
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ resultado.mensaje }}</p>
+                
+                <!-- Estadísticas -->
+                <div class="row text-center mt-3">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h2 class="text-primary">{{ resultado.totalProcesados }}</h2>
+                                <p class="mb-0">Total Procesados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body">
+                                <h2>{{ resultado.totalErrores }}</h2>
+                                <p class="mb-0">Errores Encontrados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de errores -->
+                <div *ngIf="resultado.errores.length > 0" class="mt-4">
+                    <div class="card border-danger">
+                        <div 
+                            class="card-header bg-danger text-white" 
+                            (click)="toggleDetallesErrores()"
+                            style="cursor: pointer;"
+                        >
+                            <h5 class="mb-0">
+                                <i [class]="mostrarDetallesErrores ? 'bi bi-chevron-down' : 'bi bi-chevron-right'"></i>
+                                Detalles de Errores ({{ resultado.errores.length }})
+                            </h5>
+                        </div>
+                        
+                        <div class="card-body" *ngIf="mostrarDetallesErrores">
+                            <div class="list-group">
+                                <div 
+                                    class="list-group-item list-group-item-danger" 
+                                    *ngFor="let error of resultado.errores; let i = index"
+                                >
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">
+                                            <span class="badge bg-danger me-2">#{{ i + 1 }}</span>
+                                            <span *ngIf="error.nombre">{{ error.nombre }}</span>
+                                            <span *ngIf="error.id" class="text-muted">(ID: {{ error.id }})</span>
+                                        </h6>
+                                    </div>
+                                    <p class="mb-0">{{ error.error }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de acción -->
+                <div class="mt-4 text-center">
+                    <button type="button" class="btn btn-secondary" (click)="limpiarFormulario(); resultado = null">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Intentar con Otro Archivo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del archivo procesado -->
+        <div class="alert alert-info mt-3" *ngIf="resultado.archivoMovidoA">
+            <small>
+                <i class="bi bi-info-circle"></i>
+                Archivo procesado: <strong>{{ resultado.archivoMovidoA }}</strong>
+            </small>
+        </div>
+    </div>
+</div>

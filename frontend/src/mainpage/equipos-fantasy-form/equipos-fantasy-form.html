@@ -1,0 +1,69 @@
+<div class="gradient-custom-2 gradient-form d-flex align-items-center justify-content-center">
+  <div class="card p-4" style="width: 400px;">
+    <h3 class="mb-3 text-center">Registrar / Editar Equipo</h3>
+
+    <form (ngSubmit)="onSubmit()">
+      <!-- Nombre del equipo -->
+      <div class="mb-3">
+        <label for="nombre">Nombre del equipo:</label>
+        <input 
+          id="nombre" 
+          type="text" 
+          placeholder="Ingresa el nombre del equipo" 
+          class="form-control"
+          [(ngModel)]="nombreEquipo"
+          name="nombre"
+          maxlength="100"
+          [disabled]="isLoading"
+        />
+        <small class="text-muted">
+          • El nombre del equipo debe ser único dentro de la liga (1–100 caracteres)
+        </small>
+      </div>
+
+      <!-- Imagen del equipo -->
+      <div class="mb-3">
+        <label for="imagen">Imagen del equipo (opcional):</label>
+        <input 
+          id="imagen" 
+          type="file" 
+          accept="image/png, image/jpeg" 
+          class="form-control" 
+          (change)="onFileSelected($event)"
+          [disabled]="isLoading"
+        />
+        <small class="text-muted">
+          • Formatos permitidos: JPEG, PNG<br>
+          • Dimensiones: entre 300x300 y 1024x1024 píxeles (cuadrada)<br>
+          • Tamaño máximo: 5 MB
+        </small>
+
+        <!-- Preview de la imagen -->
+        <div *ngIf="imagenPreview" class="mt-2">
+          <p class="mb-2">Preview de la imagen:</p>
+          <img 
+            [src]="imagenPreview" 
+            alt="Preview" 
+            class="img-fluid rounded border" 
+            style="max-height: 200px;" 
+          />
+        </div>
+      </div>
+
+      <!-- Mensaje de error -->
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Botón -->
+      <button 
+        type="submit" 
+        class="btn btn-primary w-100" 
+        [disabled]="!nombreEquipo.trim() || isLoading"
+      >
+        <span *ngIf="!isLoading">Guardar</span>
+        <span *ngIf="isLoading">Guardando...</span>
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+.gradient-custom-2 {
+    background: linear-gradient(to right, #013369, #D50A0A);
+    min-height: 100vh;
+}
+
+.card {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
